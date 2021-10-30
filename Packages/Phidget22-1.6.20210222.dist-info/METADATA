@@ -1,0 +1,24 @@
+Metadata-Version: 2.1
+Name: Phidget22
+Version: 1.6.20210222
+Summary: Phidget22 Python wrapper library
+Home-page: http://www.phidgets.com
+Author: Phidgets Inc
+Author-email: support@phidgets.com
+License: MIT
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Description-Content-Type: text/markdown
+
+# Phidget22 Python Package
+
+A Python wrapper library for the Phidget22 C library.
+
+This requires the Phidget22 libraries to be installed first.
+
+See: https://www.phidgets.com/docs/Language_-_Python
+
+
