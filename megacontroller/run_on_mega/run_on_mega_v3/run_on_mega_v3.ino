@@ -1,4 +1,4 @@
-/*!python3
+/*
     Author: Theodor Giles
     Created: 7/15/21
     Last Edited 7/28/21
@@ -147,7 +147,7 @@ void updateThrusters(int singleval) {
 void setup() {
     Serial.begin(9600);
     Serial1.begin(115200);
-    //JY901.StartIIC();
+    JY901.StartIIC();
     Serial2.begin(9600);
     // put your setup code here, to run once:
     /*

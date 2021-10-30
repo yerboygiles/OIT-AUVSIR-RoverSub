@@ -91,14 +91,6 @@ class IMU:
         print("Starting gyro: ", self.StartingGyro)
         # print("Starting position: ", self.Position)
 
-    # parse gyro object data from wt61p, can then pass to other programs
-    def UpdateGyro(self):
-        pass
-
-    # parse gyro object data from wt61p, can then pass to other programs
-    def UpdatePosition(self):
-        pass
-
     # position read when starting the RoboSub
     def getStartingPosition(self):
         return self.StartingPosition
