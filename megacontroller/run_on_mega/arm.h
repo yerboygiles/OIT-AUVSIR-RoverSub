@@ -1,4 +1,16 @@
-class arm{
+/*
+    Authors: Theodor Giles, Austin Morris
+    Created: 10/29/21
+    Last Edited 10/29/21
+    Description:
+    class for arm hardpoint kinematic control
+*/
+
+
+
+#include "Arduino.h"
+
+class Arm{
     private:
         // Servo Angles
         float ServoSH_Angle;
@@ -27,8 +39,8 @@ class arm{
         int GOpen;    // Servo angle for open gripper
         int GClose;    // Servo angle for closed gripper
     public:
-        arm(Servo sh, Servo el, Servo gr);
-        void Arm
+        Arm(Servo sh, Servo el, Servo gr);
+        void Arm()
         void PointTo(float x_input, float y_input)
         void Reset()
         Servo ServoSH;      // Shoulder joint

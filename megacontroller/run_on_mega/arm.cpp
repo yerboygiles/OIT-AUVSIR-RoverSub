@@ -1,4 +1,13 @@
-class arm(){
+/*
+    Authors: Theodor Giles, Austin Morris
+    Created: 10/29/21
+    Last Edited 10/29/21
+    Description:
+    class for arm hardpoint kinematic control
+*/
+
+
+class Arm(){
   Servo ServoSH;      // Shoulder joint
   Servo ServoEL;      // Elbow joint
   Servo ServoGR;      // Gripper
@@ -30,7 +39,7 @@ class arm(){
   int GOpen = 100;    // Servo angle for open gripper
   int GClose = 10;    // Servo angle for closed gripper
   public:
-    arm (Servo sh, Servo el, Servo gr){
+    Arm (Servo sh, Servo el, Servo gr){
       ServoSH = sh;
       ServoEL = el;
       ServoGR = gr;

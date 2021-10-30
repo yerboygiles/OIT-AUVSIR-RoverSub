@@ -1,4 +1,10 @@
-
+/*
+    Author: Theodor Giles
+    Created: 10/29/21
+    Last Edited 10/29/21
+    Description:
+    manager/communication file for arduino-side communication
+*/
 #include <Servo.h>
 #include <Wire.h>
 #include <JY901.h>
