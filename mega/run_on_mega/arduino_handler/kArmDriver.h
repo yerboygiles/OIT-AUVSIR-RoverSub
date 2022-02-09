@@ -6,11 +6,13 @@
     class for arm hardpoint kinematic control
 */
 
+#ifndef KARMDRIVER_H
+#define KARMDRIVER_H
 
-
+#include "Servo.h"
 #include "Arduino.h"
 
-class Arm{
+class kArmDriver{
     private:
         // Servo Angles
         float ServoSH_Angle;
@@ -39,13 +41,16 @@ class Arm{
         int GOpen;    // Servo angle for open gripper
         int GClose;    // Servo angle for closed gripper
     public:
-        Arm(Servo sh, Servo el, Servo gr);
-        void Arm()
-        void PointTo(float x_input, float y_input)
-        void Reset()
+        kArmDriver();
+        kArmDriver(Servo sh, Servo el, Servo gr);
+        void Arm();
+        void PointTo(float x_input, float y_input);
+        void Reset();
         Servo ServoSH;      // Shoulder joint
         Servo ServoEL;      // Elbow joint
         Servo ServoGR;      // Gripper
 
 
-}
+};
+
+#endif 

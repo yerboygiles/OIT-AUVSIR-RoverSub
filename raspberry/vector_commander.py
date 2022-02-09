@@ -84,8 +84,8 @@ class NavigationCommander:
             print("MovementCommander is not using Vision AI...")
 
         if self.UsingSim:
-            from python.experimental.advanced_telemetry import Telemetry
-            self.TelemetrySim = Telemetry()
+            # from python.experimental.advanced_telemetry import Telemetry
+            #self.TelemetrySim = Telemetry()
             print("MovementCommander is using Telemetry...")
         else:
             print("MovementCommander is not using Telemetry...")
@@ -159,6 +159,7 @@ class NavigationCommander:
 
         # possible targets, matches up with labelmap.txt to make easier
         self.POSSIBLE_TARGETS = [
+            "placeholder",
             "red_buoy",
             "blue_buoy",
             "green_buoy",
@@ -166,6 +167,13 @@ class NavigationCommander:
             "gate",
             "Cesar"]
         self.TargetList = []
+        self.scanned_target_format = {
+            "ID": "N/A",
+            "TARGET CLASS": self.POSSIBLE_TARGETS[0],
+            "LOCATION": (0.0, 0.0, 0.0),
+            "ORIENTATION": (0.0, 0.0, 0.0),
+            "IMPORTANCE": 1024
+        }
         print("MovementCommander initialized...")
         self.StartingTime = time.perf_counter()
 
@@ -184,11 +192,17 @@ class NavigationCommander:
             DrivingWithTime = (time.perf_counter() - self.InitialTime) < int(self.SuppCommand)
             self.BasicDirectionPower(self.CommandIndex)
 
+    def setDestination(self, north, east, down):
+        self.NorthOffset = north
+        self.EastOffset = east
+        self.DownOffset = down
+
     def BasicLinear(self):
         pass
 
     def BasicVectoring(self):
-        Vectoring = True
+        Targeting = True
+        Navigating = True
         i = 0
         print("Supplemental: ", self.SuppCommand)
         for SuppParse in str(self.SuppCommand).split(':'):
@@ -203,33 +217,60 @@ class NavigationCommander:
             if i > 2:
                 break
             i = i + 1
-        while Vectoring:
+        while Targeting:
             self.CheckIfGyroDone(threshold=10, timethreshold=3)
-            Vectoring = self.GyroRunning
+            Targeting = self.GyroRunning
             self.TradeWithArduino()
+        print("TARGETED VECTOR.")
+        while Navigating:
+            self.CheckIfPositionDone(threshold=10, timethreshold=3)
+            Navigating = self.PositionRunning
+            self.TradeWithArduino()
+        print("ARRIVED TO VECTOR.")
+
+    def BasicVectoring(self, yaw, pitch, roll):
+        Targeting = True
+        Navigating = True
+        i = 0
+        self.YawOffset = yaw
+        self.PitchOffset = pitch
+        self.RollOffset = roll
+        while Targeting:
+            self.CheckIfGyroDone(threshold=10, timethreshold=3)
+            Targeting = self.GyroRunning
+            self.TradeWithArduino()
+        print("TARGETED VECTOR.")
+        while Navigating:
+            self.CheckIfPositionDone(threshold=10, timethreshold=3)
+            Navigating = self.PositionRunning
+            self.TradeWithArduino()
+        print("ARRIVED TO VECTOR.")
 
     def WaypointVectoring(self):
         self.StoreGyroOffsets()
         self.Waypoints = []
         i = 1
-        Waypointrange = int(((self.NorthOffset+self.EastOffset+self.DownOffset)/3)/15)
+        Waypointrange = int(((self.NorthOffset + self.EastOffset + self.DownOffset) / 3) / 15)
         waypointrange = 10
         for i in range(Waypointrange):
+            n = Waypointrange - i if i > Waypointrange / 2 else n = i
             self.Waypoints[i] = [((self.NorthOffset / i) + self.IMU.Offsets[NORTH]),
-                            ((self.EastOffset / i) + self.IMU.Offsets[EAST]),
-                            ((self.DownOffset / i) + self.IMU.Offsets[DOWN])]
-            n = Waypointrange - i if i > Waypointrange/2 else n = i
-            self.Waypoints[i][0] += ((self.Waypoints[i][0] * self.YawOffset/90)/5)*n
+                                 ((self.EastOffset / i) + self.IMU.Offsets[EAST]),
+                                 ((self.DownOffset / i) + self.IMU.Offsets[DOWN])]
+            self.Waypoints[i][0] += ((self.Waypoints[i][0] * self.YawOffset / 90) / 5) * n
+        print("VECTOR CALCULATED. USING ", len(self.Waypoints), " WAYPOINTS.")
         i = 1
         for i in range(Waypointrange):
-            self.YawOffset = math.atan(self.Waypoints[i][1]/self.Waypoints[i][0])
-            self.PitchOffset = math.atan(self.Waypoints[i][2]/((self.Waypoints[i][0]+self.Waypoints[i][1])/2))
+            self.YawOffset = math.atan(self.Waypoints[i][1] / self.Waypoints[i][0])
+            self.PitchOffset = math.atan(self.Waypoints[i][2] / ((self.Waypoints[i][0] + self.Waypoints[i][1]) / 2))
             self.CheckIfGyroDone()
             self.CheckIfPositionDone()
             while self.PositionRunning:
                 self.CheckIfGyroDone()
                 self.CheckIfPositionDone()
-        print("Completed Waypoint Series")
+            print("WAYPOINT ", i, " REACHED.")
+        print("WAYPOINTS PASSED, VECTOR REACHED.")
+
     def AdvancedVectoring(self):
         self.StoreGyroOffsets()
 
@@ -476,6 +517,12 @@ class NavigationCommander:
 
     def CalculatePID(self):
         pass
+
+    def ReturnScanDict(self):
+        scanned_target = self.scanned_target_format
+        self.Vision.getDistance()
+
+        return self.scanned_target_format
 
     def BasicDirectionPower(self, index, power=15):
         if index != 0:

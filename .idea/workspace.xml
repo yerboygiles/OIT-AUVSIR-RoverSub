@@ -4,7 +4,30 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2662d174-a621-4651-86ee-331f40745cec" name="Changes" comment="" />
+    <list default="true" id="2662d174-a621-4651-86ee-331f40745cec" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mega/run_on_mega/TestThrusters/TestThrusters.ino" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mega/run_on_mega/ToolArm.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mega/run_on_mega/arduino_handler/arduino_handler.ino" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/raspberry/spatial_tracker.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/OIT-AUVSIR-RoverSub.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/OIT-AUVSIR-RoverSub.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mega/run_on_mega/Arm.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/mega/run_on_mega/arduino_handler/kArmDriver.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mega/run_on_mega/Arm.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mega/run_on_mega/JY901.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/mega/run_on_mega/arduino_handler/JY901.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mega/run_on_mega/JY901.h" beforeDir="false" afterPath="$PROJECT_DIR$/mega/run_on_mega/arduino_handler/JY901.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mega/run_on_mega/Thrusters.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/mega/run_on_mega/arduino_handler/ThrusterDriver.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mega/run_on_mega/run_on_mega_v1.ino" beforeDir="false" afterPath="$PROJECT_DIR$/mega/run_on_mega/run_on_mega_v1/run_on_mega_v1.ino" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mega/run_on_mega/run_on_mega_v3/run_on_mega_v3.ino" beforeDir="false" afterPath="$PROJECT_DIR$/mega/run_on_mega/run_on_mega_v3/run_on_mega_v3.ino" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mega/run_on_mega/run_on_mega_v4/run_on_mega_v4.ino" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/raspberry/experimental/advanced_telemetry.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/raspberry/experimental/core_protocol_v1.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/raspberry/self_awareness.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/raspberry/task_io_lib_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/task_io_lib_v2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/raspberry/vector_commander.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/vector_commander.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/raspberry/vision_v1.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/vision_v1.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -28,7 +51,15 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../Winter 2022/AUVSIR/Software/Tello" />
+    <property name="settings.editor.selected.configurable" value="fileTemplates" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\farme\Desktop\AUVSIR 21-22\OIT-AUVSIR-RoverSub\mega\run_on_mega\run_on_mega_v4" />
+      <recent name="C:\Users\farme\Desktop\AUVSIR 21-22\OIT-AUVSIR-RoverSub\mega\run_on_mega" />
+    </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -40,5 +71,28 @@
       <updated>1635570055933</updated>
     </task>
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/raspberry/task_io_lib_v2.py</url>
+          <line>8</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

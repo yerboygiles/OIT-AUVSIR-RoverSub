@@ -11,9 +11,14 @@ from vector_commander import NavigationCommander
 
 
 class TaskIO:
-    # init
+    # filename can first be sent a 0 to initialize string-input commands
+    # instead of
     def __init__(self, filename, usingvision, usinggyro, usingsim):
-        self.Filename = filename
+        self.Input = False
+        if filename is 0:
+            self.input = filename
+        else:
+            self.Filename = filename
         self.UsingVision = usingvision
         self.UsingGyro = usinggyro
         self.UsingSim = usingsim
@@ -22,16 +27,25 @@ class TaskIO:
         self.CommandList = []
 
     # get tasks from the .txt and completes them
-    def get_tasks(self):
+    def get_tasks(self, input=False):
         # Testing
-        self.Commands = open(self.Filename)
-        for CommandLine in self.Commands:
-            self.CommandList.append(CommandLine)
-        print("Commands read...")
-        self.Commands.close()
-        print("Commands: ", self.CommandList)
-        self.Movement.receiveCommands(self.CommandList)
-        self.active = False
+        if not input:
+            self.Commands = open(self.Filename)
+            for CommandLine in self.Commands:
+                self.CommandList.append(CommandLine)
+            print("Commands read...")
+            self.Commands.close()
+            print("Commands: ", self.CommandList)
+            self.Movement.receiveCommands(self.CommandList)
+            self.active = False
+        else:
+            if self.Input is not -1:
+
+            else:
+                print("Waiting for input...")
+
+
+            self.CommandList.append(self.Input)
 
     # end processes and mission
     def terminate(self):

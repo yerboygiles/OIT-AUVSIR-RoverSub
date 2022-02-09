@@ -5,9 +5,10 @@
     Description:
     class for arm hardpoint kinematic control
 */
+#include "Arduino.h"
+#include "kArmDriver.h"
 
-
-class Arm(){
+class kArmDriver(){
   Servo ServoSH;      // Shoulder joint
   Servo ServoEL;      // Elbow joint
   Servo ServoGR;      // Gripper
@@ -39,7 +40,7 @@ class Arm(){
   int GOpen = 100;    // Servo angle for open gripper
   int GClose = 10;    // Servo angle for closed gripper
   public:
-    Arm (Servo sh, Servo el, Servo gr){
+    kArmDriver (Servo sh, Servo el, Servo gr){
       ServoSH = sh;
       ServoEL = el;
       ServoGR = gr;

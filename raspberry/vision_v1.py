@@ -47,23 +47,24 @@ class vision:
 
     Captures = []
 
-    rightcamindex = 0
-    leftcamindex = 0
+    right_cam_index = 0
+    left_cam_index = 0
 
     def __init__(self, cameras, right, left):
         self.cameras = cameras
-        self.rightcamindex = right
-        self.leftcamindex = left
+        self.right_cam_index = right
+        self.left_cam_index = left
         i = 0
         while i < cameras:
             self.Captures.append(cv2.VideoCapture(i))
             i = i + 1
+        self.seen_targets = []
 
     def getImg(self, camindex):
         self.ret, self.img = self.Captures[camindex].read()
         return self.ret, self.img
 
-    def getColorMaskContours(self, ret, img, beallfancy=False):
+    def getColorMaskContours(self, ret, img, extratelem=False):
         # red values 179, 255,255
         # min 105 0 0
         hmin = 105
@@ -90,7 +91,7 @@ class vision:
             con = cv2.findContours(mask.copy(),
                                    cv2.RETR_EXTERNAL,
                                    cv2.CHAIN_APPROX_SIMPLE)[-2]
-            while beallfancy:
+            while extratelem:
                 if len(con) > 0:
                     i = 0
                     for c in con:
@@ -127,7 +128,7 @@ class vision:
         # contours
         seen = False
 
-        self.getImg(self.rightcamindex)
+        self.getImg(self.right_cam_index)
 
         if self.ret:
             hsv = cv2.cvtColor(self.img, cv2.COLOR_BGR2HSV)
@@ -152,8 +153,8 @@ class vision:
         return seen
 
     def StereoTarget(self, showim):
-        ret_left, img_left = self.Captures[self.leftcamindex].read()
-        ret_right, img_right = self.Captures[self.leftcamindex].read()
+        ret_left, img_left = self.Captures[self.left_cam_index].read()
+        ret_right, img_right = self.Captures[self.left_cam_index].read()
         gray_left = cv2.cvtColor(img_left, cv2.COLOR_BGR2GRAY)
         gray_right = cv2.cvtColor(img_right, cv2.COLOR_BGR2GRAY)
         stereo = cv2.StereoBM_create(numDisparities=16, blockSize=15)
@@ -169,8 +170,8 @@ class vision:
         # x offset, y offset, width of target, height of target, area of target
         # x y w h a
         SeenObjects = []
-        ret_left, img_left = self.Captures[self.leftcamindex].read()
-        ret_right, img_right = self.Captures[self.leftcamindex].read()
+        ret_left, img_left = self.Captures[self.left_cam_index].read()
+        ret_right, img_right = self.Captures[self.left_cam_index].read()
         ContoursL = self.getColorMaskContours(ret_left, img_left)
         ContoursR = self.getColorMaskContours(ret_right, img_right)
         if ContoursL and ContoursR:

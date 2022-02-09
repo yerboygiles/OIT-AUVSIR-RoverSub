@@ -130,6 +130,7 @@ void updateThrusters(void) {
     FLthruster.writeMicroseconds(thrusterpower[6]);
     FRthruster.writeMicroseconds(thrusterpower[7]);
 }
+
 void updateThrusters(int singleval) {
     for(int i=0; i<=7; i++){
         thrusterpower[i] = singleval;
@@ -149,6 +150,7 @@ void setup() {
     Serial1.begin(115200);
     JY901.StartIIC();
     Serial2.begin(9600);
+
     // put your setup code here, to run once:
     /*
     ServoSH_R.attach(9);
