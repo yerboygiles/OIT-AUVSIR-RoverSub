@@ -1,7 +1,7 @@
 /*
     Authors: Theodor Giles
     Created: 10/29/21
-    Last Edited 10/29/21
+    Last Edited 2/9/22
     Description:
     class for thruster hardpoint control
 */
@@ -16,13 +16,16 @@ class ThrusterDriver
   private:
   Servo Motor;      // motor driver
   String Name;      // thruster ID
+  int Offset;       // offset for finicky escs
 
   // Servo Angles
-  float ThrusterSignal;
 
   public:
+    float ThrusterSignal;
+    
     ThrusterDriver();
     ThrusterDriver(Servo motor, String ID);
+    ThrusterDriver(Servo motor, String ID, int offset);
     void Drive(int power);
     void Calibrate();
 };

@@ -1,7 +1,7 @@
 /*
     Authors: Theodor Giles, Austin Morris
     Created: 10/29/21
-    Last Edited 10/29/21
+    Last Edited 2/9/22
     Description:
     class for arm hardpoint kinematic control
 */
@@ -19,16 +19,16 @@ class kArmDriver{
         float ServoEL_Angle;
         float ServoGR_Angle;
 
-        const float a;      // Upper arm lenth (cm)
-        const float b;      // Forearm length (cm)
+        float a;      // Upper arm lenth (cm)
+        float b;      // Forearm length (cm)
 
         // Correction factors to align servo values with their respective axis
-        const float SSHCorrectionFactor;     // Align arm "a" with the horizontal when at 0 degrees
-        const float ELCorrectionFactor;     // Align arm "b" with arm "a" when at 0 degrees
+        float SSHCorrectionFactor;     // Align arm "a" with the horizontal when at 0 degrees
+        float ELCorrectionFactor;     // Align arm "b" with arm "a" when at 0 degrees
 
         // Correction factor to shift origin out to edge of the mount
-        const float X_CorrectionFactor;       // X direction correction factor (cm)
-        const float Y_CorrectionFactor;       // Y direction correction factor (cm)
+        const float X_CorrectionFactor = 0;       // X direction correction factor (cm)
+        const float Y_CorrectionFactor = 0;       // Y direction correction factor (cm)
 
         float A ;            //Angle oppposite side a (between b and c)
         float B ;            //Angle oppposite side b
@@ -45,6 +45,7 @@ class kArmDriver{
         kArmDriver(Servo sh, Servo el, Servo gr);
         void Arm();
         void PointTo(float x_input, float y_input);
+        void SetArmConfig(float upper_arm, float lower_arm);
         void Reset();
         Servo ServoSH;      // Shoulder joint
         Servo ServoEL;      // Elbow joint

@@ -1,7 +1,7 @@
 /*
     Author: Theodor Giles
     Created: 1/30/22
-    Last Edited 1/30/22
+    Last Edited 2/9/22
     Description:
     arduino mega controller
 */
@@ -21,43 +21,44 @@ byte BRpin = 7; //back right
 byte FLpin = 8; //front left
 byte FRpin = 9; //front right
 
-Servo LBsig;
-Servo LFsig;
-Servo RBsig;
-Servo RFsig;
-Servo BLsig;
-Servo BRsig;
-Servo FLsig;
-Servo FRsig;
-
+ThrusterDriver LB_Thruster;
 int thrusterpower[8];
 
 void setup() {
+  Servo LBsig;
+  Servo LFsig;
+  Servo RBsig;
+  Servo RFsig;
+  Servo BLsig;
+  Servo BRsig;
+  Servo FLsig;
+  Servo FRsig;
   // put your setup code here, to run once:
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   LBsig.attach(LBpin);
-  LFsig.attach(LFpin);
-  RBsig.attach(RBpin);
-  RFsig.attach(RFpin);
-  BLsig.attach(BLpin);
-  BRsig.attach(BRpin);
-  FLsig.attach(FLpin);
-  FRsig.attach(FRpin);
+//  LFsig.attach(LFpin);
+//  RBsig.attach(RBpin);
+//  RFsig.attach(RFpin);
+//  BLsig.attach(BLpin);
+//  BRsig.attach(BRpin);
+//  FLsig.attach(FLpin);
+//  FRsig.attach(FRpin);
   
-  ThrusterDriver LB_Thruster(LBsig, "LB");
-
-  delay(7000);
+  LB_Thruster = ThrusterDriver(LBsig, "LB");
+  LB_Thruster.Calibrate();
   //print("Done setting up.");
 
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  int Signal = 1700;
+  LB_Thruster.Drive(-100);
+  Serial.println(LB_Thruster.ThrusterSignal);
   delay(1000);
   
-  Signal = 1300;
+  LB_Thruster.Drive(100);
+  Serial.println(LB_Thruster.ThrusterSignal);
   delay(1000);
 }
 
