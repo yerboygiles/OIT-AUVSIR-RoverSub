@@ -25,6 +25,12 @@ void ThrusterDriver::Drive(int power){ // -100 to 100
 }
 void ThrusterDriver::Calibrate(){
   Motor.writeMicroseconds(1500);
+  //delay(7000);
+  Serial.print(Name);
+  Serial.println(": Calibrated.");
+}
+void ThrusterDriver::CalibrateWithDelay(){
+  Motor.writeMicroseconds(1500);
   delay(7000);
   Serial.print(Name);
   Serial.println(": Calibrated.");

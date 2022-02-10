@@ -28,6 +28,7 @@ class ThrusterDriver
     ThrusterDriver(Servo motor, String ID, int offset);
     void Drive(int power);
     void Calibrate();
+    void CalibrateWithDelay();
 };
 
 #endif 

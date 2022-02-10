@@ -22,6 +22,13 @@ byte FLpin = 8; //front left
 byte FRpin = 9; //front right
 
 ThrusterDriver LB_Thruster;
+ThrusterDriver LF_Thruster;
+ThrusterDriver RB_Thruster;
+ThrusterDriver RF_Thruster;
+ThrusterDriver BL_Thruster;
+ThrusterDriver BR_Thruster;
+ThrusterDriver FL_Thruster;
+ThrusterDriver FR_Thruster;
 int thrusterpower[8];
 
 void setup() {
@@ -37,29 +44,85 @@ void setup() {
   Serial.begin(9600);
 
   LBsig.attach(LBpin);
-//  LFsig.attach(LFpin);
-//  RBsig.attach(RBpin);
-//  RFsig.attach(RFpin);
-//  BLsig.attach(BLpin);
-//  BRsig.attach(BRpin);
-//  FLsig.attach(FLpin);
-//  FRsig.attach(FRpin);
+  LFsig.attach(LFpin);
+  RBsig.attach(RBpin);
+  RFsig.attach(RFpin);
+  BLsig.attach(BLpin);
+  BRsig.attach(BRpin);
+  FLsig.attach(FLpin);
+  FRsig.attach(FRpin);
   
   LB_Thruster = ThrusterDriver(LBsig, "LB");
+  LF_Thruster = ThrusterDriver(LFsig, "LF");
+  RB_Thruster = ThrusterDriver(RBsig, "RB");
+  RF_Thruster = ThrusterDriver(RFsig, "RF");
+  BL_Thruster = ThrusterDriver(BLsig, "BL");
+  BR_Thruster = ThrusterDriver(BRsig, "BR");
+  FL_Thruster = ThrusterDriver(FLsig, "FL");
+  FR_Thruster = ThrusterDriver(FRsig, "FR");
+  
   LB_Thruster.Calibrate();
+  LF_Thruster.Calibrate();
+  RB_Thruster.Calibrate();
+  RF_Thruster.Calibrate();
+  BL_Thruster.Calibrate();
+  BR_Thruster.Calibrate();
+  FL_Thruster.Calibrate();
+  FR_Thruster.Calibrate();
+  delay(7000);
   //print("Done setting up.");
 
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  LB_Thruster.Drive(-100);
+  LB_Thruster.Drive(15);
+  Serial.println("Thruster at port 2:");
   Serial.println(LB_Thruster.ThrusterSignal);
   delay(1000);
+  LB_Thruster.Drive(0);
   
-  LB_Thruster.Drive(100);
-  Serial.println(LB_Thruster.ThrusterSignal);
+  LF_Thruster.Drive(15);
+  Serial.println("Thruster at port 3.");
+  Serial.println(LF_Thruster.ThrusterSignal);
   delay(1000);
+  LF_Thruster.Drive(0);
+  
+  RB_Thruster.Drive(15);
+  Serial.println("Thruster at port 4.");
+  Serial.println(RB_Thruster.ThrusterSignal);
+  delay(1000);
+  RB_Thruster.Drive(0);
+  
+  RF_Thruster.Drive(15);
+  Serial.println("Thruster at port 5.");
+  Serial.println(RF_Thruster.ThrusterSignal);
+  delay(1000);
+  RF_Thruster.Drive(0);
+  
+  BL_Thruster.Drive(15);
+  Serial.println("Thruster at port 6.");
+  Serial.println(BL_Thruster.ThrusterSignal);
+  delay(1000);
+  BL_Thruster.Drive(0);
+  
+  BR_Thruster.Drive(15);
+  Serial.println("Thruster at port 7.");
+  Serial.println(BR_Thruster.ThrusterSignal);
+  delay(1000);
+  BR_Thruster.Drive(0);
+  
+  FL_Thruster.Drive(15);
+  Serial.println("Thruster at port 8.");
+  Serial.println(FL_Thruster.ThrusterSignal);
+  delay(1000);
+  FL_Thruster.Drive(0);
+  
+  FR_Thruster.Drive(15);
+  Serial.println("Thruster at port 9.");
+  Serial.println(FR_Thruster.ThrusterSignal);
+  delay(1000);
+  FR_Thruster.Drive(0);
 }
 
 String getSerialCommands(){
