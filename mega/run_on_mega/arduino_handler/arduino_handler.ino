@@ -9,6 +9,7 @@
 #include "JY901.h"
 #include "ThrusterDriver.h"
 #include "kArmDriver.h"
+#include "HMC5883L.h"
 // #include <Wire.h>
 
 
