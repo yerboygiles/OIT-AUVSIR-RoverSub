@@ -13,6 +13,7 @@
 // #include <Wire.h>
 
 
+const byte RESET_PIN = 2;
 byte LBpin = 2; //left back
 byte LFpin = 3; //left front
 byte RBpin = 4; //right back
@@ -30,18 +31,25 @@ ThrusterDriver BL_Thruster;
 ThrusterDriver BR_Thruster;
 ThrusterDriver FL_Thruster;
 ThrusterDriver FR_Thruster;
+
+Servo LBsig;
+Servo LFsig;
+Servo RBsig;
+Servo RFsig;
+Servo BLsig;
+Servo BRsig;
+Servo FLsig;
+Servo FRsig;
+  
 int thrusterpower[8];
 
 void setup() {
-  Servo LBsig;
-  Servo LFsig;
-  Servo RBsig;
-  Servo RFsig;
-  Servo BLsig;
-  Servo BRsig;
-  Servo FLsig;
-  Servo FRsig;
   // put your setup code here, to run once:
+  
+  // reset pin
+  digitalWrite(RESET_PIN,HIGH)
+  pinMode(RESET_PIN, OUTPUT)
+  
   Serial.begin(9600);
 
   LBsig.attach(LBpin);
@@ -76,8 +84,74 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  LB_Thruster.Drive(15);
+    // put your main code here, to run repeatedly:
+    beAuto();
+}
+
+String getSerialCommands(){
+    if (Serial.available() > 0){
+        String JetsonCommand = Serial.readStringUntil('\n');
+        if(JetsonCommand.comparedTo("RESET")==0){
+            Serial.println("Resetting hardware...");
+            digitalWrite(RESET_PIN,LOW);
+        }
+    }
+}
+
+String getValue(String data, char separator, int index){
+    int found = 0;
+    int strIndex[] = {0, -1};
+    int maxIndex = data.length()-1;
+
+    for(int i=0; i<=maxIndex && found<=index; i++){
+        if(data.charAt(i)==separator || i==maxIndex){
+            found++;
+            strIndex[0] = strIndex[1]+1;
+            strIndex[1] = (i == maxIndex) ? i+1 : i;
+        }
+    }
+    return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
+}
+void beAuto(){
+    LB_Thruster.Drive(10);
+    LF_Thruster.Drive(10);
+    RB_Thruster.Drive(10);
+    RF_Thruster.Drive(10);
+    BL_Thruster.Drive(15);
+    BR_Thruster.Drive(15);
+    FL_Thruster.Drive(15);
+    FR_Thruster.Drive(15);
+    delay(3000);
+    LB_Thruster.Drive(10);
+    LF_Thruster.Drive(10);
+    RB_Thruster.Drive(10);
+    RF_Thruster.Drive(10);
+    BL_Thruster.Drive(-15);
+    BR_Thruster.Drive(15);
+    FL_Thruster.Drive(-15);
+    FR_Thruster.Drive(15);
+    delay(3000);
+    LB_Thruster.Drive(10);
+    LF_Thruster.Drive(10);
+    RB_Thruster.Drive(10);
+    RF_Thruster.Drive(10);
+    BL_Thruster.Drive(15);
+    BR_Thruster.Drive(-15);
+    FL_Thruster.Drive(15);
+    FR_Thruster.Drive(-15);
+    delay(3000);
+    LB_Thruster.Drive(-10);
+    LF_Thruster.Drive(-10);
+    RB_Thruster.Drive(-10);
+    RF_Thruster.Drive(-10);
+    BL_Thruster.Drive(15);
+    BR_Thruster.Drive(15);
+    FL_Thruster.Drive(15);
+    FR_Thruster.Drive(15);
+    delay(3000);
+}
+void Test(){
+   LB_Thruster.Drive(15);
   Serial.println("Thruster at port 2:");
   Serial.println(LB_Thruster.ThrusterSignal);
   delay(1000);
@@ -124,28 +198,4 @@ void loop() {
   Serial.println(FR_Thruster.ThrusterSignal);
   delay(1000);
   FR_Thruster.Drive(0);
-}
-
-String getSerialCommands(){
-    if (Serial.available() > 0)
-    {
-        //String JetsonCommand = Serial.readStringUntil(TERMINATOR);
-        
-        
-    }
-}
-
-String getValue(String data, char separator, int index){
-    int found = 0;
-    int strIndex[] = {0, -1};
-    int maxIndex = data.length()-1;
-
-    for(int i=0; i<=maxIndex && found<=index; i++){
-    if(data.charAt(i)==separator || i==maxIndex){
-        found++;
-        strIndex[0] = strIndex[1]+1;
-        strIndex[1] = (i == maxIndex) ? i+1 : i;
-    }
-    }
-    return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
 }

@@ -72,7 +72,6 @@ class NavigationCommander:
         self.EastOffset = 0
         self.NorthOffset = 0
         self.DownOffset = 0
-
         self.UsingVision = usingvision
         self.UsingSim = usingsim
         if self.UsingVision:
@@ -85,7 +84,7 @@ class NavigationCommander:
 
         if self.UsingSim:
             # from python.experimental.advanced_telemetry import Telemetry
-            #self.TelemetrySim = Telemetry()
+            # self.TelemetrySim = Telemetry()
             print("MovementCommander is using Telemetry...")
         else:
             print("MovementCommander is not using Telemetry...")
@@ -200,49 +199,35 @@ class NavigationCommander:
     def BasicLinear(self):
         pass
 
-    def BasicVectoring(self):
-        Targeting = True
-        Navigating = True
+    def BasicVectoring(self):  # 'vector' should be a 3-integer array
+        targeting = True
+        navigating = True
         i = 0
-        print("Supplemental: ", self.SuppCommand)
-        for SuppParse in str(self.SuppCommand).split(':'):
-            print("SuppParse: ", SuppParse)
-            if i == 0:
-                self.YawOffset = float(SuppParse)
-                # print("YawOffset: ", self.YawOffset)
-            if i == 1:
-                self.PitchOffset = float(SuppParse)
-            if i == 2:
-                self.RollOffset = float(SuppParse)
-            if i > 2:
-                break
-            i = i + 1
-        while Targeting:
+        self.StoreGyroOffsets()
+        while targeting:
             self.CheckIfGyroDone(threshold=10, timethreshold=3)
-            Targeting = self.GyroRunning
+            targeting = self.GyroRunning
             self.TradeWithArduino()
         print("TARGETED VECTOR.")
-        while Navigating:
-            self.CheckIfPositionDone(threshold=10, timethreshold=3)
-            Navigating = self.PositionRunning
+        while navigating:
+            navigating = self.CheckIfPositionDone(threshold=10, timethreshold=3)
+            navigating = self.PositionRunning
             self.TradeWithArduino()
         print("ARRIVED TO VECTOR.")
 
     def BasicVectoring(self, yaw, pitch, roll):
-        Targeting = True
-        Navigating = True
+        targeting = True
+        navigating = True
         i = 0
         self.YawOffset = yaw
         self.PitchOffset = pitch
         self.RollOffset = roll
-        while Targeting:
-            self.CheckIfGyroDone(threshold=10, timethreshold=3)
-            Targeting = self.GyroRunning
+        while targeting:
+            targeting = self.CheckIfGyroDone(threshold=10, timethreshold=3)
             self.TradeWithArduino()
         print("TARGETED VECTOR.")
-        while Navigating:
-            self.CheckIfPositionDone(threshold=10, timethreshold=3)
-            Navigating = self.PositionRunning
+        while navigating:
+            navigating = self.CheckIfPositionDone(threshold=10, timethreshold=3)
             self.TradeWithArduino()
         print("ARRIVED TO VECTOR.")
 
@@ -349,10 +334,10 @@ class NavigationCommander:
         print("Stopping arduino... Wait 3.")
         time.sleep(3)
         self.SendToArduino("START")
-        print("Starting arduino... Wait 3.")
-        time.sleep(3)
+        print("Starting arduino... Wait 8.")
+        time.sleep(8)
         self.SendToArduino("MAXPOWER:20")
-        print("Sending settings... Wait 3.")
+        print("Sending thruster setting... Wait 3.")
         time.sleep(3)
         try:
             for command in commandlist:
@@ -456,6 +441,7 @@ class NavigationCommander:
         else:
             print("Gyro:", self.IMU.getGyro())
             self.InitialTime = time.perf_counter()
+        return self.GyroRunning
 
     def SendToArduino(self, whattosend):
         self.serial.write(whattosend.encode('utf-8'))

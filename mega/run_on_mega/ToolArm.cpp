@@ -1,11 +1,12 @@
 /*
     Authors: Theodor Giles, Austin Morris
     Created: 10/29/21
-    Last Edited 10/29/21
+    Last Edited 2/12/22
     Description:
     class for arm hardpoint kinematic control
 */
 
+// no more edit this. tool arm next year?
 
 class ToolArmDriver(){
   Servo ServoSH;      // Shoulder joint
