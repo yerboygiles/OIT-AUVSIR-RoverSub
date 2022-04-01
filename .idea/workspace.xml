@@ -6,9 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="2662d174-a621-4651-86ee-331f40745cec" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mega/run_on_mega/ToolArm.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/mega/run_on_mega/ToolArm.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mega/run_on_mega/arduino_handler/arduino_handler.ino" beforeDir="false" afterPath="$PROJECT_DIR$/mega/run_on_mega/arduino_handler/arduino_handler.ino" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raspberry/vector_commander.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/vector_commander.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/raspberry/spatial_tracker.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/spatial_tracker.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
