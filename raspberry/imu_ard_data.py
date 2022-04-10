@@ -68,11 +68,12 @@ class IMU:
     Roll_I = 0.0
     Roll_D = 0.0
 
-    def __init__(self, arduino):
+    def __init__(self, arduino, id=0):
 
         # read info from vehicle
         self.serial = arduino
         self.serial.flushInput()
+        self.ID = id
 
         # arm vehicle to see position
         # print(self.serial.readline())
@@ -352,3 +353,13 @@ class BN055(IMU):
     def Terminate(self):
         self.serial.write("STOP")
         self.serial.close()
+
+class ArduinoHandler(IMU):
+
+    def __init__(self, serial, numWT61P=0, numBN055=0):
+        self.WT61P_list = []
+        self.BN055_list = []
+        for i in range(numWT61P):
+            self.WT61P_list[i] = WT61P(self.serial, i)
+        for i in range(numBN055):
+            self.BN055_list[i] = BN055(self.serial, i)
