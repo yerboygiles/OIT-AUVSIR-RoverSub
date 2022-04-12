@@ -68,10 +68,10 @@ class IMU:
     Roll_I = 0.0
     Roll_D = 0.0
 
-    def __init__(self, arduino, id=0):
+    def __init__(self, serial, id=0):
 
         # read info from vehicle
-        self.serial = arduino
+        self.serial = serial
         self.serial.flushInput()
         self.ID = id
 
@@ -236,6 +236,29 @@ class IMU:
 
 class WT61P(IMU):
 
+    def __init__(self, serial):
+
+        # read info from vehicle
+        self.serial = serial
+        self.serial.flushInput()
+
+        # arm vehicle to see position
+        # print(self.serial.readline())
+        # - Read the actual attitude: Roll, Pitch, and Yaw
+        self.UpdateGyro()
+        self.StartingGyro = self.Offsets
+        print('Orientation: ', self.getStartingGyro())
+
+        # - Read the actual position North, East, and Down
+        # self.UpdatePosition()
+        # self.StartingPosition = self.Position
+        # print('Position: ', self.getStartingPosition())
+
+        # - Read the actual depth:
+        time.sleep(3)
+        print("Starting gyro: ", self.StartingGyro)
+        # print("Starting position: ", self.Position)
+
     # parse gyro object data from wt61p, can then pass to other programs
     def UpdateGyro(self):
         self.serial.writelines("GYRO")
@@ -282,10 +305,10 @@ class WT61P(IMU):
 
 class BN055(IMU):
 
-    def __init__(self, arduino):
+    def __init__(self, serial):
 
         # read info from vehicle
-        self.serial = arduino
+        self.serial = serial
         self.serial.flushInput()
 
         # arm vehicle to see position
@@ -312,16 +335,16 @@ class BN055(IMU):
         time.sleep(0.01)
         # print("Updating...")
         line = str(self.serial.readline()).strip("'").split(':')
-        for ColonParse in line:
-            if ColonParse is not None:
-                ColonParse = re.findall(r"[-+]?\d*\.\d+|\d+", ColonParse)
+        for colonparse in line:
+            if colonparse is not None:
+                colonparse = re.findall(r"[-+]?\d*\.\d+|\d+", colonparse)
                 # print("ColonParse: ", ColonParse, i)
                 if i == 2:
-                    self.Offsets[YAW] = float(ColonParse[0])
+                    self.Offsets[YAW] = float(colonparse[0])
                 if i == 4:
-                    self.Offsets[PITCH] = float(ColonParse[0])
+                    self.Offsets[PITCH] = float(colonparse[0])
                 if i == 6:
-                    self.Offsets[ROLL] = float(ColonParse[0])
+                    self.Offsets[ROLL] = float(colonparse[0])
                     break
             i = i + 1
         # print("Gyro: ", self.Gyro)
@@ -353,6 +376,7 @@ class BN055(IMU):
     def Terminate(self):
         self.serial.write("STOP")
         self.serial.close()
+
 
 class ArduinoHandler(IMU):
 

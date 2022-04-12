@@ -1,39 +1,13 @@
-#!python3
-# Author: Theodor Giles
-# Created: 7/15/20
-# Last Edited 7/29/21
-# Description:
-# Node for data from the rpi
 
-from Phidget22.Phidget import *
-from Phidget22.Devices.Spatial import *
-import time
-import re
-import math
-
-GYRO: int = 0
-POSITION: int = 1
-YAW: int = 0
-PITCH: int = 1
-ROLL: int = 2
-NORTH: int = 0
-EAST: int = 1
-DOWN: int = 2
-
-
-def MapToAngle(x):
-    in_min = -100.0
-    in_max = 100.0
-    out_min = 0.0
-    out_max = 180.0
-    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
-
-
-class Phidget9dof:
+class IMU:
     StringIn = ""
-    Gyro = [0.0, 0.0, 0.0]
-    Position = [0.0, 0.0, 0.0]
-    Angular_Motions = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
+    Offsets = [0.0, 0.0, 0.0]
+    StartingGyro = [0.0, 0.0, 0.0]
+    StartingPosition = [0.0, 0.0, 0.0]
+    Acceleration = [0.0, 0.0, 0.0]
+    AngularVelocity = [0.0, 0.0, 0.0]
+    Angle = [0.0] * 3
+    Velocity = [0.0, 0.0, 0.0]
     Measures = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
     Error = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
     Previous_Error = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
@@ -76,52 +50,29 @@ class Phidget9dof:
     Roll_I = 0.0
     Roll_D = 0.0
 
-    def __init__(self):
+    def __init__(self, serial, id=0):
+
         # read info from vehicle
-        spatial0 = Spatial()
-
-        spatial0.setOnSpatialDataHandler(self.onSpatialData)
-
-        spatial0.openWaitForAttachment(5000)
+        self.serial = serial
+        self.serial.flushInput()
+        self.ID = id
 
         # arm vehicle to see position
-        print('Gyro Armed')
+        # print(self.serial.readline())
         # - Read the actual attitude: Roll, Pitch, and Yaw
         self.UpdateGyro()
-        self.StartingGyro = self.Gyro
+        self.StartingGyro = self.Offsets
         print('Orientation: ', self.getStartingGyro())
 
         # - Read the actual position North, East, and Down
-        self.UpdatePosition()
-        self.StartingPosition = self.Position
-        print('Position: ', self.getStartingPosition())
+        # self.UpdatePosition()
+        # self.StartingPosition = self.Position
+        # print('Position: ', self.getStartingPosition())
 
         # - Read the actual depth:
         time.sleep(3)
         print("Starting gyro: ", self.StartingGyro)
         # print("Starting position: ", self.Position)
-
-    def onSpatialData(self, acceleration, angularRate, magneticField, timestamp):
-        print(
-            "Acceleration: \t" + str(acceleration[0]) + "  |  " + str(acceleration[1]) + "  |  " + str(acceleration[2]))
-
-        self.Position[NORTH] = acceleration[NORTH] * (timestamp**2)
-        self.Position[EAST] =  acceleration[EAST] * (timestamp**2)
-        self.Position[DOWN] = acceleration[DOWN] * (timestamp**2)
-
-        print("AngularRate: \t" + str(angularRate[0]) + "  |  " + str(angularRate[1]) + "  |  " + str(angularRate[2]))
-        print("MagneticField: \t" + str(magneticField[0]) + "  |  " + str(magneticField[1]) + "  |  " + str(
-            magneticField[2]))
-        print("Timestamp: " + str(timestamp))
-        print("----------")
-
-    # parse gyro object data from pixhawk, can then pass to other programs
-    def UpdateGyro(self):
-        pass
-
-    # parse position object data from pixhawk, can then pass to other programs
-    def UpdatePosition(self):
-        pass
 
     # position read when starting the RoboSub
     def getStartingPosition(self):
@@ -129,16 +80,16 @@ class Phidget9dof:
 
     # current position read
     def getPosition(self):
-        return self.Position
+        return self.Acceleration
 
     def getNorth(self):
-        return self.Position[NORTH]
+        return self.Acceleration[NORTH]
 
     def getEast(self):
-        return self.Position[EAST]
+        return self.Acceleration[EAST]
 
     def getDown(self):
-        return self.Position[DOWN]
+        return self.Acceleration[DOWN]
 
     # gyro read when starting the RoboSub
     def getStartingGyro(self):
@@ -146,19 +97,21 @@ class Phidget9dof:
 
     # current gyro read
     def getGyro(self):
-        return self.Gyro
+        return self.Offsets
 
     def getPitch(self):
-        return self.Gyro[PITCH]
+        return self.Offsets[PITCH]
 
     def getRoll(self):
-        return self.Gyro[ROLL]
+        return self.Offsets[ROLL]
 
     def getYaw(self):
-        return self.Gyro[YAW]
+        return self.Offsets[YAW]
 
     # req for PID calculation
     def CalculateError(self, yawoffset, pitchoffset, rolloffset, northoffset, eastoffset, downoffset):
+
+        self.Velocity[NORTH] = self.Acceleration[NORTH]
         # previous error for error delta
         # gyro
         self.Previous_Error[GYRO][YAW] = self.Error[GYRO][YAW]
@@ -172,14 +125,17 @@ class Phidget9dof:
 
         # error for proportional control
         # gyro
-        self.Error[GYRO][YAW] = self.Gyro[YAW] - yawoffset
-        self.Error[GYRO][PITCH] = self.Gyro[PITCH] - pitchoffset
-        self.Error[GYRO][ROLL] = self.Gyro[ROLL] - rolloffset
+        if ((180 - abs(yawoffset)) + (180 - abs(self.Offsets[YAW]))) < 180:
+            self.Error[GYRO][YAW] = self.Offsets[YAW] - yawoffset
+        elif ((abs(yawoffset)) + (abs(self.Offsets[YAW]))) < 180:
+            self.Error[GYRO][YAW] = self.Offsets[YAW] + yawoffset
+        self.Error[GYRO][PITCH] = self.Offsets[PITCH] - pitchoffset
+        self.Error[GYRO][ROLL] = self.Offsets[ROLL] - rolloffset
 
         # position
-        self.Error[POSITION][NORTH] = self.Position[NORTH] - northoffset
-        self.Error[POSITION][EAST] = self.Position[EAST] - eastoffset
-        self.Error[POSITION][DOWN] = self.Position[DOWN] - downoffset
+        self.Error[POSITION][NORTH] = self.Acceleration[NORTH] - northoffset
+        self.Error[POSITION][EAST] = self.Acceleration[EAST] - eastoffset
+        self.Error[POSITION][DOWN] = self.Acceleration[DOWN] - downoffset
 
         # sum of error for integral
         # gyro
@@ -258,8 +214,3 @@ class Phidget9dof:
 
     def getDownPID(self):
         return self.Roll_PID
-
-    # end command/vehicle running
-    def Terminate(self):
-        self.serial.write("STOP")
-        self.serial.close()

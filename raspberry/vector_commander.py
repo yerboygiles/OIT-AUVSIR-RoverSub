@@ -10,7 +10,7 @@ import time
 import random
 import math
 import serial
-import imu_ard_data
+import imu_ard
 import vision_v1
 import remote_control
 
