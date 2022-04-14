@@ -10,7 +10,8 @@ import time
 import random
 import math
 import serial
-import imu_ard
+import imu
+import imu_rpi
 import vision_v1
 import remote_control
 
@@ -45,9 +46,11 @@ class NavigationCommander:
         self.UsingGyro = usinggyro
         self.serial = serial.Serial('/dev/ttyAMA0', 115200)
         if self.UsingGyro:
-            print("Sending IMU")
-            self.SendToArduino("IMU")
-            self.IMU = imu_ard_data.WT61P(self.serial)
+            # print("Sending IMU")
+            # self.SendToArduino("IMU")
+            self.JY62_1_IMU = imu_rpi.JY62(self.serial)
+            self.IMU = imu.IMU_Swarm()
+            #self.IMU = imu_ard_data.WT61P(self.serial)
 
         else:
             print("Sending NOIMU")

@@ -1,3 +1,13 @@
+import time
+
+GYRO: int = 0
+POSITION: int = 1
+YAW: int = 0
+PITCH: int = 1
+ROLL: int = 2
+NORTH: int = 0
+EAST: int = 1
+DOWN: int = 2
 
 class IMU:
     StringIn = ""
@@ -74,6 +84,9 @@ class IMU:
         print("Starting gyro: ", self.StartingGyro)
         # print("Starting position: ", self.Position)
 
+    # updates class with data from hardware
+    def updateGyro(self):
+        pass
     # position read when starting the RoboSub
     def getStartingPosition(self):
         return self.StartingPosition
@@ -214,3 +227,30 @@ class IMU:
 
     def getDownPID(self):
         return self.Roll_PID
+
+class IMU_Swarm(IMU):
+    imucount: int = 0
+    def __init__(self, imulist):
+        # read info from vehicle
+        for imu in imulist:
+            self.imucount += 1
+
+
+        # arm vehicle to see position
+        # print(self.serial.readline())
+        # - Read the actual attitude: Roll, Pitch, and Yaw
+        self.UpdateGyro()
+        self.StartingGyro = self.Offsets
+        print('Orientation: ', self.getStartingGyro())
+
+        # - Read the actual position North, East, and Down
+        # self.UpdatePosition()
+        # self.StartingPosition = self.Position
+        # print('Position: ', self.getStartingPosition())
+
+        # - Read the actual depth:
+        time.sleep(3)
+        print("Starting gyro: ", self.StartingGyro)
+        # print("Starting position: ", self.Position)
+
+    def updateGyro(self):

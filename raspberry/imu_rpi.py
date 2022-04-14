@@ -234,7 +234,12 @@ class JY62(IMU):
         print("Starting gyro: ", self.StartingGyro)
         # print("Starting position: ", self.Position)
 
-    def DueData(self,inputdata):
+    def updateGyro(self):
+        datahex = self.serial.read(33)
+        self.DueData(datahex)
+
+    # reading info in correct format from jy62
+    def DueData(self, inputdata):
         global FrameState
         global Bytenum
         global CheckSum
@@ -266,7 +271,7 @@ class JY62(IMU):
                     Bytenum += 1
                 else:
                     if data == (CheckSum & 0xff):
-                        self.Acceleration = self.get_acc(self.ACCData)
+                        self.Acceleration = get_acc(self.ACCData)
                     CheckSum = 0
                     Bytenum = 0
                     FrameState = 0
@@ -291,7 +296,7 @@ class JY62(IMU):
                 else:
                     if data == (CheckSum & 0xff):
                         self.Angle = get_angle(self.AngleData)
-                        self.Angle_quat = euler_to_quaternion(Angle[0], Angle[1], Angle[2])
+                        self.Angle_quat = euler_to_quaternion(self.Angle[0], self.Angle[1], self.Angle[2])
 
                         # change acceleration to m/s2 (by default the unit is g)
                         self.Acceleration = [9.81 * i for i in self.Acceleration]
@@ -308,12 +313,12 @@ class JY62(IMU):
                         print
                         "====================================================================="
 
-
                     CheckSum = 0
                     Bytenum = 0
                     FrameState = 0
 
-#fns for JY61
+
+# fns for JY61
 def get_gyro(datahex):
     wxl = datahex[0]
     wxh = datahex[1]
@@ -333,6 +338,7 @@ def get_gyro(datahex):
     if gyro_z >= k_gyro:
         gyro_z -= 2 * k_gyro
     return gyro_x, gyro_y, gyro_z
+
 
 def get_acc(datahex):
     axl = datahex[0]
@@ -356,6 +362,7 @@ def get_acc(datahex):
 
     return acc_x, acc_y, acc_z
 
+
 def get_angle(datahex):
     rxl = datahex[0]
     rxh = datahex[1]
@@ -376,6 +383,7 @@ def get_angle(datahex):
         angle_z -= 2 * k_angle
 
     return angle_x, angle_y, angle_z
+
 
 def euler_to_quaternion(roll, pitch, yaw):
     # change to radius
