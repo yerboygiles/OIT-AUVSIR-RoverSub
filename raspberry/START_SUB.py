@@ -9,7 +9,7 @@
 def run():
     from task_io_lib_v2 import TaskIO
 
-    print(' ===== ROBOSUB v2.0 ===== ')
+    print(' ===== -ROVERSUB- v3.0 ===== ')
 
     Mission = TaskIO("mission.txt", False, True, False)
     for i in range(1000):
@@ -19,3 +19,4 @@ def run():
     print("done")
 
 
+run()

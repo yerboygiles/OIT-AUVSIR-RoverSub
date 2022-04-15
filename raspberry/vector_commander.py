@@ -181,15 +181,19 @@ class NavigationCommander:
         print("MovementCommander initialized...")
         self.StartingTime = time.perf_counter()
     def GyroTesting(self):
-        self.IMU.updateGyro()
-        print("Angle: ", self.IMU.getGyro())
+        #self.IMU.updateGyro()
+        #print("Angle: ", self.IMU.getGyro())
+        self.JY62_1_IMU.updateGyro()
+        self.JY62_2_IMU.updateGyro()
+        print("IMU 1 Angle: ", self.JY62_1_IMU.getGyro())
+        print("IMU 2 Angle: ", self.JY62_2_IMU.getGyro())
     def BasicDriverControl(self):
         DrivingWithControl = True
         print("Driver Control!!")
         while DrivingWithControl:
             DriveCommand = remote_control.get_wasdqerv_directional()
             self.BasicDirectionPower(DriveCommand)
-            DrivingWithControl = DriveCommand is not -2
+            DrivingWithControl = DriveCommand != -2
             self.TradeWithArduino()
 
     def BasicWithTime(self):
@@ -245,7 +249,10 @@ class NavigationCommander:
         Waypointrange = int(((self.NorthOffset + self.EastOffset + self.DownOffset) / 3) / 15)
         waypointrange = 10
         for i in range(Waypointrange):
-            n = Waypointrange - i if i > Waypointrange / 2 else n = i
+            if i > Waypointrange / 2:
+                n = Waypointrange - i
+            else:
+                n = i
             self.Waypoints[i] = [((self.NorthOffset / i) + self.IMU.Angle[NORTH]),
                                  ((self.EastOffset / i) + self.IMU.Angle[EAST]),
                                  ((self.DownOffset / i) + self.IMU.Angle[DOWN])]

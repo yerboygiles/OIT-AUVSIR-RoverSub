@@ -272,7 +272,7 @@ class IMU_Group(IMU):
             else:
                 j = 0
                 for j in range(len(temp)):
-                    self.Angle[j] = temp[j]
+                    self.Angle[j] += temp[j]
                     j += 1
 
             i += 1
@@ -298,7 +298,7 @@ class IMU_Group(IMU):
             else:
                 j = 0
                 for j in range(len(temp)):
-                    self.Position[j] = temp[j]
+                    self.Position[j] += temp[j]
                     j += 1
 
             i += 1

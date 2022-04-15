@@ -196,16 +196,13 @@ class JY62(IMU):
     # angular velocity
     AngularVelocity = [0.0] * 3
     # angle
-    Angle = [0.0] * 3
+    Angle = [0.0,0.0,0.0]
     # angle_in_quat
     Angle_quat = [0.0] * 4
-
-    ACCdata = [0.0] * 8
+    ACCData = [0.0] * 8
     GYROData = [0.0] * 8
     AngleData = [0.0] * 8
-    FrameState = 0
-    Bytenum = 0
-    CheckSum = 0
+
 
     import numpy as np
     from numpy import pi
@@ -220,7 +217,7 @@ class JY62(IMU):
         # arm vehicle to see position
         # print(self.serial.readline())
         # - Read the actual attitude: Roll, Pitch, and Yaw
-        self.UpdateGyro()
+        self.updateGyro()
         self.StartingAngle = self.Angle
         print('Orientation: ', self.getStartingGyro())
 
@@ -240,12 +237,12 @@ class JY62(IMU):
 
     # reading info in correct format from jy62
     def DueData(self, inputdata):
-        global FrameState
-        global Bytenum
-        global CheckSum
+        FrameState = 0
+        Bytenum = 0
+        CheckSum = 0
 
         for data in inputdata:
-            data = ord(data)
+            #data = ord(data)
             if FrameState == 0:
                 if data == 0x55 and Bytenum == 0:
                     CheckSum = data

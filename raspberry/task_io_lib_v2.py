@@ -15,7 +15,7 @@ class TaskIO:
     # instead of
     def __init__(self, filename, usingvision, usinggyro, usingsim):
         self.Input = False
-        if filename is 0:
+        if filename == 0:
             self.input = filename
         else:
             self.Filename = filename
@@ -39,7 +39,7 @@ class TaskIO:
             self.Movement.receiveCommands(self.CommandList)
             self.active = False
         else:
-            if self.Input is not -1:
+            if self.Input != -1:
                 pass
             else:
                 print("Waiting for input...")
