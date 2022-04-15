@@ -217,6 +217,7 @@ class JY62(IMU):
         # arm vehicle to see position
         # print(self.serial.readline())
         # - Read the actual attitude: Roll, Pitch, and Yaw
+        print("Initializing Gyro, ID - ", self.ID)
         self.updateGyro()
         self.StartingAngle = self.Angle
         print('Orientation: ', self.getStartingGyro())
