@@ -237,7 +237,7 @@ class JY62(IMU):
         self.serial.close()
         connectstring = '/dev/ttyUSB' + str(self.ID)
         print(connectstring)
-        self.serial = serial.Serial('/dev/ttyUSB0', 115200)
+        self.serial = serial.Serial(connectstring, 115200)
 
     def calibrateGyro(self):
         pass

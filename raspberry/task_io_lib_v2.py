@@ -48,10 +48,10 @@ class TaskIO:
             self.CommandList.append(self.Input)
 
     def testData(self):
-        for i in range(1000):
+        for i in range(100):
             self.Movement.GyroTesting()
         self.Movement.ResetGyro()
-        for i in range(1000):
+        for i in range(100):
             self.Movement.GyroTesting()
 
     # end processes and mission
