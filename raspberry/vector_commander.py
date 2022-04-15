@@ -196,7 +196,7 @@ class NavigationCommander:
         y2 = "{:.4f}".format(gyro2[1])
         z2 = "{:.4f}".format(gyro2[2])
         print("IMU 1 Angle: ", x1,y1,z1)
-        print("IMU 2 Angle: ", x1,y1,z1)
+        print("IMU 2 Angle: ", x2,y2,z2)
     def BasicDriverControl(self):
         DrivingWithControl = True
         print("Driver Control!!")
