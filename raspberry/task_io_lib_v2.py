@@ -46,8 +46,14 @@ class TaskIO:
                 print("Waiting for input...")
 
             self.CommandList.append(self.Input)
+
     def testData(self):
-        self.Movement.GyroTesting()
+        for i in range(1000):
+            self.Movement.GyroTesting()
+        self.Movement.ResetGyro()
+        for i in range(1000):
+            self.Movement.GyroTesting()
+
     # end processes and mission
     def terminate(self):
         self.Active = False

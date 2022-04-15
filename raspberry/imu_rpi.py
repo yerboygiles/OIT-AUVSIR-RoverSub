@@ -10,6 +10,7 @@ from Phidget22.Phidget import *
 from Phidget22.Devices.Spatial import *
 import numpy as np
 from numpy import pi
+import serial
 
 from imu import IMU
 import re
@@ -196,13 +197,12 @@ class JY62(IMU):
     # angular velocity
     AngularVelocity = [0.0] * 3
     # angle
-    Angle = [0.0,0.0,0.0]
+    Angle = [0.0, 0.0, 0.0]
     # angle_in_quat
     Angle_quat = [0.0] * 4
     ACCData = [0.0] * 8
     GYROData = [0.0] * 8
     AngleData = [0.0] * 8
-
 
     import numpy as np
     from numpy import pi
@@ -232,6 +232,16 @@ class JY62(IMU):
         print("Starting gyro: ", self.StartingAngle)
         # print("Starting position: ", self.Position)
 
+    def resetGyro(self):
+        # '/dev/ttyUSB0'
+        self.serial.close()
+        connectstring = '/dev/ttyUSB' + str(self.ID)
+        print(connectstring)
+        self.serial = serial.Serial('/dev/ttyUSB0', 115200)
+
+    def calibrateGyro(self):
+        pass
+
     def updateGyro(self):
         datahex = self.serial.read(33)
         self.DueData(datahex)
@@ -243,7 +253,7 @@ class JY62(IMU):
         CheckSum = 0
 
         for data in inputdata:
-            #data = ord(data)
+            # data = ord(data)
             if FrameState == 0:
                 if data == 0x55 and Bytenum == 0:
                     CheckSum = data
@@ -399,3 +409,16 @@ def euler_to_quaternion(roll, pitch, yaw):
         yaw / 2)
 
     return qx, qy, qz, qw
+
+# def searchUSBSerial():
+#     for ns in xrange(101):
+#         try:
+#             ser.port = ns
+#             ser.open()
+#             print
+#             "COM" + str(ns + 1) + " available"
+#             ser.close()
+#
+#         except serial.SerialException:
+#             print
+#             "COM" + str(ns + 1) + " NOT available"

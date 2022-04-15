@@ -182,9 +182,10 @@ class NavigationCommander:
         }
         print("MovementCommander initialized...")
         self.StartingTime = time.perf_counter()
+
     def GyroTesting(self):
-        #self.IMU.updateGyro()
-        #print("Angle: ", self.IMU.getGyro())
+        # self.IMU.updateGyro()
+        # print("Angle: ", self.IMU.getGyro())
         self.JY62_1_IMU.updateGyro()
         self.JY62_2_IMU.updateGyro()
         gyro1 = self.JY62_1_IMU.getGyro()
@@ -195,8 +196,13 @@ class NavigationCommander:
         x2 = "{:.4f}".format(gyro2[0])
         y2 = "{:.4f}".format(gyro2[1])
         z2 = "{:.4f}".format(gyro2[2])
-        print("IMU 1 Angle: ", x1,y1,z1)
-        print("IMU 2 Angle: ", x2,y2,z2)
+        print("IMU 1 Angle: ", x1, y1, z1)
+        print("IMU 2 Angle: ", x2, y2, z2)
+
+    def ResetGyro(self):
+        self.JY62_1_IMU.resetGyro()
+        self.JY62_2_IMU.resetGyro()
+
     def BasicDriverControl(self):
         DrivingWithControl = True
         print("Driver Control!!")
