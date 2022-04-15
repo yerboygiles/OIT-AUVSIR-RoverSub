@@ -40,13 +40,13 @@ class TaskIO:
             self.active = False
         else:
             if self.Input is not -1:
-
+                pass
             else:
                 print("Waiting for input...")
 
-
             self.CommandList.append(self.Input)
-
+    def testData(self):
+        self.Movement.GyroTesting()
     # end processes and mission
     def terminate(self):
         self.Active = False

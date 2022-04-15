@@ -44,20 +44,22 @@ class NavigationCommander:
         time.sleep(8)
         print("Communicating with Arduino and it's peripherals...")
         self.UsingGyro = usinggyro
-        self.serial = serial.Serial('/dev/ttyAMA0', 115200)
+        # arduino. omitting for now, in favor of pure rpi gyro reads
+        # self.serial = serial.Serial('/dev/ttyAMA0', 115200)
         if self.UsingGyro:
             # print("Sending IMU")
             # self.SendToArduino("IMU")
-            self.JY62_1_IMU = imu_rpi.JY62(self.serial)
-            self.IMU = imu.IMU_Swarm()
-            #self.IMU = imu_ard_data.WT61P(self.serial)
+            self.JY62_1_IMU = imu_rpi.JY62(serial.Serial('/dev/ttyUSB0', 115200), 0)
+            self.JY62_2_IMU = imu_rpi.JY62(serial.Serial('/dev/ttyUSB1', 115200), 1)
+            self.IMU = imu.IMU_Group([self.JY62_1_IMU, self.JY62_2_IMU])
+            # self.IMU = imu_ard_data.WT61P(self.serial)
 
         else:
             print("Sending NOIMU")
-            self.SendToArduino("NOIMU")
+            # self.SendToArduino("NOIMU")
 
         if resetheadingoncmd:
-            self.YawOffset = self.IMU.StartingGyro[0]
+            self.YawOffset = self.IMU.StartingAngle[0]
             self.ResetHeadingOnCMD = resetheadingoncmd
 
         self.YawLocked = False
@@ -75,8 +77,10 @@ class NavigationCommander:
         self.EastOffset = 0
         self.NorthOffset = 0
         self.DownOffset = 0
+
         self.UsingVision = usingvision
         self.UsingSim = usingsim
+
         if self.UsingVision:
             # import Theos_Really_Good_Detection_Script as obj_det
             # self.VisionAI = obj_det.Detector("TensorFlow_Graph/Tflite", False)
@@ -94,12 +98,12 @@ class NavigationCommander:
         # thruster hardpoint classes
         # 'ventral' are the central, vertically oriented thrusters
         # for roll/pitch and ascent/descent
-        # 'lateral' are the outer, 45 deg. oriented thrusters for
-        # yaw/turning and strafe movement
         self.Thruster_VentralLB = ThrusterDriver("LB")  # left back
         self.Thruster_VentralLF = ThrusterDriver("LF")  # left front
         self.Thruster_VentralRB = ThrusterDriver("RB")  # right back
         self.Thruster_VentralRF = ThrusterDriver("RF")  # right front
+        # 'lateral' are the outer, 45 deg. oriented thrusters for
+        # yaw/turning and strafe movement
         self.Thruster_LateralLB = ThrusterDriver("BL")  # back left
         self.Thruster_LateralRB = ThrusterDriver("BR")  # back right
         self.Thruster_LateralLF = ThrusterDriver("FL")  # front left !
@@ -115,8 +119,6 @@ class NavigationCommander:
         self.VentralPowerRB = 0
         self.VentralPowerRF = 0
         self.VentralPowerLF = 0
-        # boolean for toggling between data sent
-        self.secondSetTrade = False
         # initialize thruster values to brake (self.PowerXX set to 0^)
         self.UpdateThrusters()
 
@@ -178,7 +180,9 @@ class NavigationCommander:
         }
         print("MovementCommander initialized...")
         self.StartingTime = time.perf_counter()
-
+    def GyroTesting(self):
+        self.IMU.updateGyro()
+        print("Angle: ", self.IMU.getGyro())
     def BasicDriverControl(self):
         DrivingWithControl = True
         print("Driver Control!!")
@@ -242,9 +246,9 @@ class NavigationCommander:
         waypointrange = 10
         for i in range(Waypointrange):
             n = Waypointrange - i if i > Waypointrange / 2 else n = i
-            self.Waypoints[i] = [((self.NorthOffset / i) + self.IMU.Offsets[NORTH]),
-                                 ((self.EastOffset / i) + self.IMU.Offsets[EAST]),
-                                 ((self.DownOffset / i) + self.IMU.Offsets[DOWN])]
+            self.Waypoints[i] = [((self.NorthOffset / i) + self.IMU.Angle[NORTH]),
+                                 ((self.EastOffset / i) + self.IMU.Angle[EAST]),
+                                 ((self.DownOffset / i) + self.IMU.Angle[DOWN])]
             self.Waypoints[i][0] += ((self.Waypoints[i][0] * self.YawOffset / 90) / 5) * n
         print("VECTOR CALCULATED. USING ", len(self.Waypoints), " WAYPOINTS.")
         i = 1

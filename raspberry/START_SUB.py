@@ -11,8 +11,10 @@ def run():
 
     print(' ===== ROBOSUB v2.0 ===== ')
 
-    Mission = TaskIO("mission.txt", False, False, False)
-    Mission.get_tasks()
+    Mission = TaskIO("mission.txt", False, True, False)
+    for i in range(1000):
+        Mission.testData()
+    # Mission.get_tasks(True)
     Mission.terminate()
     print("done")
 

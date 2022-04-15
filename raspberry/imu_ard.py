@@ -32,7 +32,7 @@ class WT61P(IMU):
         # print(self.serial.readline())
         # - Read the actual attitude: Roll, Pitch, and Yaw
         self.UpdateGyro()
-        self.StartingGyro = self.Offsets
+        self.StartingGyro = self.Angle
         print('Orientation: ', self.getStartingGyro())
 
         # - Read the actual position North, East, and Down
@@ -55,11 +55,11 @@ class WT61P(IMU):
                 ColonParse = re.findall(r"[-+]?\d*\.\d+|\d+", ColonParse)
                 # print("ColonParse: ", ColonParse, i)
                 if i == 2:
-                    self.Offsets[ROLL] = float(ColonParse[0])
+                    self.Angle[ROLL] = float(ColonParse[0])
                 if i == 4:
-                    self.Offsets[PITCH] = float(ColonParse[0])
+                    self.Angle[PITCH] = float(ColonParse[0])
                 if i == 6:
-                    self.Offsets[YAW] = float(ColonParse[0])
+                    self.Angle[YAW] = float(ColonParse[0])
                     break
             i = i + 1
         pass
@@ -74,11 +74,11 @@ class WT61P(IMU):
                 ColonParse = re.findall(r"[-+]?\d*\.\d+|\d+", ColonParse)
                 # print("ColonParse: ", ColonParse, i)
                 if i == 2:
-                    self.Offsets[DOWN] = float(ColonParse[0])
+                    self.Angle[DOWN] = float(ColonParse[0])
                 if i == 4:
-                    self.Offsets[EAST] = float(ColonParse[0])
+                    self.Angle[EAST] = float(ColonParse[0])
                 if i == 6:
-                    self.Offsets[NORTH] = float(ColonParse[0])
+                    self.Angle[NORTH] = float(ColonParse[0])
                     break
             i = i + 1
         pass
@@ -101,7 +101,7 @@ class BN055(IMU):
         # print(self.serial.readline())
         # - Read the actual attitude: Roll, Pitch, and Yaw
         self.UpdateGyro()
-        self.StartingGyro = self.Offsets
+        self.StartingGyro = self.Angle
         print('Orientation: ', self.getStartingGyro())
 
         # - Read the actual position North, East, and Down
@@ -126,11 +126,11 @@ class BN055(IMU):
                 colonparse = re.findall(r"[-+]?\d*\.\d+|\d+", colonparse)
                 # print("ColonParse: ", ColonParse, i)
                 if i == 2:
-                    self.Offsets[YAW] = float(colonparse[0])
+                    self.Angle[YAW] = float(colonparse[0])
                 if i == 4:
-                    self.Offsets[PITCH] = float(colonparse[0])
+                    self.Angle[PITCH] = float(colonparse[0])
                 if i == 6:
-                    self.Offsets[ROLL] = float(colonparse[0])
+                    self.Angle[ROLL] = float(colonparse[0])
                     break
             i = i + 1
         # print("Gyro: ", self.Gyro)

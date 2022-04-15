@@ -47,7 +47,7 @@ class Phidget9dof(IMU):
         print('Gyro Armed')
         # - Read the actual attitude: Roll, Pitch, and Yaw
         self.UpdateGyro()
-        self.StartingGyro = self.Gyro
+        self.StartingGyro = self.Angle
         print('Orientation: ', self.getStartingGyro())
 
         # - Read the actual position North, East, and Down
@@ -97,9 +97,9 @@ class Phidget9dof(IMU):
 
         # error for proportional control
         # gyro
-        self.Error[GYRO][YAW] = self.Gyro[YAW] - yawoffset
-        self.Error[GYRO][PITCH] = self.Gyro[PITCH] - pitchoffset
-        self.Error[GYRO][ROLL] = self.Gyro[ROLL] - rolloffset
+        self.Error[GYRO][YAW] = self.Angle[YAW] - yawoffset
+        self.Error[GYRO][PITCH] = self.Angle[PITCH] - pitchoffset
+        self.Error[GYRO][ROLL] = self.Angle[ROLL] - rolloffset
 
         # position
         self.Error[POSITION][NORTH] = self.Position[NORTH] - northoffset
@@ -221,7 +221,7 @@ class JY62(IMU):
         # print(self.serial.readline())
         # - Read the actual attitude: Roll, Pitch, and Yaw
         self.UpdateGyro()
-        self.StartingGyro = self.Offsets
+        self.StartingAngle = self.Angle
         print('Orientation: ', self.getStartingGyro())
 
         # - Read the actual position North, East, and Down
@@ -231,7 +231,7 @@ class JY62(IMU):
 
         # - Read the actual depth:
         time.sleep(3)
-        print("Starting gyro: ", self.StartingGyro)
+        print("Starting gyro: ", self.StartingAngle)
         # print("Starting position: ", self.Position)
 
     def updateGyro(self):
