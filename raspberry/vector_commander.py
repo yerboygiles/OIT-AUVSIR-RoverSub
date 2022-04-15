@@ -38,11 +38,13 @@ GENERAL_THROTTLE = 17.5
 class NavigationCommander:
 
     # initialize everything to supposed starting position
-    def __init__(self, usingvision=False, usinggyro=False, usingsim=False, resetheadingoncmd=False):
+    def __init__(self, usingarduino=False, usingvision=False, usinggyro=False, usingsim=False, resetheadingoncmd=False):
         # setting up board serial port
-        print("Waiting 8 for Arduino...")
-        time.sleep(8)
-        print("Communicating with Arduino and it's peripherals...")
+        self.UsingArduino = usingarduino
+        if self.UsingArduino:
+            print("Waiting 8 for Arduino...")
+            time.sleep(8)
+            print("Communicating with Arduino and it's peripherals...")
         self.UsingGyro = usinggyro
         # arduino. omitting for now, in favor of pure rpi gyro reads
         # self.serial = serial.Serial('/dev/ttyAMA0', 115200)

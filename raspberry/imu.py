@@ -265,13 +265,16 @@ class IMU_Group(IMU):
         i = 0
         temp = []
         for imu in self.IMU_list:
+            print("Updating group-gyro.")
             imu.updateGyro()
             temp = imu.getGyro()
+            print("Temp(gyro-", i,") readout: ", temp)
             if i == 0:
                 self.Angle = temp
             else:
                 j = 0
                 for j in range(len(temp)):
+
                     self.Angle[j] += temp[j]
                     j += 1
 

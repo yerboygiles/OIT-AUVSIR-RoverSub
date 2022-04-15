@@ -11,7 +11,7 @@ def run():
 
     print(' ===== -ROVERSUB- v3.0 ===== ')
 
-    Mission = TaskIO("mission.txt", False, True, False)
+    Mission = TaskIO("mission.txt", False, False, True, False)
     for i in range(1000):
         Mission.testData()
     # Mission.get_tasks(True)

@@ -13,17 +13,18 @@ from vector_commander import NavigationCommander
 class TaskIO:
     # filename can first be sent a 0 to initialize string-input commands
     # instead of
-    def __init__(self, filename, usingvision, usinggyro, usingsim):
+    def __init__(self, filename, usingarduino, usingvision, usinggyro, usingsim):
         self.Input = False
         if filename == 0:
             self.input = filename
         else:
             self.Filename = filename
+        self.UsingArduino = usingarduino
         self.UsingVision = usingvision
         self.UsingGyro = usinggyro
         self.UsingSim = usingsim
         self.Active = False
-        self.Movement = NavigationCommander(self.UsingVision, self.UsingGyro, self.UsingSim)
+        self.Movement = NavigationCommander(self.UsingArduino, self.UsingVision, self.UsingGyro, self.UsingSim)
         self.CommandList = []
 
     # get tasks from the .txt and completes them

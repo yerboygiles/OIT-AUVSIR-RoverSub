@@ -299,16 +299,16 @@ class JY62(IMU):
                         self.Acceleration = [9.81 * i for i in self.Acceleration]
                         self.Acceleration = tuple(self.Acceleration)
 
-                        print
-                        "acceleration(m/s2):\t%10.3f %10.3f %10.3f" % self.Acceleration
-                        print
-                        "angular vel(deg/s):\t%10.3f %10.3f %10.3f" % self.AngularVelocity
-                        print
-                        "angle(deg):\t\t%10.3f %10.3f %10.3f" % self.Angle
-                        print
-                        "angle_quat:\t\t%10.3f %10.3f %10.3f %10.3f" % self.Angle_quat
-                        print
-                        "====================================================================="
+                        # print
+                        # "acceleration(m/s2):\t%10.3f %10.3f %10.3f" % self.Acceleration
+                        # print
+                        # "angular vel(deg/s):\t%10.3f %10.3f %10.3f" % self.AngularVelocity
+                        # print
+                        # "angle(deg):\t\t%10.3f %10.3f %10.3f" % self.Angle
+                        # print
+                        # "angle_quat:\t\t%10.3f %10.3f %10.3f %10.3f" % self.Angle_quat
+                        # print
+                        # "====================================================================="
 
                     CheckSum = 0
                     Bytenum = 0
