@@ -187,8 +187,16 @@ class NavigationCommander:
         #print("Angle: ", self.IMU.getGyro())
         self.JY62_1_IMU.updateGyro()
         self.JY62_2_IMU.updateGyro()
-        print("IMU 1 Angle: ", self.JY62_1_IMU.getGyro())
-        print("IMU 2 Angle: ", self.JY62_2_IMU.getGyro())
+        gyro1 = self.JY62_1_IMU.getGyro()
+        gyro2 = self.JY62_2_IMU.getGyro()
+        x1 = "{:.4f}".format(gyro1[0])
+        y1 = "{:.4f}".format(gyro1[1])
+        z1 = "{:.4f}".format(gyro1[2])
+        x2 = "{:.4f}".format(gyro2[0])
+        y2 = "{:.4f}".format(gyro2[1])
+        z2 = "{:.4f}".format(gyro2[2])
+        print("IMU 1 Angle: ", x1,y1,z1)
+        print("IMU 2 Angle: ", x1,y1,z1)
     def BasicDriverControl(self):
         DrivingWithControl = True
         print("Driver Control!!")
@@ -713,13 +721,15 @@ class NavigationCommander:
         self.Thruster_LateralRF.setSpeed(0)
         self.Thruster_LateralLF.setSpeed(0)
         # self.UpdateThrusters()
-        self.SendToArduino("STOP")
-        time.sleep(1)
+        if self.UsingArduino:
+            print("Killing Arduino. Wait 1...")
+            self.SendToArduino("STOP")
+            time.sleep(1)
         if self.UsingVision:
             print("Killing Vision. Wait 1...")
             time.sleep(1)
             self.Vision.Terminate()
-        print("Killing board. Wait 1...")
+        print("Killing RPi. Wait 1...")
         time.sleep(1)
 
 

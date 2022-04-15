@@ -264,13 +264,14 @@ class IMU_Group(IMU):
     def updateGyro(self):
         i = 0
         temp = []
+        self.Angle = list(self.Angle)
         # real shite workaround. whatever.
-        list(self.Angle)
         for imu in self.IMU_list:
             print("Updating group-gyro.")
             imu.updateGyro()
             temp = imu.getGyro()
-            print("Temp(gyro-", i,") readout: ", temp)
+            temp = list(temp)
+            print("Temp(gyro-",i,") readout: ", temp)
             if i == 0:
                 self.Angle = temp
             else:
@@ -283,6 +284,7 @@ class IMU_Group(IMU):
             i += 1
         for data in self.Angle:
             data /= i
+        self.Angle = tuple(self.Angle)
         return self.Angle
 
     def getGyro(self):
@@ -295,10 +297,11 @@ class IMU_Group(IMU):
     def updatePosition(self):
         i = 0
         temp = []
-        list(self.Position)
+        self.Position = list(self.Position)
         for imu in self.IMU_list:
             imu.updatePosition()
             temp = imu.getPosition()
+            temp = list(temp)
             if i == 0:
                 self.Position = temp
             else:
@@ -310,6 +313,7 @@ class IMU_Group(IMU):
             i += 1
         for data in self.Position:
             data /= i
+        self.Position = tuple(self.Position)
         return self.Position
 
     # current position read
