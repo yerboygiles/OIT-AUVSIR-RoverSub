@@ -47,10 +47,14 @@ void setup() {
   // put your setup code here, to run once:
   
   // reset pin
-  digitalWrite(RESET_PIN,HIGH)
-  pinMode(RESET_PIN, OUTPUT)
+  digitalWrite(RESET_PIN,HIGH);
+  pinMode(RESET_PIN, OUTPUT);
   
   Serial.begin(9600);
+  
+  Serial1.begin(9600);
+
+  //Serial1.onReceive(ParseCommands)
 
   LBsig.attach(LBpin);
   LFsig.attach(LFpin);
@@ -60,11 +64,14 @@ void setup() {
   BRsig.attach(BRpin);
   FLsig.attach(FLpin);
   FRsig.attach(FRpin);
-  
+
+  //ventral
   LB_Thruster = ThrusterDriver(LBsig, "LB");
   LF_Thruster = ThrusterDriver(LFsig, "LF");
   RB_Thruster = ThrusterDriver(RBsig, "RB");
   RF_Thruster = ThrusterDriver(RFsig, "RF");
+
+  //lateral
   BL_Thruster = ThrusterDriver(BLsig, "BL");
   BR_Thruster = ThrusterDriver(BRsig, "BR");
   FL_Thruster = ThrusterDriver(FLsig, "FL");
@@ -80,22 +87,11 @@ void setup() {
   FR_Thruster.Calibrate();
   delay(7000);
   //print("Done setting up.");
-
 }
 
 void loop() {
     // put your main code here, to run repeatedly:
     beAuto();
-}
-
-String getSerialCommands(){
-    if (Serial.available() > 0){
-        String JetsonCommand = Serial.readStringUntil('\n');
-        if(JetsonCommand.comparedTo("RESET")==0){
-            Serial.println("Resetting hardware...");
-            digitalWrite(RESET_PIN,LOW);
-        }
-    }
 }
 
 String getValue(String data, char separator, int index){
@@ -112,6 +108,74 @@ String getValue(String data, char separator, int index){
     }
     return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
+
+void ParseCommands()
+{
+    // variable declarations
+    String JetsonCommand; // seial string
+    String str_array[9]; // array of substrings 
+    int n_str = 0; // number of subsrtings
+
+    // moves serial value into a string
+    while (Serial1.available())
+    {
+      JetsonCommand = Serial1.readString();
+    }
+    // creates c string from JetsonCommand
+    char str[JetsonCommand.length() + 1];
+    for (int i = 0; i < JetsonCommand.length(); ++i)
+    {
+      str[i] = JetsonCommand[i];
+    }
+    str[JetsonCommand.length()] = '\0';
+
+    // sepaerates JetsonCommand into array of substrings
+    String sub_str = strtok(str, ","); // create initial substring
+    while (str != NULL) // while not empty
+    {
+      n_str++; // increments number of current substring
+      str_array[n_str - 1] = sub_str; // sets value of string in array
+      sub_str = strtok(str, ","); // get next substring
+    }
+
+    // test the first char in string 0
+    switch (str_array[0][0])
+    {
+      case 't': // thrusters
+        // test second char in string 0
+        switch (str_array[0][1])
+        {
+          case 'a': // all
+            // runs all of the driver fucntions
+            LB_Thruster.Drive(str_array[1].toInt());
+            LF_Thruster.Drive(str_array[2].toInt());
+            RB_Thruster.Drive(str_array[3].toInt());
+            RF_Thruster.Drive(str_array[4].toInt());
+            BL_Thruster.Drive(str_array[5].toInt());
+            FL_Thruster.Drive(str_array[6].toInt());
+            BR_Thruster.Drive(str_array[7].toInt());
+            FR_Thruster.Drive(str_array[8].toInt());
+            break;
+          case 'v': // vertical
+            // runs the first 4 driver functions
+            LB_Thruster.Drive(str_array[1].toInt());
+            LF_Thruster.Drive(str_array[2].toInt());
+            RB_Thruster.Drive(str_array[3].toInt());
+            RF_Thruster.Drive(str_array[4].toInt());
+            break;
+          case 'l': // lateral
+            // runs the last 4 driver fuctions
+            BL_Thruster.Drive(str_array[1].toInt());
+            FL_Thruster.Drive(str_array[2].toInt());
+            BR_Thruster.Drive(str_array[3].toInt());
+            FR_Thruster.Drive(str_array[4].toInt());
+            break;
+        }
+        break;
+        // add move cases below when needed
+    }
+}
+
 void beAuto(){
     LB_Thruster.Drive(10);
     LF_Thruster.Drive(10);
