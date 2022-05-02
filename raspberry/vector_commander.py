@@ -51,8 +51,8 @@ class NavigationCommander:
         if self.UsingGyro:
             # print("Sending IMU")
             # self.SendToArduino("IMU")
-            self.JY62_1_IMU = imu_rpi.JY62(serial.Serial('/dev/ttyUSB0', 115200), 0)
-            self.JY62_2_IMU = imu_rpi.JY62(serial.Serial('/dev/ttyUSB1', 115200), 1)
+            self.JY62_1_IMU = imu_rpi.JY62('/dev/ttyUSB0', 0)
+            self.JY62_2_IMU = imu_rpi.JY62('/dev/ttyUSB1', 1)
             self.IMU = imu.IMU_Group([self.JY62_1_IMU, self.JY62_2_IMU])
             # self.IMU = imu_ard_data.WT61P(self.serial)
 

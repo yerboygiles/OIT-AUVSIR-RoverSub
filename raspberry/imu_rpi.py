@@ -212,10 +212,11 @@ class JY62(IMU):
     import numpy as np
     from numpy import pi
 
-    def __init__(self, serial, id=0):
+    def __init__(self, port, id=0):
 
         # read info from vehicle
-        self.serial = serial
+        self.port = port
+        self.serial = serial.Serial(self.port, 115200)
         self.serial.flushInput()
         self.ID = id
 
@@ -240,9 +241,10 @@ class JY62(IMU):
     def resetGyro(self):
         # '/dev/ttyUSB0'
         self.serial.close()
-        connectstring = '/dev/ttyUSB' + str(self.ID)
-        print(connectstring)
-        self.serial = serial.Serial(connectstring, 115200)
+        # save this for when we dynamically connect/disconnect gyros
+        # connectstring = '/dev/ttyUSB' + str(self.ID)
+        # print(connectstring)
+        self.serial = serial.Serial(self.port, 115200)
 
     def calibrateGyro(self):
         pass
