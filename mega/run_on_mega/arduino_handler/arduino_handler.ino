@@ -109,17 +109,22 @@ String getValue(String data, char separator, int index){
     return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
 
+void serialEvent1(){
+  
+}
 void ParseCommands()
 {
     // variable declarations
-    String JetsonCommand; // seial string
+    String JetsonCommand; // serial string
     String str_array[9]; // array of substrings 
     int n_str = 0; // number of subsrtings
-
+  
     // moves serial value into a string
     while (Serial1.available())
     {
-      JetsonCommand = Serial1.readString();
+      // JetsonCommand = Serial1.readString();
+      char inChar = (char)Serial1.read();
+      JetsonCommand += inChar
     }
     // creates c string from JetsonCommand
     char str[JetsonCommand.length() + 1];
@@ -146,7 +151,6 @@ void ParseCommands()
         switch (str_array[0][1])
         {
           case 'a': // all
-            // runs all of the driver fucntions
             LB_Thruster.Drive(str_array[1].toInt());
             LF_Thruster.Drive(str_array[2].toInt());
             RB_Thruster.Drive(str_array[3].toInt());
@@ -156,15 +160,16 @@ void ParseCommands()
             BR_Thruster.Drive(str_array[7].toInt());
             FR_Thruster.Drive(str_array[8].toInt());
             break;
-          case 'v': // vertical
-            // runs the first 4 driver functions
+          case 'v': // ventral
+            switch (str_array[1][0]){
+              
+            }
             LB_Thruster.Drive(str_array[1].toInt());
             LF_Thruster.Drive(str_array[2].toInt());
             RB_Thruster.Drive(str_array[3].toInt());
             RF_Thruster.Drive(str_array[4].toInt());
             break;
           case 'l': // lateral
-            // runs the last 4 driver fuctions
             BL_Thruster.Drive(str_array[1].toInt());
             FL_Thruster.Drive(str_array[2].toInt());
             BR_Thruster.Drive(str_array[3].toInt());

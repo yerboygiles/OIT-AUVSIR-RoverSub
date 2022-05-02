@@ -1,7 +1,11 @@
-tl-100
-
+// example strings to parse
+// thruster encodings
+// all thrusters
 ta,40,40,40,40,100,100,100,100
-30,30,30,30,-10,-10,-10,-10
+// ventral thrusters
+tv,25,-25,-25,25
+// lateral thrusters
+tl,40,40,40,40
 
 g2g
 g2a
