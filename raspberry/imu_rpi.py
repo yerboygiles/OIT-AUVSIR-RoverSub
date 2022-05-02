@@ -200,9 +200,14 @@ class JY62(IMU):
     Angle = [0.0, 0.0, 0.0]
     # angle_in_quat
     Angle_quat = [0.0] * 4
+
     ACCData = [0.0] * 8
     GYROData = [0.0] * 8
     AngleData = [0.0] * 8
+
+    FrameState = 0
+    Bytenum = 0
+    CheckSum = 0
 
     import numpy as np
     from numpy import pi
@@ -248,61 +253,58 @@ class JY62(IMU):
 
     # reading info in correct format from jy62
     def DueData(self, inputdata):
-        FrameState = 0
-        Bytenum = 0
-        CheckSum = 0
 
         for data in inputdata:
             # data = ord(data)
-            if FrameState == 0:
-                if data == 0x55 and Bytenum == 0:
-                    CheckSum = data
-                    Bytenum = 1
+            if self.FrameState == 0:
+                if data == 0x55 and self.Bytenum == 0:
+                    self.CheckSum = data
+                    self.Bytenum = 1
                     continue
-                elif data == 0x51 and Bytenum == 1:
-                    CheckSum += data
-                    FrameState = 1
-                    Bytenum = 2
-                elif data == 0x52 and Bytenum == 1:
-                    CheckSum += data
-                    FrameState = 2
-                    Bytenum = 2
-                elif data == 0x53 and Bytenum == 1:
-                    CheckSum += data
-                    FrameState = 3
-                    Bytenum = 2
-            elif FrameState == 1:  # acc
+                elif data == 0x51 and self.Bytenum == 1:
+                    self.CheckSum += data
+                    self.FrameState = 1
+                    self.Bytenum = 2
+                elif data == 0x52 and self.Bytenum == 1:
+                    self.CheckSum += data
+                    self.FrameState = 2
+                    self.Bytenum = 2
+                elif data == 0x53 and self.Bytenum == 1:
+                    self.CheckSum += data
+                    self.FrameState = 3
+                    self.Bytenum = 2
+            elif self.FrameState == 1:  # acc
 
-                if Bytenum < 10:
-                    self.ACCData[Bytenum - 2] = data
-                    CheckSum += data
-                    Bytenum += 1
+                if self.Bytenum < 10:
+                    self.ACCData[self.Bytenum - 2] = data
+                    self.CheckSum += data
+                    self.Bytenum += 1
                 else:
-                    if data == (CheckSum & 0xff):
+                    if data == (self.CheckSum & 0xff):
                         self.Acceleration = get_acc(self.ACCData)
-                    CheckSum = 0
-                    Bytenum = 0
-                    FrameState = 0
-            elif FrameState == 2:  # gyro
+                    self.CheckSum = 0
+                    self.Bytenum = 0
+                    self.FrameState = 0
+            elif self.FrameState == 2:  # gyro
 
-                if Bytenum < 10:
-                    self.GYROData[Bytenum - 2] = data
-                    CheckSum += data
-                    Bytenum += 1
+                if self.Bytenum < 10:
+                    self.GYROData[self.Bytenum - 2] = data
+                    self.CheckSum += data
+                    self.Bytenum += 1
                 else:
-                    if data == (CheckSum & 0xff):
+                    if data == (self.CheckSum & 0xff):
                         self.AngularVelocity = get_gyro(self.GYROData)
-                    CheckSum = 0
-                    Bytenum = 0
-                    FrameState = 0
-            elif FrameState == 3:  # angle
+                    self.CheckSum = 0
+                    self.Bytenum = 0
+                    self.FrameState = 0
+            elif self.FrameState == 3:  # angle
 
-                if Bytenum < 10:
-                    self.AngleData[Bytenum - 2] = data
-                    CheckSum += data
-                    Bytenum += 1
+                if self.Bytenum < 10:
+                    self.AngleData[self.Bytenum - 2] = data
+                    self.CheckSum += data
+                    self.Bytenum += 1
                 else:
-                    if data == (CheckSum & 0xff):
+                    if data == (self.CheckSum & 0xff):
                         self.Angle = get_angle(self.AngleData)
                         self.Angle_quat = euler_to_quaternion(self.Angle[0], self.Angle[1], self.Angle[2])
 
@@ -321,9 +323,9 @@ class JY62(IMU):
                         # print
                         # "====================================================================="
 
-                    CheckSum = 0
-                    Bytenum = 0
-                    FrameState = 0
+                    self.CheckSum = 0
+                    self.Bytenum = 0
+                    self.FrameState = 0
 
 
 # fns for JY61

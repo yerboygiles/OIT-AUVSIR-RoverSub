@@ -1,5 +1,5 @@
 // example strings to parse
-// thruster encodings
+// thruster encodings to arduino
 // all thrusters
 ta,40,40,40,40,100,100,100,100
 // ventral thrusters
@@ -7,7 +7,11 @@ tv,25,-25,-25,25
 // lateral thrusters
 tl,40,40,40,40
 
+// gyro encodings to arduino, to return data
+// access gyro 2's gyroscope data
 g2g
+// access gyro 2's accelerometer data
 g2a
+// access gyro 1's magnetometer data
 g1m
 
