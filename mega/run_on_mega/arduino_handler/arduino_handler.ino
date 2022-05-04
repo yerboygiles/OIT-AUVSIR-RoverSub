@@ -1,7 +1,7 @@
 /*
     Author: Theodor Giles
     Created: 1/30/22
-    Last Edited 2/9/22
+    Last Edited 5/4/22
     Description:
     arduino mega controller
 */
@@ -51,6 +51,7 @@ void setup() {
   pinMode(RESET_PIN, OUTPUT);
   
   Serial.begin(9600);
+  Serial.println("Configuring...");
   
   Serial1.begin(9600);
 
@@ -86,12 +87,12 @@ void setup() {
   FL_Thruster.Calibrate();
   FR_Thruster.Calibrate();
   delay(7000);
+  Serial.println("Configured.");
   //print("Done setting up.");
 }
 
 void loop() {
     // put your main code here, to run repeatedly:
-    beAuto();
 }
 
 String getValue(String data, char separator, int index){
@@ -110,10 +111,7 @@ String getValue(String data, char separator, int index){
 }
 
 void serialEvent1(){
-  
-}
-void ParseCommands()
-{
+    Serial.println("Info received.");
     // variable declarations
     String JetsonCommand; // serial string
     String str_array[9]; // array of substrings 
@@ -124,26 +122,31 @@ void ParseCommands()
     {
       // JetsonCommand = Serial1.readString();
       char inChar = (char)Serial1.read();
-      JetsonCommand += inChar
+      JetsonCommand += inChar;
     }
+    Serial.print("Command: ");
+    Serial.println(JetsonCommand);
     // creates c string from JetsonCommand
     char str[JetsonCommand.length() + 1];
     for (int i = 0; i < JetsonCommand.length(); ++i)
     {
+      Serial.println("In for loop.");
       str[i] = JetsonCommand[i];
     }
     str[JetsonCommand.length()] = '\0';
 
     // sepaerates JetsonCommand into array of substrings
     String sub_str = strtok(str, ","); // create initial substring
-    while (str != NULL) // while not empty
+    while (sub_str != NULL) // while not empty
     {
+      Serial.println("In str!=NULL loop.");
       n_str++; // increments number of current substring
       str_array[n_str - 1] = sub_str; // sets value of string in array
       sub_str = strtok(str, ","); // get next substring
     }
 
     // test the first char in string 0
+    Serial.print("Checking indexes for command parse.");
     switch (str_array[0][0])
     {
       case 't': // thrusters
@@ -159,6 +162,7 @@ void ParseCommands()
             FL_Thruster.Drive(str_array[6].toInt());
             BR_Thruster.Drive(str_array[7].toInt());
             FR_Thruster.Drive(str_array[8].toInt());
+            Serial1.println("ATD");
             break;
           case 'v': // ventral
             switch (str_array[1][0]){

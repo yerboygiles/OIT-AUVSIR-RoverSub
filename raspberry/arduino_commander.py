@@ -1,10 +1,18 @@
+#!python3
+# Author: Theodor Giles
+# Created: 4/10/21
+# Last Edited 5/4/22
+# Description:
+# This node manages the commands/movement/physical
+# control of the RoboSub V2, 2020-21
+
 import serial
 
 
 class ArduinoCommander:
 
     def __init__(self, serialport='/dev/ttyAMA0'):
-        self.serial = serial.Serial('/dev/ttyAMA0', 115200, timeout=0.2)
+        self.serial = serial.Serial('/dev/ttyAMA0', 9600)
 
     # new protocol for ard. communication -
     # by having a single charac at the beginning of string, we can improve the parse speed of the arduino. instead of
