@@ -87,27 +87,21 @@ void setup() {
   BR_Thruster.Calibrate();
   FL_Thruster.Calibrate();
   FR_Thruster.Calibrate();
-  delay(7000);
+  delay(1000);
   Serial.println("Configured.");
   //print("Done setting up.");
 }
 
 void loop() {
     // put your main code here, to run repeatedly:
-    JetsonCommand = "";
-    while (Serial1.available()>0)
-    {
-      Serial.println("serial1 avail");
-      // JetsonCommand = Serial1.readString();
-      char inChar = (char)Serial1.read();
-      if (inChar != NULL){
-        JetsonCommand += inChar;
-      }
-    }
-    if (JetsonCommand!=NULL){
-      Serial.print("JetsonCommand: ");
+    //Serial1.println("Hello!!");
+    if(JetsonCommand!=NULL){
+      Serial.print("Command: ");
       Serial.println(JetsonCommand);
+      commandRead();
     }
+    Serial.println("In loop...");
+    JetsonCommand = "";
     
 }
 
@@ -123,108 +117,91 @@ String getValue(String data, char separator, int index){
             strIndex[1] = (i == maxIndex) ? i+1 : i;
         }
     }
+    
     return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
-void serialEvent3(){
-  bool goodcomm = true;
-  String JetsonCommand; // serial string
-  Serial.println("In Serial1 event");
-  while (goodcomm){
-    if (Serial1.available())
-    {
-      // JetsonCommand = Serial1.readString();
-      char inChar = (char)Serial1.read();
-      if (inChar != NULL){
-        JetsonCommand += inChar;
-      }else{
-        goodcomm = false;
-      }
-    }
-    
-  }
+void serialEvent1(){
+//  Serial.println("Info received.");
+
+  // moves serial value into a string
+//  while (goodcomm){
+//    char inChar = (char)Serial1.read();
+//    if (inChar != NULL){
+//      JetsonCommand += inChar;
+//    }
+//    else{
+//      goodcomm = false;
+//    }
+//  }
+  JetsonCommand = Serial1.readString();
+//  break;
+  return;
 }
 
-void serialEvent2(){
-    bool goodcomm = true;
-    Serial.println("Info received.");
-    // variable declarations
-    String JetsonCommand; // serial string
-    String str_array[9]; // array of substrings 
-    int n_str = 0; // number of subsrtings
-  
-    // moves serial value into a string
-    while (goodcomm){
-      if (Serial1.available())
+void commandRead(){
+  String str_array[9]; // array of substrings 
+  int n_str = 0; // number of subsrtings
+  int startIndex=0;
+  int endIndex=0;
+  int cmdIndex = JetsonCommand.indexOf(',');
+  String encodedCMD = JetsonCommand.substring(0,cmdIndex);
+  String value;
+  int j=0;
+  int i=0;
+  startIndex = cmdIndex;
+  for (int i = 0; i < 10; i++)
+  {
+    endIndex = JetsonCommand.indexOf(',', endIndex+1);
+    value = JetsonCommand.substring(startIndex+1,endIndex);
+    if(value.compareTo(",")!=0){
+      str_array[i] = value;
+    }
+    startIndex = endIndex;
+  }
+  switch (encodedCMD.charAt(0))
+  {
+    case 't': // thrusters
+      // test second char in string 0
+      switch (encodedCMD.charAt(1))
       {
-        // JetsonCommand = Serial1.readString();
-        char inChar = (char)Serial1.read();
-        while (inChar != NULL){
-          
-        }
-        JetsonCommand += inChar;
-    }
-      
-    }
-    
-    Serial.print("Command: ");
-    Serial.println(JetsonCommand);
-    // creates c string from JetsonCommand
-    char str[JetsonCommand.length() + 1];
-    for (int i = 0; i < JetsonCommand.length(); ++i)
-    {
-      Serial.println("In for loop.");
-      str[i] = JetsonCommand[i];
-    }
-    str[JetsonCommand.length()] = '\0';
-
-    // sepaerates JetsonCommand into array of substrings
-    String sub_str = strtok(str, ","); // create initial substring
-    while (sub_str != NULL) // while not empty
-    {
-      Serial.println("In str!=NULL loop.");
-      n_str++; // increments number of current substring
-      str_array[n_str - 1] = sub_str; // sets value of string in array
-      sub_str = strtok(str, ","); // get next substring
-    }
-
-    // test the first char in string 0
-    Serial.print("Checking indexes for command parse.");
-    switch (str_array[0][0])
-    {
-      case 't': // thrusters
-        // test second char in string 0
-        switch (str_array[0][1])
-        {
-          case 'a': // all
-            LB_Thruster.Drive(str_array[1].toInt());
-            LF_Thruster.Drive(str_array[2].toInt());
-            RB_Thruster.Drive(str_array[3].toInt());
-            RF_Thruster.Drive(str_array[4].toInt());
-            BL_Thruster.Drive(str_array[5].toInt());
-            FL_Thruster.Drive(str_array[6].toInt());
-            BR_Thruster.Drive(str_array[7].toInt());
-            FR_Thruster.Drive(str_array[8].toInt());
-            Serial1.println("ATD");
-            break;
-          case 'v': // ventral
-            switch (str_array[1][0]){
-              
-            }
-            LB_Thruster.Drive(str_array[1].toInt());
-            LF_Thruster.Drive(str_array[2].toInt());
-            RB_Thruster.Drive(str_array[3].toInt());
-            RF_Thruster.Drive(str_array[4].toInt());
-            break;
-          case 'l': // lateral
-            BL_Thruster.Drive(str_array[1].toInt());
-            FL_Thruster.Drive(str_array[2].toInt());
-            BR_Thruster.Drive(str_array[3].toInt());
-            FR_Thruster.Drive(str_array[4].toInt());
-            break;
-        }
-        break;
-        // add move cases below when needed
-    }
+        case 'a': // all
+//          Serial1.flush();
+//          Serial1.println("ATD");
+          LB_Thruster.Drive(str_array[1].toInt());
+          LF_Thruster.Drive(str_array[2].toInt());
+          RB_Thruster.Drive(str_array[3].toInt());
+          RF_Thruster.Drive(str_array[4].toInt());
+          BL_Thruster.Drive(str_array[5].toInt());
+          FL_Thruster.Drive(str_array[6].toInt());
+          BR_Thruster.Drive(str_array[7].toInt());
+          FR_Thruster.Drive(str_array[8].toInt());
+//          Serial.println("Drove all thrusters.");
+        case 'v': // ventral
+          switch (encodedCMD.charAt(1)){
+            
+          }
+          LB_Thruster.Drive(str_array[1].toInt());
+          LF_Thruster.Drive(str_array[2].toInt());
+          RB_Thruster.Drive(str_array[3].toInt());
+          RF_Thruster.Drive(str_array[4].toInt());
+        case 'l': // lateral
+          BL_Thruster.Drive(str_array[1].toInt());
+          FL_Thruster.Drive(str_array[2].toInt());
+          BR_Thruster.Drive(str_array[3].toInt());
+          FR_Thruster.Drive(str_array[4].toInt());
+      }
+//    case 'g': // gyros
+//      switch (str_array[0][1])
+//      {
+//        case '1':
+//          Serial.println("fortnite");
+//      }
+      // add move cases below when needed
+  }
+//  Serial1.flush();
+//  Serial.println("Done reading command.");
+  return;
+//  break;
 }
 
 void beAuto(){

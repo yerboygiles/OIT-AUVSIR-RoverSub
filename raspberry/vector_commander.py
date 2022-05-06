@@ -209,10 +209,9 @@ class NavigationCommander:
     def ResetGyro(self):
         self.JY62_1_IMU.resetGyro()
         self.JY62_2_IMU.resetGyro()
-
+    def
     def ArduinoTesting(self):
         self.ArduinoCommander.CommunicateAllThrusters(100, 40, 40, 100, -25, 100, -25, 100)
-
     def BasicDriverControl(self):
         DrivingWithControl = True
         print("Driver Control!!")
@@ -244,12 +243,12 @@ class NavigationCommander:
         while targeting:
             self.CheckIfGyroDone(threshold=10, timethreshold=3)
             targeting = self.GyroRunning
-            self.TradeWithArduino()
+            self.ArduinoCommander.CommunicateAllThrusters(100, 40, 40, 100, -25, 100, -25, 100)
         print("TARGETED VECTOR.")
         while navigating:
             navigating = self.CheckIfPositionDone(threshold=10, timethreshold=3)
             navigating = self.PositionRunning
-            self.TradeWithArduino()
+            self.ArduinoCommander.CommunicateAllThrusters(100, 40, 40, 100, -25, 100, -25, 100)
         print("ARRIVED TO VECTOR.")
 
     def BasicVectoring(self, yaw, pitch, roll, ):
@@ -261,11 +260,11 @@ class NavigationCommander:
         self.RollOffset = roll
         while targeting:
             targeting = self.CheckIfGyroDone(threshold=10, timethreshold=3)
-            self.TradeWithArduino()
+            self.ArduinoCommander.CommunicateAllThrusters(100, 40, 40, 100, -25, 100, -25, 100)
         print("TARGETED VECTOR.")
         while navigating:
             navigating = self.CheckIfPositionDone(threshold=10, timethreshold=3)
-            self.TradeWithArduino()
+            self.ArduinoCommander.CommunicateAllThrusters(100, 40, 40, 100, -25, 100, -25, 100)
         print("ARRIVED TO VECTOR.")
 
     def WaypointVectoring(self):  # arc vectoring
@@ -620,6 +619,9 @@ class NavigationCommander:
         self.Thruster_VentralRB.setSpeed(self.VentralPowerRB)
         self.Thruster_VentralLF.setSpeed(self.VentralPowerLF)
         self.Thruster_VentralRF.setSpeed(self.VentralPowerRF)
+        self.ArduinoCommander.CommunicateAllThrusters(self.LateralPowerLB,self.LateralPowerLF,self.LateralPowerRB,
+                                                      self.LateralPowerRF,self.VentralPowerLB,self.VentralPowerRB,
+                                                      self.VentralPowerLF,self.VentralPowerRF,)
 
     def UpdateThrustersGyroVisionPID(self):
         self.Thruster_LateralBL.setSpeedPID(self.LateralPowerLB,

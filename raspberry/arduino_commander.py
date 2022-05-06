@@ -12,7 +12,7 @@ import serial
 class ArduinoCommander:
 
     def __init__(self, serialport='/dev/ttyAMA0'):
-        self.serial = serial.Serial('/dev/serial0', 115200)
+        self.serial = serial.Serial('/dev/ttyS0', 115200)
 
     # new protocol for ard. communication -
     # by having a single charac at the beginning of string, we can improve the parse speed of the arduino. instead of
@@ -23,6 +23,11 @@ class ArduinoCommander:
     # s - servo
     #
     # bring in thruster vals as 3-char strings
+    def ReadFromArd(self):
+        response = ""
+        response = self.serial.readline()
+        if response != "":
+            print("Response: ", response)
 
     def CommunicateAllThrusters(self, lLBspeed, lRBspeed, lLFspeed, lRFspeed, vLBspeed, vLFspeed, vRBspeed, vRFspeed):
         confirm = False
@@ -53,15 +58,15 @@ class ArduinoCommander:
         self.serial.write(outdata.encode('ascii'))
         print("Outdata: ", outdata.encode('ascii'))
         # confirm data received
-        self.serial.reset_input_buffer()
-        while self.serial.inWaiting() > 0:
-            response = self.serial.readline()
-            if response == "ATD":
-                print("Thruster values sent, handshake confirmed.")
-                confirm = False
-            else:
-                print("Thruster values sent, handshake unconfirmed.")
-                confirm = False
+        # self.serial.reset_input_buffer()
+        # while confirm is False:
+        #     response = self.serial.readline().decode('ascii')
+        #     if response == "ATD":
+        #         print("Thruster values sent, handshake confirmed.")
+        #         confirm = True
+        #     else:
+        #         print("Thruster values sent, handshake unconfirmed.")
+        #         confirm = False
         return confirm
 
     def Communicate_Thrusters(self, thrustid, speed):
