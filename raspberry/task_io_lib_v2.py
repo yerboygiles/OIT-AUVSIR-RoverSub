@@ -33,6 +33,7 @@ class TaskIO:
         if not input:
             self.Commands = open(self.Filename)
             for CommandLine in self.Commands:
+                print("CommandLine: ", CommandLine)
                 self.CommandList.append(CommandLine)
             print("Commands read...")
             self.Commands.close()

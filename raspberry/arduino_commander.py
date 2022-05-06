@@ -12,7 +12,7 @@ import serial
 class ArduinoCommander:
 
     def __init__(self, serialport='/dev/ttyAMA0'):
-        self.serial = serial.Serial('/dev/ttyS0', 115200)
+        self.serial = serial.Serial('/dev/ttyS0', 9600)
 
     # new protocol for ard. communication -
     # by having a single charac at the beginning of string, we can improve the parse speed of the arduino. instead of
@@ -53,12 +53,14 @@ class ArduinoCommander:
         outdata += ','
         outdata += str(vRFspeed)
 
+        # outdata += "}"
         outdata += "\n"
 
+        self.serial.reset_input_buffer()
+        self.serial.reset_output_buffer()
         self.serial.write(outdata.encode('ascii'))
-        print("Outdata: ", outdata.encode('ascii'))
+        # print("Outdata: ", outdata.encode('ascii'))
         # confirm data received
-        # self.serial.reset_input_buffer()
         # while confirm is False:
         #     response = self.serial.readline().decode('ascii')
         #     if response == "ATD":
@@ -148,4 +150,5 @@ class ArduinoCommander:
         self.serial.write(sendstring.encode('utf-8'))
 
     def SendToArduino(self, whattosend):
+        whattosend += "\n"
         self.serial.write(whattosend.encode('utf-8'))

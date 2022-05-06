@@ -129,7 +129,7 @@ class NavigationCommander:
         self.VentralPowerRF = 0
         self.VentralPowerLF = 0
         # initialize thruster values to brake (self.PowerXX set to 0^)
-        self.UpdateThrusters()
+        # self.UpdateThrusters()
 
         # string list of movement commands, because I thought I'd make
         # the index number of each command streamlined with other
@@ -209,9 +209,11 @@ class NavigationCommander:
     def ResetGyro(self):
         self.JY62_1_IMU.resetGyro()
         self.JY62_2_IMU.resetGyro()
-    def
+
     def ArduinoTesting(self):
         self.ArduinoCommander.CommunicateAllThrusters(100, 40, 40, 100, -25, 100, -25, 100)
+        time.sleep(1)
+
     def BasicDriverControl(self):
         DrivingWithControl = True
         print("Driver Control!!")
@@ -223,8 +225,12 @@ class NavigationCommander:
 
     def BasicWithTime(self):
         DrivingWithTime = True
+        if self.SuppCommand == "":
+            print("SuppCommand empty, defaulting to run for 5 seconds...")
+            self.SuppCommand = "10"
         while DrivingWithTime:
             DrivingWithTime = (time.perf_counter() - self.InitialTime) < int(self.SuppCommand)
+            print("Time: ", time.perf_counter() - self.InitialTime)
             self.BasicDirectionPower(self.CommandIndex)
 
     def setDestination(self, north, east, down):
@@ -243,12 +249,12 @@ class NavigationCommander:
         while targeting:
             self.CheckIfGyroDone(threshold=10, timethreshold=3)
             targeting = self.GyroRunning
-            self.ArduinoCommander.CommunicateAllThrusters(100, 40, 40, 100, -25, 100, -25, 100)
+            self.UpdateThrustersGyroPID()
         print("TARGETED VECTOR.")
         while navigating:
             navigating = self.CheckIfPositionDone(threshold=10, timethreshold=3)
             navigating = self.PositionRunning
-            self.ArduinoCommander.CommunicateAllThrusters(100, 40, 40, 100, -25, 100, -25, 100)
+            self.UpdateThrustersGyroPID()
         print("ARRIVED TO VECTOR.")
 
     def BasicVectoring(self, yaw, pitch, roll, ):
@@ -340,7 +346,6 @@ class NavigationCommander:
                 self.BasicDirectionPower(6)
                 if state2_timer - state1_timer > 3:
                     scanstate = True
-        else:
             if not self.MovingToConfidence:
                 confidence_timer = time.perf_counter()
                 self.MovingToConfidence = True
@@ -369,23 +374,19 @@ class NavigationCommander:
         # going through commands in parsed list
         self.CommandIndex = 0
         # tell arduino to arm motors
-        self.SendToArduino("STOP")
-        print("Stopping arduino... Wait 3.")
-        time.sleep(3)
-        self.SendToArduino("START")
-        print("Starting arduino... Wait 8.")
+        self.ArduinoCommander.SendToArduino("tc,")
+        print("Calibrating and arming thrusters...")
         time.sleep(8)
-        self.SendToArduino("MAXPOWER:20")
-        print("Sending thruster setting... Wait 3.")
-        time.sleep(3)
+        print("Calibrated and armed.")
         try:
             for command in commandlist:
                 print("VectorCommander running: ", command)
                 self.MainCommand = ""
                 self.SuppCommand = ""
                 j = 0
-                for commandParsed in str(command).split(','):
+                for commandParsed in str(command).split('\n'):
                     commandParsed.strip()
+                    print("commandParsed")
                     if j == 0:
                         self.MainCommand = commandParsed
                     if j == 1:
@@ -394,43 +395,53 @@ class NavigationCommander:
                 print("Main: ", self.MainCommand, ", Supplementary: ", self.SuppCommand)
                 if self.MainCommand == "REMOTE":
                     print("Driver Control With:")
-                    self.BasicDriverControl()
                     if self.SuppCommand == "KEYBOARD":
                         print("Keyboard!")
+                        self.BasicDriverControl()
                     else:
                         pass
                 else:
-                    print("Searching basic movement...")
                     for basiccommand in self.BASIC_MOVEMENT_COMMANDS:
                         i = 0
                         if self.MainCommand == basiccommand:
                             self.InitialTime = time.perf_counter()
                             if self.UsingGyro:
+                                print("Running basic command...")
                                 self.BasicLinear()
                             else:
+                                print("Running basic command with time due to no Gyro functionality...")
                                 self.BasicWithTime()
                         i += 2
                         self.CommandIndex += 1
                     self.CommandIndex = 0
-                    print("Searching advanced movement...")
                     for advancedcommand in self.ADVANCED_MOVEMENT_COMMANDS:
                         i = 0
                         if self.MainCommand == advancedcommand:
                             self.InitialTime = time.perf_counter()
-                            self.BasicVectoring()
+                            if self.UsingGyro:
+                                print("Running advanced command...")
+                                self.BasicVectoring()
+                            else:
+                                print("Can't run advanced command without Gyro functionality...")
                         i += 2
                         self.CommandIndex += 1
                     self.CommandIndex = 0
-                    print("Searching target movement...")
                     for targetcommand in self.TARGET_MOVEMENT_COMMANDS:
                         i = 0
                         if self.MainCommand == targetcommand:
                             self.InitialTime = time.perf_counter()
+
+                            if self.UsingGyro:
+                                print("Running target-based command...")
+                                self.TargetMovement()
+                            else:
+                                print("Can't run target commands without Gyro and Vision functionality...")
                             self.TargetMovement()
                         i += 2
                         self.CommandIndex += 1
                     self.CommandIndex = 0
         except:
+            print("Ran into issue parsing commands. Terminating...")
             self.Terminate()
 
     def StoreGyroOffsets(self):
@@ -481,6 +492,7 @@ class NavigationCommander:
             print("Gyro:", self.IMU.getGyro())
             self.InitialTime = time.perf_counter()
         return self.GyroRunning
+
     #
     # def TradeWithArduino(self):
     #     self.UpdateThrusters()
@@ -547,67 +559,73 @@ class NavigationCommander:
         return self.scanned_target_format
 
     def BasicDirectionPower(self, index, power=15):
+        # print("Index: ", index)
+        index = index + 1
         if index != 0:
             if index == 1:
-                print("MOVING FORWARDS")
+                # print("MOVING FORWARDS")
                 self.LateralPowerLB = power
                 self.LateralPowerLF = power
                 self.LateralPowerRB = power
                 self.LateralPowerRF = power
             elif index == 2:
-                print("STRAFING LEFT")
+                # print("STRAFING LEFT")
                 self.LateralPowerLB = power
                 self.LateralPowerLF = -power
                 self.LateralPowerRB = -power
                 self.LateralPowerRF = power
             elif index == 3:
-                print("REVERSING")
+                # print("REVERSING")
                 self.LateralPowerLB = -power
                 self.LateralPowerLF = -power
                 self.LateralPowerRB = -power
                 self.LateralPowerRF = -power
             elif index == 4:
-                print("STRAFING RIGHT")
+                # print("STRAFING RIGHT")
                 self.LateralPowerLB = -power
                 self.LateralPowerLF = power
                 self.LateralPowerRB = power
                 self.LateralPowerRF = -power
             elif index == 5:
-                print("TURNING LEFT")
+                # print("TURNING LEFT")
                 self.LateralPowerLB = -power
                 self.LateralPowerLF = -power
                 self.LateralPowerRB = power
                 self.LateralPowerRF = power
             elif index == 6:
-                print("TURNING RIGHT")
+                # print("TURNING RIGHT")
                 self.LateralPowerLB = power
                 self.LateralPowerLF = power
                 self.LateralPowerRB = -power
                 self.LateralPowerRF = -power
             elif index == 7:
-                print("ASCENDING")
+                # print("ASCENDING")
                 self.LateralPowerLB = power
                 self.LateralPowerLF = power
                 self.LateralPowerRB = -power
                 self.LateralPowerRF = -power
             elif index == 8:
-                print("DESCENDING")
+                # print("DESCENDING")
                 self.LateralPowerLB = power
                 self.LateralPowerLF = power
                 self.LateralPowerRB = -power
                 self.LateralPowerRF = -power
             elif index == -1:
-                print("PAUSING")
+                # print("PAUSING")
                 self.LateralPowerLB = 0
                 self.LateralPowerLF = 0
                 self.LateralPowerRB = 0
                 self.LateralPowerRF = 0
             elif index == -2:
-                print("STOPPING")
+                # print("STOPPING")
                 self.LateralPowerLB = 0
                 self.LateralPowerLF = 0
                 self.LateralPowerRB = 0
                 self.LateralPowerRF = 0
+        if self.UsingGyro:
+            self.UpdateThrustersGyroPID()
+        else:
+            self.UpdateThrusters()
 
     def UpdateThrusters(self):
         self.Thruster_LateralBL.setSpeed(self.LateralPowerLB)
@@ -619,9 +637,10 @@ class NavigationCommander:
         self.Thruster_VentralRB.setSpeed(self.VentralPowerRB)
         self.Thruster_VentralLF.setSpeed(self.VentralPowerLF)
         self.Thruster_VentralRF.setSpeed(self.VentralPowerRF)
-        self.ArduinoCommander.CommunicateAllThrusters(self.LateralPowerLB,self.LateralPowerLF,self.LateralPowerRB,
-                                                      self.LateralPowerRF,self.VentralPowerLB,self.VentralPowerRB,
-                                                      self.VentralPowerLF,self.VentralPowerRF,)
+        self.ArduinoCommander.CommunicateAllThrusters(self.LateralPowerLB, self.LateralPowerLF, self.LateralPowerRB,
+                                                      self.LateralPowerRF, self.VentralPowerLB, self.VentralPowerRB,
+                                                      self.VentralPowerLF, self.VentralPowerRF)
+        time.sleep(.2)
 
     def UpdateThrustersGyroVisionPID(self):
         self.Thruster_LateralBL.setSpeedPID(self.LateralPowerLB,
@@ -645,6 +664,10 @@ class NavigationCommander:
         self.Thruster_VentralRF.setSpeedPID(self.VentralPowerRF,
                                             zpid=self.IMU.getRollPID(),
                                             ypid=-self.IMU.getPitchPID() - self.Vision.getYPID())
+        self.ArduinoCommander.CommunicateAllThrusters(self.LateralPowerLB, self.LateralPowerLF, self.LateralPowerRB,
+                                                      self.LateralPowerRF, self.VentralPowerLB, self.VentralPowerRB,
+                                                      self.VentralPowerLF, self.VentralPowerRF)
+        time.sleep(.2)
 
     def UpdateThrustersGyroPID(self):
         self.Thruster_LateralBL.setSpeedPID(self.LateralPowerLB, xpid=self.IMU.getYawPID())
@@ -664,6 +687,10 @@ class NavigationCommander:
         self.Thruster_VentralRF.setSpeedPID(self.VentralPowerRF,
                                             zpid=self.IMU.getRollPID(),
                                             ypid=-self.IMU.getPitchPID())
+        self.ArduinoCommander.CommunicateAllThrusters(self.LateralPowerLB, self.LateralPowerLF, self.LateralPowerRB,
+                                                      self.LateralPowerRF, self.VentralPowerLB, self.VentralPowerRB,
+                                                      self.VentralPowerLF, self.VentralPowerRF)
+        time.sleep(.2)
 
     def UpdateThrustersVisionPID(self):
 
@@ -680,6 +707,9 @@ class NavigationCommander:
                                             ypid=-self.Vision.getYPID())
         self.Thruster_VentralRF.setSpeedPID(self.VentralPowerRF,
                                             ypid=-self.Vision.getYPID())
+        self.ArduinoCommander.CommunicateAllThrusters(self.LateralPowerLB, self.LateralPowerLF, self.LateralPowerRB,
+                                                      self.LateralPowerRF, self.VentralPowerLB, self.VentralPowerRB,
+                                                      self.VentralPowerLF, self.VentralPowerRF, )
 
     def UpdateGyro(self):
         if self.UsingGyro:
@@ -738,7 +768,7 @@ class NavigationCommander:
         # self.UpdateThrusters()
         if self.UsingArduino:
             print("Killing Arduino. Wait 1...")
-            self.ArduinoCommander.SendToArduino("STOP")
+            # self.ArduinoCommander.SendToArduino("STOP")
             self.ArduinoCommander.serial.close()
             time.sleep(1)
         if self.UsingVision:
