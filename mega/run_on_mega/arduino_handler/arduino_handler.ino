@@ -42,6 +42,7 @@ Servo FLsig;
 Servo FRsig;
   
 int thrusterpower[8];
+String JetsonCommand; // serial string
 
 void setup() {
   // put your setup code here, to run once:
@@ -53,7 +54,7 @@ void setup() {
   Serial.begin(9600);
   Serial.println("Configuring...");
   
-  Serial1.begin(9600);
+  Serial1.begin(115200);
 
   //Serial1.onReceive(ParseCommands)
 
@@ -93,6 +94,21 @@ void setup() {
 
 void loop() {
     // put your main code here, to run repeatedly:
+    JetsonCommand = "";
+    while (Serial1.available()>0)
+    {
+      Serial.println("serial1 avail");
+      // JetsonCommand = Serial1.readString();
+      char inChar = (char)Serial1.read();
+      if (inChar != NULL){
+        JetsonCommand += inChar;
+      }
+    }
+    if (JetsonCommand!=NULL){
+      Serial.print("JetsonCommand: ");
+      Serial.println(JetsonCommand);
+    }
+    
 }
 
 String getValue(String data, char separator, int index){
@@ -109,8 +125,27 @@ String getValue(String data, char separator, int index){
     }
     return found>index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
+void serialEvent3(){
+  bool goodcomm = true;
+  String JetsonCommand; // serial string
+  Serial.println("In Serial1 event");
+  while (goodcomm){
+    if (Serial1.available())
+    {
+      // JetsonCommand = Serial1.readString();
+      char inChar = (char)Serial1.read();
+      if (inChar != NULL){
+        JetsonCommand += inChar;
+      }else{
+        goodcomm = false;
+      }
+    }
+    
+  }
+}
 
-void serialEvent1(){
+void serialEvent2(){
+    bool goodcomm = true;
     Serial.println("Info received.");
     // variable declarations
     String JetsonCommand; // serial string
@@ -118,12 +153,19 @@ void serialEvent1(){
     int n_str = 0; // number of subsrtings
   
     // moves serial value into a string
-    while (Serial1.available())
-    {
-      // JetsonCommand = Serial1.readString();
-      char inChar = (char)Serial1.read();
-      JetsonCommand += inChar;
+    while (goodcomm){
+      if (Serial1.available())
+      {
+        // JetsonCommand = Serial1.readString();
+        char inChar = (char)Serial1.read();
+        while (inChar != NULL){
+          
+        }
+        JetsonCommand += inChar;
     }
+      
+    }
+    
     Serial.print("Command: ");
     Serial.println(JetsonCommand);
     // creates c string from JetsonCommand

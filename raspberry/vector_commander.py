@@ -42,8 +42,8 @@ class NavigationCommander:
         # setting up board serial port
         self.UsingArduino = usingarduino
         if self.UsingArduino:
-            print("Waiting 8 for Arduino...")
-            time.sleep(8)
+            # print("Waiting 8 for Arduino...")
+            # time.sleep(8)
             print("Communicating with Arduino and it's peripherals...")
         self.UsingGyro = usinggyro
         # arduino. omitting for now, in favor of pure rpi gyro reads
@@ -482,50 +482,47 @@ class NavigationCommander:
             print("Gyro:", self.IMU.getGyro())
             self.InitialTime = time.perf_counter()
         return self.GyroRunning
-
-    def SendToArduino(self, whattosend):
-        self.serial.write(whattosend.encode('utf-8'))
-
-    def TradeWithArduino(self):
-        self.UpdateThrusters()
-        outdata = ""
-        if self.secondSetTrade:
-            outdata += str(self.Thruster_LateralBL.name)
-            outdata += ":"
-            outdata += str(self.Thruster_LateralBL.getSpeed())
-            outdata += ","
-            outdata += str(self.Thruster_LateralBR.name)
-            outdata += ":"
-            outdata += str(self.Thruster_LateralBR.getSpeed())
-            outdata += ","
-            outdata += str(self.Thruster_LateralFL.name)
-            outdata += ":"
-            outdata += str(self.Thruster_LateralFL.getSpeed())
-            outdata += ","
-            outdata += str(self.Thruster_LateralFR.name)
-            outdata += ":"
-            outdata += str(self.Thruster_LateralFR.getSpeed())
-            outdata += "\n"
-            self.serial.write(outdata.encode('utf-8'))
-        if not self.secondSetTrade:
-            outdata += str(self.Thruster_VentralLB.name)
-            outdata += ":"
-            outdata += str(self.Thruster_VentralLB.getSpeed())
-            outdata += ","
-            outdata += str(self.Thruster_VentralLF.name)
-            outdata += ":"
-            outdata += str(self.Thruster_VentralLF.getSpeed())
-            outdata += ","
-            outdata += str(self.Thruster_VentralRB.name)
-            outdata += ":"
-            outdata += str(self.Thruster_VentralRB.getSpeed())
-            outdata += ","
-            outdata += str(self.Thruster_VentralRF.name)
-            outdata += ":"
-            outdata += str(self.Thruster_VentralRF.getSpeed())
-            outdata += "\n"
-            self.serial.write(outdata.encode('utf-8'))
-        self.secondSetTrade = not self.secondSetTrade
+    #
+    # def TradeWithArduino(self):
+    #     self.UpdateThrusters()
+    #     outdata = ""
+    #     if self.secondSetTrade:
+    #         outdata += str(self.Thruster_LateralBL.name)
+    #         outdata += ":"
+    #         outdata += str(self.Thruster_LateralBL.getSpeed())
+    #         outdata += ","
+    #         outdata += str(self.Thruster_LateralBR.name)
+    #         outdata += ":"
+    #         outdata += str(self.Thruster_LateralBR.getSpeed())
+    #         outdata += ","
+    #         outdata += str(self.Thruster_LateralFL.name)
+    #         outdata += ":"
+    #         outdata += str(self.Thruster_LateralFL.getSpeed())
+    #         outdata += ","
+    #         outdata += str(self.Thruster_LateralFR.name)
+    #         outdata += ":"
+    #         outdata += str(self.Thruster_LateralFR.getSpeed())
+    #         outdata += "\n"
+    #         self.serial.write(outdata.encode('utf-8'))
+    #     if not self.secondSetTrade:
+    #         outdata += str(self.Thruster_VentralLB.name)
+    #         outdata += ":"
+    #         outdata += str(self.Thruster_VentralLB.getSpeed())
+    #         outdata += ","
+    #         outdata += str(self.Thruster_VentralLF.name)
+    #         outdata += ":"
+    #         outdata += str(self.Thruster_VentralLF.getSpeed())
+    #         outdata += ","
+    #         outdata += str(self.Thruster_VentralRB.name)
+    #         outdata += ":"
+    #         outdata += str(self.Thruster_VentralRB.getSpeed())
+    #         outdata += ","
+    #         outdata += str(self.Thruster_VentralRF.name)
+    #         outdata += ":"
+    #         outdata += str(self.Thruster_VentralRF.getSpeed())
+    #         outdata += "\n"
+    #         self.serial.write(outdata.encode('utf-8'))
+    #     self.secondSetTrade = not self.secondSetTrade
 
     def CheckIfPositionDone(self, threshold=3, timethreshold=5):
         self.PositionRunning = True
@@ -739,7 +736,8 @@ class NavigationCommander:
         # self.UpdateThrusters()
         if self.UsingArduino:
             print("Killing Arduino. Wait 1...")
-            self.SendToArduino("STOP")
+            self.ArduinoCommander.SendToArduino("STOP")
+            self.ArduinoCommander.serial.close()
             time.sleep(1)
         if self.UsingVision:
             print("Killing Vision. Wait 1...")

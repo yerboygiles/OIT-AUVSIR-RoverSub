@@ -12,7 +12,7 @@ import serial
 class ArduinoCommander:
 
     def __init__(self, serialport='/dev/ttyAMA0'):
-        self.serial = serial.Serial('/dev/ttyAMA0', 9600)
+        self.serial = serial.Serial('/dev/serial0', 115200)
 
     # new protocol for ard. communication -
     # by having a single charac at the beginning of string, we can improve the parse speed of the arduino. instead of
@@ -30,26 +30,37 @@ class ArduinoCommander:
         outdata = ""
         outdata += 't'
         outdata += 'a'
+        outdata += ','
         outdata += str(lLBspeed)
+        outdata += ','
         outdata += str(lRBspeed)
+        outdata += ','
         outdata += str(lLFspeed)
+        outdata += ','
         outdata += str(lRFspeed)
 
+        outdata += ','
         outdata += str(vLBspeed)
+        outdata += ','
         outdata += str(vRBspeed)
+        outdata += ','
         outdata += str(vLFspeed)
+        outdata += ','
         outdata += str(vRFspeed)
 
         outdata += "\n"
 
-        self.serial.write(outdata.encode('utf-8'))
+        self.serial.write(outdata.encode('ascii'))
+        print("Outdata: ", outdata.encode('ascii'))
         # confirm data received
-        while self.serial.inWaiting():
+        self.serial.reset_input_buffer()
+        while self.serial.inWaiting() > 0:
             response = self.serial.readline()
             if response == "ATD":
                 print("Thruster values sent, handshake confirmed.")
                 confirm = False
             else:
+                print("Thruster values sent, handshake unconfirmed.")
                 confirm = False
         return confirm
 
