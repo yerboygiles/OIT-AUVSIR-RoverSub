@@ -63,7 +63,7 @@ void setup() {
   Serial.begin(9600);
   Serial.println("Configuring...");
 
-  Serial1.begin(9600);
+  Serial1.begin(115200);
   JetsonCommand.reserve(200);
   value.reserve(5);
 

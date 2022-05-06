@@ -12,7 +12,7 @@ import serial
 class ArduinoCommander:
 
     def __init__(self, serialport='/dev/ttyAMA0'):
-        self.serial = serial.Serial('/dev/ttyS0', 9600)
+        self.serial = serial.Serial('/dev/ttyS0', 115200)
 
     # new protocol for ard. communication -
     # by having a single charac at the beginning of string, we can improve the parse speed of the arduino. instead of
