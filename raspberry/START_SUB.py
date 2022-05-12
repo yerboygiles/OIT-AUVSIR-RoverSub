@@ -11,7 +11,7 @@ def run():
 
     print(' ===== -ROVERSUB- v3.0 ===== ')
 
-    Mission = TaskIO("mission.txt", True, False, True, False)
+    Mission = TaskIO("mission.txt", True, False, False, False)
     # Mission.testArduino()
     # Mission.testData()
     Mission.get_tasks()

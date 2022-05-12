@@ -24,7 +24,11 @@ class TaskIO:
         self.UsingGyro = usinggyro
         self.UsingSim = usingsim
         self.Active = False
-        self.Movement = NavigationCommander(self.UsingArduino, self.UsingVision, self.UsingGyro, self.UsingSim)
+        self.Movement = NavigationCommander(self.UsingArduino,
+                                            self.UsingVision,
+                                            self.UsingGyro,
+                                            self.UsingSim,
+                                            False)
         self.CommandList = []
 
     # get tasks from the .txt and completes them

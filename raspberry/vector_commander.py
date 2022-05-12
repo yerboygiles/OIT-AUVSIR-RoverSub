@@ -52,8 +52,9 @@ class NavigationCommander:
             # print("Sending IMU")
             # self.SendToArduino("IMU")
             self.JY62_1_IMU = imu_rpi.JY62('/dev/ttyUSB0', 0)
-            self.JY62_2_IMU = imu_rpi.JY62('/dev/ttyUSB1', 1)
-            self.IMU = imu.IMU_Group([self.JY62_1_IMU, self.JY62_2_IMU])
+            # self.JY62_2_IMU = imu_rpi.JY62('/dev/ttyUSB1', 1)
+            # self.IMU = imu.IMU_Group([self.JY62_1_IMU, self.JY62_2_IMU])
+            self.IMU = imu.IMU_Group([self.JY62_1_IMU])
             # self.IMU = imu_ard_data.WT61P(self.serial)
 
         else:
@@ -63,12 +64,13 @@ class NavigationCommander:
         if resetheadingoncmd:
             self.YawOffset = self.IMU.StartingAngle[0]
             self.ResetHeadingOnCMD = resetheadingoncmd
+        else:
+            self.YawOffset = 0
 
         self.YawLocked = False
         self.PitchLocked = False
         self.RollLocked = False
 
-        self.YawOffset = 0
         self.PitchOffset = 0
         self.RollOffset = 0
 
@@ -233,11 +235,6 @@ class NavigationCommander:
             # print("Time: ", time.perf_counter() - self.InitialTime)
             self.BasicDirectionPower(self.CommandIndex)
 
-    def setDestination(self, north, east, down):
-        self.NorthOffset = north
-        self.EastOffset = east
-        self.DownOffset = down
-
     def BasicLinear(self):
         DrivingWithTime = True
         if self.SuppCommand == "":
@@ -245,8 +242,14 @@ class NavigationCommander:
             self.SuppCommand = "10"
         while DrivingWithTime:
             DrivingWithTime = (time.perf_counter() - self.InitialTime) < int(self.SuppCommand)
+            # print("Yaw, Roll, Pitch error: ", self.IMU.Yaw_PID, )
             # print("Time: ", time.perf_counter() - self.InitialTime)
             self.BasicDirectionPower(self.CommandIndex)
+
+    def setDestination(self, north, east, down):
+        self.NorthOffset = north
+        self.EastOffset = east
+        self.DownOffset = down
 
     def BasicVectoring(self):  # 'vector' should be a 3-integer array
         targeting = True
@@ -264,7 +267,7 @@ class NavigationCommander:
             self.UpdateThrustersGyroPID()
         print("ARRIVED TO VECTOR.")
 
-    def BasicVectoring(self, yaw, pitch, roll, ):
+    def BasicVectoring(self, yaw, pitch, roll):
         targeting = True
         navigating = True
         i = 0
@@ -385,71 +388,69 @@ class NavigationCommander:
         print("Calibrating and arming thrusters...")
         time.sleep(8)
         print("Calibrated and armed.")
-        try:
-            for command in commandlist:
-                print("VectorCommander running: ", command)
-                self.MainCommand = ""
-                self.SuppCommand = ""
-                j = 0
-                for commandParsed in str(command).split('\n'):
-                    commandParsed.strip()
-                    print("commandParsed")
-                    if j == 0:
-                        self.MainCommand = commandParsed
-                    if j == 1:
-                        self.SuppCommand = commandParsed
-                    j = j + 1
-                print("Main: ", self.MainCommand, ", Supplementary: ", self.SuppCommand)
-                if self.MainCommand == "REMOTE":
-                    print("Driver Control With:")
-                    if self.SuppCommand == "KEYBOARD":
-                        print("Keyboard!")
-                        self.BasicDriverControl()
-                    else:
-                        pass
+        for command in commandlist:
+            print("VectorCommander running: ", command)
+            self.MainCommand = ""
+            self.SuppCommand = ""
+            j = 0
+            for commandParsed in str(command).split('\n'):
+                commandParsed.strip()
+                print("commandParsed")
+                if j == 0:
+                    self.MainCommand = commandParsed
+                if j == 1:
+                    self.SuppCommand = commandParsed
+                j = j + 1
+            print("Main: ", self.MainCommand, ", Supplementary: ", self.SuppCommand)
+            if self.MainCommand == "REMOTE":
+                print("Driver Control With:")
+                if self.SuppCommand == "KEYBOARD":
+                    print("Keyboard!")
+                    self.BasicDriverControl()
                 else:
-                    for basiccommand in self.BASIC_MOVEMENT_COMMANDS:
-                        i = 0
-                        if self.MainCommand == basiccommand:
-                            self.InitialTime = time.perf_counter()
-                            if self.UsingGyro:
-                                print("Running basic command...")
-                                self.BasicLinear()
-                            else:
-                                print("Running basic command with time due to no Gyro functionality...")
-                                self.BasicWithTime()
-                        i += 2
-                        self.CommandIndex += 1
-                    self.CommandIndex = 0
-                    for advancedcommand in self.ADVANCED_MOVEMENT_COMMANDS:
-                        i = 0
-                        if self.MainCommand == advancedcommand:
-                            self.InitialTime = time.perf_counter()
-                            if self.UsingGyro:
-                                print("Running advanced command...")
-                                self.BasicVectoring()
-                            else:
-                                print("Can't run advanced command without Gyro functionality...")
-                        i += 2
-                        self.CommandIndex += 1
-                    self.CommandIndex = 0
-                    for targetcommand in self.TARGET_MOVEMENT_COMMANDS:
-                        i = 0
-                        if self.MainCommand == targetcommand:
-                            self.InitialTime = time.perf_counter()
+                    pass
+            else:
+                for basiccommand in self.BASIC_MOVEMENT_COMMANDS:
+                    i = 0
+                    if self.MainCommand == basiccommand:
+                        self.InitialTime = time.perf_counter()
+                        if self.UsingGyro:
+                            print("Running basic command...")
+                            self.BasicLinear()
+                        else:
+                            print("Running basic command with time due to no Gyro functionality...")
+                            self.BasicWithTime()
+                    i += 2
+                    self.CommandIndex += 1
+                self.CommandIndex = 0
+                for advancedcommand in self.ADVANCED_MOVEMENT_COMMANDS:
+                    i = 0
+                    if self.MainCommand == advancedcommand:
+                        self.InitialTime = time.perf_counter()
+                        if self.UsingGyro:
+                            print("Running advanced command...")
+                            self.BasicVectoring()
+                        else:
+                            print("Can't run advanced command without Gyro functionality...")
+                    i += 2
+                    self.CommandIndex += 1
+                self.CommandIndex = 0
+                for targetcommand in self.TARGET_MOVEMENT_COMMANDS:
+                    i = 0
+                    if self.MainCommand == targetcommand:
+                        self.InitialTime = time.perf_counter()
 
-                            if self.UsingGyro:
-                                print("Running target-based command...")
-                                self.TargetMovement()
-                            else:
-                                print("Can't run target commands without Gyro and Vision functionality...")
+                        if self.UsingGyro:
+                            print("Running target-based command...")
                             self.TargetMovement()
-                        i += 2
-                        self.CommandIndex += 1
-                    self.CommandIndex = 0
-        except:
-            print("Ran into issue parsing commands. Terminating...")
-            self.Terminate()
+                        else:
+                            print("Can't run target commands without Gyro and Vision functionality...")
+                        self.TargetMovement()
+                    i += 2
+                    self.CommandIndex += 1
+                self.CommandIndex = 0
+            # print("Ran into issue parsing commands...")
+            # self.Terminate()
 
     def StoreGyroOffsets(self):
         i = 0
@@ -630,6 +631,7 @@ class NavigationCommander:
                 self.LateralPowerBR = 0
                 self.LateralPowerFR = 0
         if self.UsingGyro:
+            self.UpdateGyro()
             self.UpdateThrustersGyroPID()
         else:
             self.UpdateThrusters()
@@ -652,6 +654,8 @@ class NavigationCommander:
         time.sleep(.1)
 
     def UpdateThrustersGyroVisionPID(self):
+        self.IMU.CalculateError(self.YawOffset, self.PitchOffset, self.RollOffset,
+                                self.NorthOffset, self.EastOffset, self.DownOffset)
 
         self.Thruster_VentralLB.setSpeedPID(self.VentralPowerLB,
                                             zpid=self.IMU.getRollPID(),
@@ -686,7 +690,8 @@ class NavigationCommander:
         time.sleep(.1)
 
     def UpdateThrustersGyroPID(self):
-
+        self.IMU.CalculateError(self.YawOffset, self.PitchOffset, self.RollOffset,
+                                self.NorthOffset, self.EastOffset, self.DownOffset)
         self.Thruster_VentralLB.setSpeedPID(self.VentralPowerLB,
                                             zpid=self.IMU.getRollPID(),
                                             ypid=-self.IMU.getPitchPID())
@@ -742,7 +747,7 @@ class NavigationCommander:
 
     def UpdateGyro(self):
         if self.UsingGyro:
-            self.IMU.UpdateGyro()
+            self.IMU.updateGyro()
             # print(self.Gyro.getGyro())
             self.IMU.CalculateError(self.YawOffset,
                                     self.PitchOffset,
@@ -786,6 +791,7 @@ class NavigationCommander:
 
     # ending vehicle connection and AI processing after mission completion or a major fucky wucky
     def Terminate(self):
+        print("Disarming Thrusters. Wait 6...")
         self.Thruster_VentralLB.setSpeed(0)
         self.Thruster_VentralLF.setSpeed(0)
         self.Thruster_VentralRB.setSpeed(0)
@@ -794,12 +800,14 @@ class NavigationCommander:
         self.Thruster_LateralBR.setSpeed(0)
         self.Thruster_LateralFR.setSpeed(0)
         self.Thruster_LateralFL.setSpeed(0)
+        self.BrakeAllThrusters()
         # self.UpdateThrusters()
+        time.sleep(6)
         if self.UsingArduino:
             print("Killing Arduino. Wait 1...")
             # self.ArduinoCommander.SendToArduino("STOP")
-            self.ArduinoCommander.serial.close()
             time.sleep(1)
+            self.ArduinoCommander.serial.close()
         if self.UsingVision:
             print("Killing Vision. Wait 1...")
             time.sleep(1)
@@ -820,7 +828,8 @@ class ThrusterDriver:
             speed = MAX_THROTTLE
         elif speed < -MAX_THROTTLE:
             speed = -MAX_THROTTLE
-        self.speed = MapToPWM(speed)
+        self.speed = round(self.speed, 3)
+        self.speed = speed
 
     #  sets speed of thruster and incorporates the addition of pwm variables
     def setSpeedPID(self, speed, zpid=0.0, ypid=0.0, xpid=0.0):
@@ -829,7 +838,8 @@ class ThrusterDriver:
             self.speed = MAX_THROTTLE
         elif self.speed < -MAX_THROTTLE:
             self.speed = -MAX_THROTTLE
-        self.speed = MapToPWM(self.speed)
+        self.speed = round(self.speed, 3)
+        self.speed = self.speed
 
     # returns speed
     def getSpeed(self):
@@ -841,4 +851,12 @@ def MapToPWM(x):
     in_max = 100.0
     out_min = 1100
     out_max = 1900
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+
+
+def MapFromPWM(x):
+    in_min = 1100
+    in_max = 1900
+    out_min = -100.0
+    out_max = 100
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min

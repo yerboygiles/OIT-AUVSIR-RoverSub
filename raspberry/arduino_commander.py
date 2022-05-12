@@ -12,7 +12,13 @@ import serial
 class ArduinoCommander:
 
     def __init__(self, serialport='/dev/ttyAMA0'):
-        self.serial = serial.Serial('/dev/ttyS0', 115200)
+        self.serial = serial.Serial('/dev/ttyS0', 115200, timeout=1)
+        try:
+            self.serial.open()
+        except serial.serialutil.SerialException:
+            print("Port already open.")
+            pass
+
 
     # new protocol for ard. communication -
     # by having a single charac at the beginning of string, we can improve the parse speed of the arduino. instead of

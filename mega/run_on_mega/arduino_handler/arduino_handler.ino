@@ -6,7 +6,7 @@
     arduino mega controller
 */
 #include <Servo.h>
-#include "JY901.h"
+#include "JY901_Serial.h"
 #include "ThrusterDriver.h"
 #include "kArmDriver.h"
 #include "HMC5883L.h"
@@ -66,7 +66,12 @@ void setup() {
   Serial1.begin(115200);
   JetsonCommand.reserve(200);
   value.reserve(5);
+  
+  Serial2.begin(9600);
+  JY901_F.attach(Serial2);
 
+  Serial3.begin(9600);
+  JY901_R.attach(Serial3);
 
   LBsig.attach(LBpin);
   LFsig.attach(LFpin);
@@ -170,15 +175,15 @@ int readCommand() {
       switch (encodedCMD.charAt(1))
       {
         case 'a': // all
-          LB_Thruster.Drive(str_array[1].toInt());
-          LF_Thruster.Drive(str_array[2].toInt());
-          RB_Thruster.Drive(str_array[3].toInt());
-          RF_Thruster.Drive(str_array[4].toInt());
-          BL_Thruster.Drive(str_array[5].toInt());
-          FL_Thruster.Drive(str_array[6].toInt());
-          BR_Thruster.Drive(str_array[7].toInt());
-          FR_Thruster.Drive(str_array[8].toInt());
-          Serial.println("Drove all thrusters.");
+          BL_Thruster.Drive(str_array[1].toInt());
+          FL_Thruster.Drive(str_array[2].toInt());
+          BR_Thruster.Drive(str_array[3].toInt());
+          FR_Thruster.Drive(str_array[4].toInt());
+          LB_Thruster.Drive(str_array[5].toInt());
+          LF_Thruster.Drive(str_array[6].toInt());
+          RB_Thruster.Drive(str_array[7].toInt());
+          RF_Thruster.Drive(str_array[8].toInt());
+//          Serial.println("Drove all thrusters.");
           commandComplete = 1;
           break;
         case 'v': // ventral
@@ -213,16 +218,30 @@ int readCommand() {
       break;
     default:
       break;
-      //    case 'g': // gyros
-      //      switch (str_array[0][1])
-      //      {
-      //        case '1':
-      //          Serial.println("fortnite");
-      //      }
+          case 'g': // gyros
+            JY901.receiveSerialData();
+            switch (str_array[0][1])
+            {
+              case 'f':
+                JY901_F.receiveSerialData();
+                switch (str_array[0][1]){
+                  case 'c':
+                    JY901_F.autoCaliGyro(1);
+                    Serial1.print("JY901_F Calibrated.\n");
+                    break;
+                  case 'a':
+                    Serial1.print("Angle: ");
+                }
+                Serial1.print("Gyro:");
+                break;
+              case 'r':
+                JY901_R.receiveSerialData();
+                Serial1.println("fortnite");
+            }
       // add move cases below when needed
   }
   //  Serial1.flush();
-  Serial.println("Done reading command.");
+//  Serial.println("Done reading command.");
   return commandComplete;
   //  break;
 }

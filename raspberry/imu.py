@@ -267,17 +267,16 @@ class IMU_Group(IMU):
         self.Angle = list(self.Angle)
         # real shite workaround. whatever.
         for imu in self.IMU_list:
-            print("Updating group-gyro.")
+            # print("Updating group-gyro.")
             imu.updateGyro()
             temp = imu.getGyro()
             temp = list(temp)
-            print("Temp(gyro-",i,") readout: ", temp)
+            print("Temp(gyro-", i, ") readout: ", temp)
             if i == 0:
                 self.Angle = temp
             else:
                 j = 0
                 for j in range(len(temp)):
-
                     self.Angle[j] += temp[j]
                     j += 1
 
@@ -369,6 +368,10 @@ class IMU_Group(IMU):
         self.Error[GYRO][PITCH] = self.Angle[PITCH] - pitchoffset
         self.Error[GYRO][ROLL] = self.Angle[ROLL] - rolloffset
 
+        # print("Yaw, Roll, Pitch error: ", self.Error[GYRO][YAW],
+        #       self.Error[GYRO][PITCH],
+        #       self.Error[GYRO][ROLL])
+
         # position
         self.Error[POSITION][NORTH] = self.Acceleration[NORTH] - northoffset
         self.Error[POSITION][EAST] = self.Acceleration[EAST] - eastoffset
@@ -416,6 +419,8 @@ class IMU_Group(IMU):
         self.Roll_D = (self.Error_Delta[GYRO][ROLL] * self.Kd[GYRO][ROLL])
         self.Roll_PID = self.Roll_P + self.Roll_I + self.Roll_D
 
+        # test
+        # print("Yaw, Pitch, Roll PID: ", self.Yaw_PID, self.Pitch_PID, self.Roll_PID)
         # North PID variable setting
         self.North_P = (self.Error[POSITION][NORTH] * self.Kp[POSITION][NORTH])
         self.North_I = (self.Error_Sum[POSITION][NORTH] * self.Ki[POSITION][NORTH])

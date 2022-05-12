@@ -216,7 +216,7 @@ class JY62(IMU):
 
         # read info from vehicle
         self.port = port
-        self.serial = serial.Serial(self.port, 115200)
+        self.serial = serial.Serial(self.port, 9600)
         self.serial.flushInput()
         self.ID = id
 
@@ -329,6 +329,8 @@ class JY62(IMU):
                     self.Bytenum = 0
                     self.FrameState = 0
 
+    def Terminate(self):
+        self.serial.close()
 
 # fns for JY61
 def get_gyro(datahex):
