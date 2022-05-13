@@ -428,5 +428,3 @@ void CJY901::setGPSrate(int gpsFlag) {
   JY901_GPSBAUDRATE[3] = gpsFlag;
   Serial_->write(JY901_GPSBAUDRATE, 5);
 }
-
-CJY901 JY901;

@@ -52,6 +52,8 @@ int endIndex = 0;
 int cmdIndex;
 String encodedCMD;
 String value;
+CJY901 JY901_F;
+CJY901 JY901_R;
 
 void setup() {
   // put your setup code here, to run once:
@@ -110,6 +112,8 @@ void setup() {
 
 
 void loop() {
+  JY901_F.receiveSerialData();
+  JY901_R.receiveSerialData();
   // put your main code here, to run repeatedly:
   //Serial1.println("Hello!!");
   if (stringComplete) {
@@ -136,9 +140,9 @@ void loop() {
     stringComplete = false;
   }
 //    Serial.println("In loop...");
-  if (Serial1.available()) {
+  if (Serial.available()) {
     // get the new byte:
-    char inChar = (char)Serial1.read();
+    char inChar = (char)Serial.read();
     // add it to the inputString:
     // if the incoming character is a newline, set a flag so the main loop can
     // do something about it:
@@ -219,24 +223,44 @@ int readCommand() {
     default:
       break;
           case 'g': // gyros
-            JY901.receiveSerialData();
+//            JY901.receiveSerialData();
             switch (str_array[0][1])
             {
               case 'f':
-                JY901_F.receiveSerialData();
-                switch (str_array[0][1]){
+                switch (str_array[0][2]){
                   case 'c':
-                    JY901_F.autoCaliGyro(1);
+//                    JY901_F.autoCaliGyro(1);
+                    Serial.print("JY901_F Calibrated.\n");
+                    break;
+                  case 'a':
+                    Serial.print("Angle: ");
+                    Serial.print(JY901_F.getRoll());
+                    Serial.print(" ");
+                    Serial.print(JY901_F.getPitch());
+                    Serial.print(" ");
+                    Serial.print(JY901_F.getYaw());
+                    Serial.print("\n");
+                    break;
+                }
+                break;
+              case 'r':
+//                JY901_R.receiveSerialData();
+                switch (str_array[0][2]){
+                  case 'c':
+//                    JY901_F.autoCaliGyro(1);
                     Serial1.print("JY901_F Calibrated.\n");
                     break;
                   case 'a':
                     Serial1.print("Angle: ");
+                    Serial1.print(JY901_F.getRoll());
+                    Serial1.print(" ");
+                    Serial1.print(JY901_F.getPitch());
+                    Serial1.print(" ");
+                    Serial1.print(JY901_F.getYaw());
+                    Serial1.print("\n");
+                    break;
                 }
-                Serial1.print("Gyro:");
                 break;
-              case 'r':
-                JY901_R.receiveSerialData();
-                Serial1.println("fortnite");
             }
       // add move cases below when needed
   }
