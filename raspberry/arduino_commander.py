@@ -19,7 +19,6 @@ class ArduinoCommander:
             print("Port already open.")
             pass
 
-
     # new protocol for ard. communication -
     # by having a single charac at the beginning of string, we can improve the parse speed of the arduino. instead of
     # searching the huge list of hardpoints, we can classify each and only search in the places we want.
