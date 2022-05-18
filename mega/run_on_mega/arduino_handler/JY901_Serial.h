@@ -1,3 +1,10 @@
+/*
+    Author: Theodor Giles
+    Created: 5/11/22
+    Last Edited 5/18/22
+    Description:
+    JY901 serial manager
+*/
 #ifndef _JY901_SERIAL_H_
 #define _JY901_SERIAL_H_
 

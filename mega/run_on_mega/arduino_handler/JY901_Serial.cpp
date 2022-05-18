@@ -1,4 +1,10 @@
-
+/*
+    Author: Theodor Giles
+    Created: 5/11/22
+    Last Edited 5/18/22
+    Description:
+    JY901 serial manager
+*/
 #include "JY901_Serial.h"
 #include <Arduino.h>
 #include <Wire.h>

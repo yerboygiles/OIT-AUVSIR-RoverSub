@@ -2,7 +2,7 @@
 
 # Author: Theodor Giles
 # Created: 7/14/20
-# Last Edited 5/4/22
+# Last Edited 5/18/22
 # Description:
 # This program is very basic, just so we can mess with a variable or two. will be integrated into gui?
 #

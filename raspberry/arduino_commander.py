@@ -1,10 +1,9 @@
 #!python3
 # Author: Theodor Giles
 # Created: 4/10/21
-# Last Edited 5/4/22
+# Last Edited 5/18/22
 # Description:
-# This node manages the commands/movement/physical
-# control of the RoboSub V2, 2020-21
+# This node manages the communication with the arduino
 
 import serial
 
@@ -159,15 +158,24 @@ class ArduinoCommander:
         self.serial.write(whattosend.encode('utf-8'))
 
     def getAngleFront(self):
-        self.serial.write(("gfa\n").encode('utf-8'))
+        self.serial.write("gfa\n".encode('utf-8'))
         data = self.serial.read_until("\n")
-
-        print("Front angle:", data)
+        return parseXYZDataToList(data)
+        # print("Front angle:", data)
 
     def getAngleRear(self):
-        self.serial.write(("gra\n").encode('utf-8'))
+        self.serial.write("gra\n".encode('utf-8'))
         data = self.serial.read_until("\n")
+        return parseXYZDataToList(data)
 
-        print("Rear angle:", data)
+        # print("Rear angle:", data)
 
 
+def parseXYZDataToList(xyz_data):
+    i = -1
+    xyz = [0.0, 0.0, 0.0]
+    for parsed in str(xyz_data).split(':'):
+        if i < 4:
+            xyz[i] = float(parsed)
+        i = i + 1
+    return xyz

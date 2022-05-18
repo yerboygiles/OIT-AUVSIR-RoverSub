@@ -11,7 +11,6 @@
       <change beforePath="$PROJECT_DIR$/mega/run_on_mega/arduino_handler/arduino_handler.ino" beforeDir="false" afterPath="$PROJECT_DIR$/mega/run_on_mega/arduino_handler/arduino_handler.ino" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/raspberry/START_SUB.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/START_SUB.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/raspberry/arduino_commander.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/arduino_commander.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raspberry/rpi_communicator.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/rpi_communicator.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/raspberry/task_io_lib_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/task_io_lib_v2.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/raspberry/vector_commander.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/vector_commander.py" afterDir="false" />
     </list>

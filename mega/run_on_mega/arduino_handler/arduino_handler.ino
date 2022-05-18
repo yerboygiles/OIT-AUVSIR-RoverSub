@@ -1,7 +1,7 @@
 /*
     Author: Theodor Giles
     Created: 1/30/22
-    Last Edited 5/4/22
+    Last Edited 5/18/22
     Description:
     arduino mega controller
 */
@@ -53,21 +53,41 @@ int cmdIndex;
 String encodedCMD;
 String value;
 
+//gyro data
 float Xangle_R;
 float Yangle_R;
 float Zangle_R;
-
-float Xangle_offset_R;
-float Yangle_offset_R;
-float Zangle_offset_R;
 
 float Xangle_F;
 float Yangle_F;
 float Zangle_F;
 
-float Xangle_offset_F;
-float Yangle_offset_F;
-float Zangle_offset_F;
+//gyro data offsets for calib/heading reset
+float Xangle_offset_R=0;
+float Yangle_offset_R=0;
+float Zangle_offset_R=0;
+
+float Xangle_offset_F=0;
+float Yangle_offset_F=0;
+float Zangle_offset_F=0;
+
+//accel data
+float Xaccel;
+float Yaccel;
+float Zaccel;
+
+//velocity integration
+float Xveloc=0;
+float Xposit=0;
+
+float Yveloc=0;
+float Yposit=0;
+
+float Zveloc=0;
+float Zposit=0;
+
+long newTime;
+long lastTime=0;
 
 void setup() {
   // put your setup code here, to run once:
@@ -299,6 +319,38 @@ int readCommand() {
   //  break;
 }
 
+void updateAccel(){
+  Xaccel = (JY901_R.getAccX() + JY901_F.getAccX())/2;
+  Yaccel = (JY901_R.getAccY() + JY901_F.getAccY())/2;
+  Zaccel = (JY901_R.getAccZ() + JY901_F.getAccZ())/2;
+}
+float integrateXaccel(){
+  newTime = millis();
+  
+  Xveloc = Xveloc + Xaccel * (newTime - lastTime)/1000;
+  
+  Xposit = Xposit + Xveloc * (newTime - lastTime)/1000;
+  
+  lastTime=newTime;
+}
+float integrateYaccel(){
+  newTime = millis();
+  
+  Yveloc = Yveloc + Yaccel * (newTime - lastTime)/1000;
+  
+  Yposit = Yposit + Yveloc * (newTime - lastTime)/1000;
+  
+  lastTime=newTime;
+}
+float integrateZaccel(){
+  newTime = millis();
+  
+  Zveloc = Zveloc + Zaccel * (newTime - lastTime)/1000;
+  
+  Zposit = Zposit + Zveloc * (newTime - lastTime)/1000;
+  
+  lastTime=newTime;
+}
 
 void beAuto() {
   LB_Thruster.Drive(10);

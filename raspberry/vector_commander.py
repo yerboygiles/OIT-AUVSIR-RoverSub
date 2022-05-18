@@ -1,7 +1,7 @@
 #!python3
 # Author: Theodor Giles
 # Created: 11/22/20
-# Last Edited 5/4/22
+# Last Edited 5/18/22
 # Description:
 # This node manages the commands/movement/physical
 # control of the RoboSub V2, 2020-21
@@ -216,7 +216,7 @@ class NavigationCommander:
 
     def ArduinoTesting(self):
         self.ArduinoCommander.CommunicateAllThrusters(100, 40, 40, 100, -25, 100, -25, 100)
-        time.sleep(1)
+        time.sleep(.1)
 
     def BasicDriverControl(self):
         DrivingWithControl = True
@@ -225,7 +225,7 @@ class NavigationCommander:
             DriveCommand = remote_control.get_wasdqerv_directional()
             self.BasicDirectionPower(DriveCommand)
             DrivingWithControl = DriveCommand != -2
-            self.TradeWithArduino()
+            # self.TradeWithArduino()
 
     def BasicWithTime(self):
         DrivingWithTime = True
@@ -503,48 +503,6 @@ class NavigationCommander:
             self.InitialTime = time.perf_counter()
         return self.GyroRunning
 
-    #
-    # def TradeWithArduino(self):
-    #     self.UpdateThrusters()
-    #     outdata = ""
-    #     if self.secondSetTrade:
-    #         outdata += str(self.Thruster_LateralBL.name)
-    #         outdata += ":"
-    #         outdata += str(self.Thruster_LateralBL.getSpeed())
-    #         outdata += ","
-    #         outdata += str(self.Thruster_LateralBR.name)
-    #         outdata += ":"
-    #         outdata += str(self.Thruster_LateralBR.getSpeed())
-    #         outdata += ","
-    #         outdata += str(self.Thruster_LateralFL.name)
-    #         outdata += ":"
-    #         outdata += str(self.Thruster_LateralFL.getSpeed())
-    #         outdata += ","
-    #         outdata += str(self.Thruster_LateralFR.name)
-    #         outdata += ":"
-    #         outdata += str(self.Thruster_LateralFR.getSpeed())
-    #         outdata += "\n"
-    #         self.serial.write(outdata.encode('utf-8'))
-    #     if not self.secondSetTrade:
-    #         outdata += str(self.Thruster_VentralLB.name)
-    #         outdata += ":"
-    #         outdata += str(self.Thruster_VentralLB.getSpeed())
-    #         outdata += ","
-    #         outdata += str(self.Thruster_VentralLF.name)
-    #         outdata += ":"
-    #         outdata += str(self.Thruster_VentralLF.getSpeed())
-    #         outdata += ","
-    #         outdata += str(self.Thruster_VentralRB.name)
-    #         outdata += ":"
-    #         outdata += str(self.Thruster_VentralRB.getSpeed())
-    #         outdata += ","
-    #         outdata += str(self.Thruster_VentralRF.name)
-    #         outdata += ":"
-    #         outdata += str(self.Thruster_VentralRF.getSpeed())
-    #         outdata += "\n"
-    #         self.serial.write(outdata.encode('utf-8'))
-    #     self.secondSetTrade = not self.secondSetTrade
-
     def CheckIfPositionDone(self, threshold=3, timethreshold=5):
         self.PositionRunning = True
         self.NorthLocked = (abs(self.IMU.getNorth() - self.NorthOffset) < threshold)
@@ -558,9 +516,6 @@ class NavigationCommander:
         else:
             self.InitialTime = time.perf_counter()
         return self.PositionRunning
-
-    def CalculatePID(self):
-        pass
 
     def ReturnScanDict(self):
         scanned_target = self.scanned_target_format
@@ -638,6 +593,18 @@ class NavigationCommander:
         else:
             self.UpdateThrusters()
 
+    def UpdateGyro(self):
+        if self.UsingGyro:
+            self.IMU.updateGyro()
+            # print(self.Gyro.getGyro())
+            self.IMU.CalculateError(self.YawOffset,
+                                    self.PitchOffset,
+                                    self.RollOffset,
+                                    self.NorthOffset,
+                                    self.EastOffset,
+                                    self.DownOffset)
+            self.IMU.PID()
+
     def UpdateThrusters(self):
 
         self.Thruster_VentralLB.setSpeed(self.VentralPowerLB)
@@ -653,7 +620,63 @@ class NavigationCommander:
         self.ArduinoCommander.CommunicateAllThrusters(self.LateralPowerBL, self.LateralPowerFL, self.LateralPowerBR,
                                                       self.LateralPowerFR, self.VentralPowerLB, self.VentralPowerRB,
                                                       self.VentralPowerLF, self.VentralPowerRF)
-        time.sleep(.1)
+        # time.sleep(.1)
+
+    def UpdateThrustersGyroPID(self):
+        self.IMU.CalculateError(self.YawOffset, self.PitchOffset, self.RollOffset,
+                                self.NorthOffset, self.EastOffset, self.DownOffset)
+        self.Thruster_VentralLB.setSpeedPID(self.VentralPowerLB,
+                                            zpid=self.IMU.getRollPID(),
+                                            ypid=-self.IMU.getPitchPID())
+        self.Thruster_VentralRB.setSpeedPID(self.VentralPowerRB,
+                                            zpid=-self.IMU.getRollPID(),
+                                            ypid=-self.IMU.getPitchPID())
+        self.Thruster_VentralLF.setSpeedPID(self.VentralPowerLF,
+                                            zpid=-self.IMU.getRollPID(),
+                                            ypid=-self.IMU.getPitchPID())
+        self.Thruster_VentralRF.setSpeedPID(self.VentralPowerRF,
+                                            zpid=self.IMU.getRollPID(),
+                                            ypid=-self.IMU.getPitchPID())
+
+        self.Thruster_LateralBL.setSpeedPID(self.LateralPowerBL, xpid=self.IMU.getYawPID())
+        self.Thruster_LateralFL.setSpeedPID(self.LateralPowerFL, xpid=self.IMU.getYawPID())
+        self.Thruster_LateralBR.setSpeedPID(self.LateralPowerBR, xpid=-self.IMU.getYawPID())
+        self.Thruster_LateralFR.setSpeedPID(self.LateralPowerFR, xpid=-self.IMU.getYawPID())
+
+        self.ArduinoCommander.CommunicateAllThrusters(self.Thruster_LateralBL.getSpeed(),
+                                                      self.Thruster_LateralFL.getSpeed(),
+                                                      self.Thruster_LateralBR.getSpeed(),
+                                                      self.Thruster_LateralFR.getSpeed(),
+                                                      self.Thruster_VentralLB.getSpeed(),
+                                                      self.Thruster_VentralRB.getSpeed(),
+                                                      self.Thruster_VentralLF.getSpeed(),
+                                                      self.Thruster_VentralRF.getSpeed())
+        # time.sleep(.1)
+
+    def UpdateThrustersVisionPID(self):
+
+        self.Thruster_LateralBL.setSpeedPID(self.LateralPowerBL, xpid=self.Vision.getXPID())
+        self.Thruster_LateralFL.setSpeedPID(self.LateralPowerFL, xpid=self.Vision.getXPID())
+        self.Thruster_LateralBR.setSpeedPID(self.LateralPowerBR, xpid=-self.Vision.getXPID())
+        self.Thruster_LateralFR.setSpeedPID(self.LateralPowerFR, xpid=-self.Vision.getXPID())
+
+        self.Thruster_VentralLB.setSpeedPID(self.VentralPowerLB,
+                                            ypid=self.Vision.getYPID())
+        self.Thruster_VentralRB.setSpeedPID(self.VentralPowerRB,
+                                            ypid=self.Vision.getYPID())
+        self.Thruster_VentralLF.setSpeedPID(self.VentralPowerLF,
+                                            ypid=-self.Vision.getYPID())
+        self.Thruster_VentralRF.setSpeedPID(self.VentralPowerRF,
+                                            ypid=-self.Vision.getYPID())
+
+        self.ArduinoCommander.CommunicateAllThrusters(self.Thruster_LateralBL.getSpeed(),
+                                                      self.Thruster_LateralFL.getSpeed(),
+                                                      self.Thruster_LateralBR.getSpeed(),
+                                                      self.Thruster_LateralFR.getSpeed(),
+                                                      self.Thruster_VentralLB.getSpeed(),
+                                                      self.Thruster_VentralRB.getSpeed(),
+                                                      self.Thruster_VentralLF.getSpeed(),
+                                                      self.Thruster_VentralRF.getSpeed())
 
     def UpdateThrustersGyroVisionPID(self):
         self.IMU.CalculateError(self.YawOffset, self.PitchOffset, self.RollOffset,
@@ -689,75 +712,7 @@ class NavigationCommander:
                                                       self.Thruster_VentralRB.getSpeed(),
                                                       self.Thruster_VentralLF.getSpeed(),
                                                       self.Thruster_VentralRF.getSpeed())
-        time.sleep(.1)
-
-    def UpdateThrustersGyroPID(self):
-        self.IMU.CalculateError(self.YawOffset, self.PitchOffset, self.RollOffset,
-                                self.NorthOffset, self.EastOffset, self.DownOffset)
-        self.Thruster_VentralLB.setSpeedPID(self.VentralPowerLB,
-                                            zpid=self.IMU.getRollPID(),
-                                            ypid=-self.IMU.getPitchPID())
-        self.Thruster_VentralRB.setSpeedPID(self.VentralPowerRB,
-                                            zpid=-self.IMU.getRollPID(),
-                                            ypid=-self.IMU.getPitchPID())
-        self.Thruster_VentralLF.setSpeedPID(self.VentralPowerLF,
-                                            zpid=-self.IMU.getRollPID(),
-                                            ypid=-self.IMU.getPitchPID())
-        self.Thruster_VentralRF.setSpeedPID(self.VentralPowerRF,
-                                            zpid=self.IMU.getRollPID(),
-                                            ypid=-self.IMU.getPitchPID())
-
-        self.Thruster_LateralBL.setSpeedPID(self.LateralPowerBL, xpid=self.IMU.getYawPID())
-        self.Thruster_LateralFL.setSpeedPID(self.LateralPowerFL, xpid=self.IMU.getYawPID())
-        self.Thruster_LateralBR.setSpeedPID(self.LateralPowerBR, xpid=-self.IMU.getYawPID())
-        self.Thruster_LateralFR.setSpeedPID(self.LateralPowerFR, xpid=-self.IMU.getYawPID())
-
-        self.ArduinoCommander.CommunicateAllThrusters(self.Thruster_LateralBL.getSpeed(),
-                                                      self.Thruster_LateralFL.getSpeed(),
-                                                      self.Thruster_LateralBR.getSpeed(),
-                                                      self.Thruster_LateralFR.getSpeed(),
-                                                      self.Thruster_VentralLB.getSpeed(),
-                                                      self.Thruster_VentralRB.getSpeed(),
-                                                      self.Thruster_VentralLF.getSpeed(),
-                                                      self.Thruster_VentralRF.getSpeed())
-        time.sleep(.1)
-
-    def UpdateThrustersVisionPID(self):
-
-        self.Thruster_LateralBL.setSpeedPID(self.LateralPowerBL, xpid=self.Vision.getXPID())
-        self.Thruster_LateralFL.setSpeedPID(self.LateralPowerFL, xpid=self.Vision.getXPID())
-        self.Thruster_LateralBR.setSpeedPID(self.LateralPowerBR, xpid=-self.Vision.getXPID())
-        self.Thruster_LateralFR.setSpeedPID(self.LateralPowerFR, xpid=-self.Vision.getXPID())
-
-        self.Thruster_VentralLB.setSpeedPID(self.VentralPowerLB,
-                                            ypid=self.Vision.getYPID())
-        self.Thruster_VentralRB.setSpeedPID(self.VentralPowerRB,
-                                            ypid=self.Vision.getYPID())
-        self.Thruster_VentralLF.setSpeedPID(self.VentralPowerLF,
-                                            ypid=-self.Vision.getYPID())
-        self.Thruster_VentralRF.setSpeedPID(self.VentralPowerRF,
-                                            ypid=-self.Vision.getYPID())
-
-        self.ArduinoCommander.CommunicateAllThrusters(self.Thruster_LateralBL.getSpeed(),
-                                                      self.Thruster_LateralFL.getSpeed(),
-                                                      self.Thruster_LateralBR.getSpeed(),
-                                                      self.Thruster_LateralFR.getSpeed(),
-                                                      self.Thruster_VentralLB.getSpeed(),
-                                                      self.Thruster_VentralRB.getSpeed(),
-                                                      self.Thruster_VentralLF.getSpeed(),
-                                                      self.Thruster_VentralRF.getSpeed())
-
-    def UpdateGyro(self):
-        if self.UsingGyro:
-            self.IMU.updateGyro()
-            # print(self.Gyro.getGyro())
-            self.IMU.CalculateError(self.YawOffset,
-                                    self.PitchOffset,
-                                    self.RollOffset,
-                                    self.NorthOffset,
-                                    self.EastOffset,
-                                    self.DownOffset)
-            self.IMU.PID()
+        # time.sleep(.1)
 
     def BrakeAllThrusters(self):
         # horizontal
