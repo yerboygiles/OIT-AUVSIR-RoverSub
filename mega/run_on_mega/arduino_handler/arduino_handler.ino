@@ -69,11 +69,11 @@ void setup() {
   JetsonCommand.reserve(200);
   value.reserve(5);
   
-  Serial2.begin(9600);
-  JY901_F.attach(Serial2);
-
-  Serial3.begin(9600);
-  JY901_R.attach(Serial3);
+//  Serial2.begin(9600);
+//  JY901_F.attach(Serial2);
+//
+//  Serial3.begin(9600);
+//  JY901_R.attach(Serial3);
 
   LBsig.attach(LBpin);
   LFsig.attach(LFpin);
@@ -112,8 +112,8 @@ void setup() {
 
 
 void loop() {
-  JY901_F.receiveSerialData();
-  JY901_R.receiveSerialData();
+//  JY901_F.receiveSerialData();
+//  JY901_R.receiveSerialData();
   // put your main code here, to run repeatedly:
   //Serial1.println("Hello!!");
   if (stringComplete) {
@@ -140,9 +140,9 @@ void loop() {
     stringComplete = false;
   }
 //    Serial.println("In loop...");
-  if (Serial.available()) {
+  if (Serial1.available()) {
     // get the new byte:
-    char inChar = (char)Serial.read();
+    char inChar = (char)Serial1.read();
     // add it to the inputString:
     // if the incoming character is a newline, set a flag so the main loop can
     // do something about it:
