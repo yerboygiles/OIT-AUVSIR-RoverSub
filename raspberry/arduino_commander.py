@@ -10,7 +10,7 @@ import serial
 
 class ArduinoCommander:
 
-    def __init__(self, serialport='/dev/ttyAMA0'):
+    def __init__(self):
         self.serial = serial.Serial('/dev/ttyS0', 115200, timeout=1)
         try:
             self.serial.open()
@@ -63,16 +63,6 @@ class ArduinoCommander:
         self.serial.reset_input_buffer()
         self.serial.reset_output_buffer()
         self.serial.write(outdata.encode('ascii'))
-        # print("Outdata: ", outdata.encode('ascii'))
-        # confirm data received
-        # while confirm is False:
-        #     response = self.serial.readline().decode('ascii')
-        #     if response == "ATD":
-        #         print("Thruster values sent, handshake confirmed.")
-        #         confirm = True
-        #     else:
-        #         print("Thruster values sent, handshake unconfirmed.")
-        #         confirm = False
         return confirm
 
     def Communicate_Thrusters(self, thrustid, speed):
