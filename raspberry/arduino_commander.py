@@ -157,3 +157,17 @@ class ArduinoCommander:
     def SendToArduino(self, whattosend):
         whattosend += "\n"
         self.serial.write(whattosend.encode('utf-8'))
+
+    def getAngleFront(self):
+        self.serial.write(("gfa\n").encode('utf-8'))
+        data = self.serial.read_until("\n")
+
+        print("Front angle:", data)
+
+    def getAngleRear(self):
+        self.serial.write(("gra\n").encode('utf-8'))
+        data = self.serial.read_until("\n")
+
+        print("Rear angle:", data)
+
+

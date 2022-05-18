@@ -52,8 +52,22 @@ int endIndex = 0;
 int cmdIndex;
 String encodedCMD;
 String value;
-CJY901 JY901_F;
-CJY901 JY901_R;
+
+float Xangle_R;
+float Yangle_R;
+float Zangle_R;
+
+float Xangle_offset_R;
+float Yangle_offset_R;
+float Zangle_offset_R;
+
+float Xangle_F;
+float Yangle_F;
+float Zangle_F;
+
+float Xangle_offset_F;
+float Yangle_offset_F;
+float Zangle_offset_F;
 
 void setup() {
   // put your setup code here, to run once:
@@ -69,11 +83,14 @@ void setup() {
   JetsonCommand.reserve(200);
   value.reserve(5);
   
-//  Serial2.begin(9600);
-//  JY901_F.attach(Serial2);
-//
-//  Serial3.begin(9600);
-//  JY901_R.attach(Serial3);
+  Serial2.begin(115200);
+  JY901_F.attach(Serial2);
+
+  Serial3.begin(115200);
+  JY901_R.attach(Serial3);
+
+  JY901_F.receiveSerialData();
+  JY901_R.receiveSerialData();
 
   LBsig.attach(LBpin);
   LFsig.attach(LFpin);
@@ -112,8 +129,8 @@ void setup() {
 
 
 void loop() {
-//  JY901_F.receiveSerialData();
-//  JY901_R.receiveSerialData();
+  JY901_F.receiveSerialData();
+  JY901_R.receiveSerialData();
   // put your main code here, to run repeatedly:
   //Serial1.println("Hello!!");
   if (stringComplete) {
@@ -222,46 +239,58 @@ int readCommand() {
       break;
     default:
       break;
-          case 'g': // gyros
-//            JY901.receiveSerialData();
-            switch (str_array[0][1])
-            {
-              case 'f':
-                switch (str_array[0][2]){
-                  case 'c':
-//                    JY901_F.autoCaliGyro(1);
-                    Serial.print("JY901_F Calibrated.\n");
-                    break;
-                  case 'a':
-                    Serial.print("Angle: ");
-                    Serial.print(JY901_F.getRoll());
-                    Serial.print(" ");
-                    Serial.print(JY901_F.getPitch());
-                    Serial.print(" ");
-                    Serial.print(JY901_F.getYaw());
-                    Serial.print("\n");
-                    break;
-                }
-                break;
-              case 'r':
-//                JY901_R.receiveSerialData();
-                switch (str_array[0][2]){
-                  case 'c':
-//                    JY901_F.autoCaliGyro(1);
-                    Serial1.print("JY901_F Calibrated.\n");
-                    break;
-                  case 'a':
-                    Serial1.print("Angle: ");
-                    Serial1.print(JY901_F.getRoll());
-                    Serial1.print(" ");
-                    Serial1.print(JY901_F.getPitch());
-                    Serial1.print(" ");
-                    Serial1.print(JY901_F.getYaw());
-                    Serial1.print("\n");
-                    break;
-                }
-                break;
-            }
+    case 'g': // gyros
+      switch (str_array[0][1])
+      {
+        case 'f':
+          JY901_F.receiveSerialData();
+          switch (str_array[0][2]){
+            case 'h':
+              Zangle_offset_R = JY901_F.getYaw();
+              Serial1.print("fh\n");
+              break;
+            case 'c':
+              Xangle_offset_F = JY901_F.getRoll();
+              Yangle_offset_F = JY901_F.getPitch();
+              Zangle_offset_F = JY901_F.getYaw();
+              Serial1.print("fc\n");
+              break;
+            case 'a':
+              Serial1.print("A:");
+              Serial1.print(JY901_F.getRoll());
+              Serial1.print(":");
+              Serial1.print(JY901_F.getPitch());
+              Serial1.print(":");
+              Serial1.print(JY901_F.getYaw());
+              Serial1.print("\n");
+              break;
+          }
+          break;
+        case 'r':
+          JY901_R.receiveSerialData();
+          switch (str_array[0][2]){
+            case 'h':
+              Zangle_offset_R = JY901_R.getYaw();
+              Serial1.print("rh\n");
+              break;
+            case 'c':
+              Xangle_offset_R = JY901_R.getRoll();
+              Yangle_offset_R = JY901_R.getPitch();
+              Zangle_offset_R = JY901_R.getYaw();
+              Serial1.print("rc\n");
+              break;
+            case 'a':
+              Serial1.print("A:");
+              Serial1.print(JY901_R.getRoll());
+              Serial1.print(":");
+              Serial1.print(JY901_R.getPitch());
+              Serial1.print(":");
+              Serial1.print(JY901_R.getYaw());
+              Serial1.print("\n");
+              break;
+          }
+          break;
+      }
       // add move cases below when needed
   }
   //  Serial1.flush();

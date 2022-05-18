@@ -1,28 +1,36 @@
 import socket
 
 # take the server name and port name
-
 host = 'local host'
-port = 5000
+port = 9000
 
-# create a socket at client side
+# create a socket at server side
 # using TCP / IP protocol
 s = socket.socket(socket.AF_INET,
-				socket.SOCK_STREAM)
+                  socket.SOCK_STREAM)
 
-# connect it to server and port
-# number on local computer.
-s.connect(('127.0.0.1', port))
+# bind the socket with server
+# and port number
+s.bind(('', port))
 
-# receive message string from
-# server, at a time 1024 B
-msg = s.recv(1024)
+# allow maximum 1 connection to
+# the socket
+s.listen(1)
 
-# repeat as long as message
-# string are not empty
-while msg:
-	print('Received:' + msg.decode())
-	msg = s.recv(1024)
+# wait till a client accept
+# connection
+c, addr = s.accept()
 
-# disconnect the client
-s.close()
+# display client address
+print("CONNECTION FROM:", str(addr))
+
+# send message to the client after
+# encoding into binary string
+c.send(b"HELLO, How are you ? \
+       Welcome to Akash hacking World")
+
+msg = "Bye.............."
+c.send(msg.encode())
+
+# disconnect the server
+c.close()

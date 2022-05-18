@@ -6,6 +6,7 @@
 # Description:
 # This program is very basic, just so we can mess with a variable or two. will be integrated into gui?
 #
+
 def run():
     from task_io_lib_v2 import TaskIO
 
@@ -13,8 +14,8 @@ def run():
 
     Mission = TaskIO("mission.txt", True, False, False, False)
     # Mission.testArduino()
-    # Mission.testData()
-    Mission.get_tasks()
+    Mission.testData()
+    # Mission.get_tasks()
     Mission.terminate()
     print("done")
 
