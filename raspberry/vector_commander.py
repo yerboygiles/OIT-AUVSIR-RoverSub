@@ -215,11 +215,13 @@ class NavigationCommander:
         # z2 = "{:.4f}".format(gyro2[2])
         # print("IMU 1 Angle: ", x1, y1, z1)
         # print("IMU 2 Angle: ", x2, y2, z2)
-        self.BrakeAllThrusters()
-        self.ArdIMU.UpdateFrontAngle()
-        print("Front angle, corrected: ", self.ArdIMU.getCorrectedFrontAngle())
-        self.ArdIMU.UpdateRearAngle()
-        print("Rear angle, corrected: ", self.ArdIMU.getCorrectedRearAngle())
+        # self.BrakeAllThrusters()
+        self.ArdIMU.UpdateAngle()
+        print("Averaged Angle: ", self.ArdIMU.getAngle())
+        # self.ArdIMU.UpdateFrontAngle()
+        # print("Front angle, corrected: ", self.ArdIMU.getCorrectedFrontAngle())
+        # self.ArdIMU.UpdateRearAngle()
+        # print("Rear angle, corrected: ", self.ArdIMU.getCorrectedRearAngle())
 
         # print("Yaw PID: ", self.ArdIMU.getYawPID())
         pass

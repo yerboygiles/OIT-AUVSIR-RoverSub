@@ -54,9 +54,9 @@ class ArduinoIMU(IMU):
         angleRear = self.getAngleRear()
         startFront = self.getStartingFrontAngle()
         startRear = self.getStartingRearAngle()
-        self.Angle[0] = (angleFront[0]-startFront[0] + angleRear[0]-startRear[0]) / 2
-        self.Angle[1] = (angleFront[1]-startFront[1] + angleRear[1]-startRear[1]) / 2
-        self.Angle[2] = (angleFront[2]-startFront[2] + angleRear[2]-startRear[2]) / 2
+        self.Angle[0] = ((angleFront[0]-startFront[0]) + (angleRear[0]-startRear[0])) / 2
+        self.Angle[1] = ((angleFront[1]-startFront[1]) - (angleRear[1]-startRear[1])) / 2
+        self.Angle[2] = ((angleFront[2]-startFront[2]) - (angleRear[2]-startRear[2])) / 2
 
     def CalibrateStart(self):
         angle = self.getAngleFront()
