@@ -42,29 +42,30 @@ class NavigationCommander:
     def __init__(self, usingarduino=False, usingvision=False, usinggyro=False, usingsim=False, resetheadingoncmd=False):
         # setting up board serial port
         self.UsingArduino = usingarduino
+
         if self.UsingArduino:
-            # print("Waiting 8 for Arduino...")
-            # time.sleep(8)
-            print("Communicating with Arduino and it's peripherals...")
+            from arduino_commander import ArduinoCommander
+            self.ArduinoCommander = ArduinoCommander()
+            print("MovementCommander is using Arduino, wait 3...")
+            time.sleep(3)
+        else:
+            print("MovementCommander is not using Arduino...")
         self.UsingGyro = usinggyro
         # arduino. omitting for now, in favor of pure rpi gyro reads
         # self.serial = serial.Serial('/dev/ttyAMA0', 115200)
         if self.UsingGyro:
             # print("Sending IMU")
             # self.SendToArduino("IMU")
-            self.JY62_1_IMU = imu_rpi.JY62('/dev/ttyUSB0', 0)
+            # self.JY62_1_IMU = imu_rpi.JY62('/dev/ttyUSB0', 0)
             # self.JY62_2_IMU = imu_rpi.JY62('/dev/ttyUSB1', 1)
-            # self.IMU = imu.IMU_Group([self.JY62_1_IMU, self.JY62_2_IMU])
-            self.ArdIMU = imu_ard.ArduinoIMU
-            self.IMU = imu.IMU_Group([self.JY62_1_IMU])
-            # self.IMU = imu_ard_data.WT61P(self.serial)
+            self.ArdIMU = imu_ard.ArduinoIMU(self.ArduinoCommander.getSerial())
 
         else:
             print("Sending NOIMU")
             # self.SendToArduino("NOIMU")
 
         if resetheadingoncmd:
-            self.YawOffset = self.IMU.StartingAngle[0]
+            self.YawOffset = self.ArdIMU.StartingAngle[0]
             self.ResetHeadingOnCMD = resetheadingoncmd
         else:
             self.YawOffset = 0
@@ -95,19 +96,13 @@ class NavigationCommander:
         else:
             print("MovementCommander is not using Vision AI...")
 
-        if self.UsingArduino:
-            from arduino_commander import ArduinoCommander
-            self.ArduinoCommander = ArduinoCommander()
-            print("MovementCommander is using Arduino...")
-        else:
-            print("MovementCommander is not using Arduino...")
-
         if self.UsingSim:
             # from python.experimental.advanced_telemetry import Telemetry
             # self.TelemetrySim = Telemetry()
             print("MovementCommander is using Telemetry...")
         else:
             print("MovementCommander is not using Telemetry...")
+
         # thruster hardpoint classes
         # 'ventral' are the central, vertically oriented thrusters
         # for roll/pitch and ascent/descent
@@ -209,16 +204,23 @@ class NavigationCommander:
         # z2 = "{:.4f}".format(gyro2[2])
         # print("IMU 1 Angle: ", x1, y1, z1)
         # print("IMU 2 Angle: ", x2, y2, z2)
-        self.ArduinoCommander.getAngleFront()
-        self.ArduinoCommander.getAngleRear()
+        self.ArdIMU.UpdateFrontAngle()
+        print("Front angle, corrected: ", self.ArdIMU.getCorrectedFrontAngle())
+        self.ArdIMU.UpdateRearAngle()
+        print("Rear angle, corrected: ", self.ArdIMU.getCorrectedRearAngle())
+
+        # print("Yaw PID: ", self.ArdIMU.getYawPID())
+        pass
 
     def ResetGyro(self):
         # self.JY62_1_IMU.resetGyro()
         # self.JY62_2_IMU.resetGyro()
+        pass
 
     def ArduinoTesting(self):
-        self.ArduinoCommander.CommunicateAllThrusters(100, 40, 40, 100, -25, 100, -25, 100)
-        time.sleep(.1)
+        # self.ArduinoCommander.CommunicateAllThrusters(100, 40, 40, 100, -25, 100, -25, 100)
+        # time.sleep(.1)
+        pass
 
     def BasicDriverControl(self):
         DrivingWithControl = True
@@ -300,9 +302,9 @@ class NavigationCommander:
                 n = Waypointrange - i
             else:
                 n = i
-            self.Waypoints[i] = [((self.NorthOffset / i) + self.IMU.Angle[NORTH]),
-                                 ((self.EastOffset / i) + self.IMU.Angle[EAST]),
-                                 ((self.DownOffset / i) + self.IMU.Angle[DOWN])]
+            self.Waypoints[i] = [((self.NorthOffset / i) + self.ArdIMU.Angle[NORTH]),
+                                 ((self.EastOffset / i) + self.ArdIMU.Angle[EAST]),
+                                 ((self.DownOffset / i) + self.ArdIMU.Angle[DOWN])]
             self.Waypoints[i][0] += ((self.Waypoints[i][0] * self.YawOffset / 90) / 5) * n
         print("VECTOR CALCULATED. USING ", len(self.Waypoints), " WAYPOINTS.")
         i = 1
@@ -492,9 +494,9 @@ class NavigationCommander:
         self.GyroRunning = True
         integer = 0
         self.UpdateGyro()
-        self.YawLocked = (abs(self.IMU.getYaw() - self.YawOffset) < threshold)
-        self.PitchLocked = (abs(self.IMU.getPitch() - self.PitchOffset) < threshold)
-        self.RollLocked = (abs(self.IMU.getRoll() - self.RollOffset) < threshold)
+        self.YawLocked = (abs(self.ArdIMU.getYaw() - self.YawOffset) < threshold)
+        self.PitchLocked = (abs(self.ArdIMU.getPitch() - self.PitchOffset) < threshold)
+        self.RollLocked = (abs(self.ArdIMU.getRoll() - self.RollOffset) < threshold)
 
         if self.YawLocked and self.PitchLocked and self.RollLocked:
             self.ElapsedTime = time.perf_counter() - self.InitialTime
@@ -502,15 +504,15 @@ class NavigationCommander:
             if self.ElapsedTime >= timethreshold:
                 self.GyroRunning = False
         else:
-            print("Gyro:", self.IMU.getGyro())
+            print("Gyro:", self.ArdIMU.getGyro())
             self.InitialTime = time.perf_counter()
         return self.GyroRunning
 
     def CheckIfPositionDone(self, threshold=3, timethreshold=5):
         self.PositionRunning = True
-        self.NorthLocked = (abs(self.IMU.getNorth() - self.NorthOffset) < threshold)
-        self.EastLocked = (abs(self.IMU.getEast() - self.EastOffset) < threshold)
-        self.DownLocked = (abs(self.IMU.getDown() - self.DownOffset) < threshold)
+        self.NorthLocked = (abs(self.ArdIMU.getNorth() - self.NorthOffset) < threshold)
+        self.EastLocked = (abs(self.ArdIMU.getEast() - self.EastOffset) < threshold)
+        self.DownLocked = (abs(self.ArdIMU.getDown() - self.DownOffset) < threshold)
         if self.NorthLocked and self.EastLocked and self.NorthLocked:
             self.ElapsedTime = time.perf_counter() - self.InitialTime
             print("Within position threshold. Waiting ", timethreshold, "...")
@@ -598,15 +600,15 @@ class NavigationCommander:
 
     def UpdateGyro(self):
         if self.UsingGyro:
-            self.IMU.updateGyro()
+            self.ArdIMU.updateGyro()
             # print(self.Gyro.getGyro())
-            self.IMU.CalculateError(self.YawOffset,
-                                    self.PitchOffset,
-                                    self.RollOffset,
-                                    self.NorthOffset,
-                                    self.EastOffset,
-                                    self.DownOffset)
-            self.IMU.PID()
+            self.ArdIMU.CalculateError(self.YawOffset,
+                                       self.PitchOffset,
+                                       self.RollOffset,
+                                       self.NorthOffset,
+                                       self.EastOffset,
+                                       self.DownOffset)
+            self.ArdIMU.PID()
 
     def UpdateThrusters(self):
 
@@ -626,25 +628,25 @@ class NavigationCommander:
         # time.sleep(.1)
 
     def UpdateThrustersGyroPID(self):
-        self.IMU.CalculateError(self.YawOffset, self.PitchOffset, self.RollOffset,
-                                self.NorthOffset, self.EastOffset, self.DownOffset)
+        self.ArdIMU.CalculateError(self.YawOffset, self.PitchOffset, self.RollOffset,
+                                   self.NorthOffset, self.EastOffset, self.DownOffset)
         self.Thruster_VentralLB.setSpeedPID(self.VentralPowerLB,
-                                            zpid=self.IMU.getRollPID(),
-                                            ypid=-self.IMU.getPitchPID())
+                                            zpid=self.ArdIMU.getRollPID(),
+                                            ypid=-self.ArdIMU.getPitchPID())
         self.Thruster_VentralRB.setSpeedPID(self.VentralPowerRB,
-                                            zpid=-self.IMU.getRollPID(),
-                                            ypid=-self.IMU.getPitchPID())
+                                            zpid=-self.ArdIMU.getRollPID(),
+                                            ypid=-self.ArdIMU.getPitchPID())
         self.Thruster_VentralLF.setSpeedPID(self.VentralPowerLF,
-                                            zpid=-self.IMU.getRollPID(),
-                                            ypid=-self.IMU.getPitchPID())
+                                            zpid=-self.ArdIMU.getRollPID(),
+                                            ypid=-self.ArdIMU.getPitchPID())
         self.Thruster_VentralRF.setSpeedPID(self.VentralPowerRF,
-                                            zpid=self.IMU.getRollPID(),
-                                            ypid=-self.IMU.getPitchPID())
+                                            zpid=self.ArdIMU.getRollPID(),
+                                            ypid=-self.ArdIMU.getPitchPID())
 
-        self.Thruster_LateralBL.setSpeedPID(self.LateralPowerBL, xpid=self.IMU.getYawPID())
-        self.Thruster_LateralFL.setSpeedPID(self.LateralPowerFL, xpid=self.IMU.getYawPID())
-        self.Thruster_LateralBR.setSpeedPID(self.LateralPowerBR, xpid=-self.IMU.getYawPID())
-        self.Thruster_LateralFR.setSpeedPID(self.LateralPowerFR, xpid=-self.IMU.getYawPID())
+        self.Thruster_LateralBL.setSpeedPID(self.LateralPowerBL, xpid=self.ArdIMU.getYawPID())
+        self.Thruster_LateralFL.setSpeedPID(self.LateralPowerFL, xpid=self.ArdIMU.getYawPID())
+        self.Thruster_LateralBR.setSpeedPID(self.LateralPowerBR, xpid=-self.ArdIMU.getYawPID())
+        self.Thruster_LateralFR.setSpeedPID(self.LateralPowerFR, xpid=-self.ArdIMU.getYawPID())
 
         self.ArduinoCommander.CommunicateAllThrusters(self.Thruster_LateralBL.getSpeed(),
                                                       self.Thruster_LateralFL.getSpeed(),
@@ -682,30 +684,30 @@ class NavigationCommander:
                                                       self.Thruster_VentralRF.getSpeed())
 
     def UpdateThrustersGyroVisionPID(self):
-        self.IMU.CalculateError(self.YawOffset, self.PitchOffset, self.RollOffset,
-                                self.NorthOffset, self.EastOffset, self.DownOffset)
+        self.ArdIMU.CalculateError(self.YawOffset, self.PitchOffset, self.RollOffset,
+                                   self.NorthOffset, self.EastOffset, self.DownOffset)
 
         self.Thruster_VentralLB.setSpeedPID(self.VentralPowerLB,
-                                            zpid=self.IMU.getRollPID(),
-                                            ypid=self.IMU.getPitchPID() + self.Vision.getYPID())
+                                            zpid=self.ArdIMU.getRollPID(),
+                                            ypid=self.ArdIMU.getPitchPID() + self.Vision.getYPID())
         self.Thruster_VentralRB.setSpeedPID(self.VentralPowerRB,
-                                            zpid=-self.IMU.getRollPID(),
-                                            ypid=self.IMU.getPitchPID() + self.Vision.getYPID())
+                                            zpid=-self.ArdIMU.getRollPID(),
+                                            ypid=self.ArdIMU.getPitchPID() + self.Vision.getYPID())
         self.Thruster_VentralLF.setSpeedPID(self.VentralPowerLF,
-                                            zpid=-self.IMU.getRollPID(),
-                                            ypid=-self.IMU.getPitchPID() - self.Vision.getYPID())
+                                            zpid=-self.ArdIMU.getRollPID(),
+                                            ypid=-self.ArdIMU.getPitchPID() - self.Vision.getYPID())
         self.Thruster_VentralRF.setSpeedPID(self.VentralPowerRF,
-                                            zpid=self.IMU.getRollPID(),
-                                            ypid=-self.IMU.getPitchPID() - self.Vision.getYPID())
+                                            zpid=self.ArdIMU.getRollPID(),
+                                            ypid=-self.ArdIMU.getPitchPID() - self.Vision.getYPID())
 
         self.Thruster_LateralBL.setSpeedPID(self.LateralPowerBL,
-                                            xpid=self.IMU.getYawPID() + self.Vision.getXPID())
+                                            xpid=self.ArdIMU.getYawPID() + self.Vision.getXPID())
         self.Thruster_LateralFL.setSpeedPID(self.LateralPowerFL,
-                                            xpid=self.IMU.getYawPID() + self.Vision.getXPID())
+                                            xpid=self.ArdIMU.getYawPID() + self.Vision.getXPID())
         self.Thruster_LateralBR.setSpeedPID(self.LateralPowerBR,
-                                            xpid=-self.IMU.getYawPID() - self.Vision.getXPID())
+                                            xpid=-self.ArdIMU.getYawPID() - self.Vision.getXPID())
         self.Thruster_LateralFR.setSpeedPID(self.LateralPowerFR,
-                                            xpid=-self.IMU.getYawPID() - self.Vision.getXPID())
+                                            xpid=-self.ArdIMU.getYawPID() - self.Vision.getXPID())
 
         self.ArduinoCommander.CommunicateAllThrusters(self.Thruster_LateralBL.getSpeed(),
                                                       self.Thruster_LateralFL.getSpeed(),

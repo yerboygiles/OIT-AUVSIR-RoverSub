@@ -13,6 +13,7 @@ from vector_commander import NavigationCommander
 class TaskIO:
     # filename can first be sent a 0 to initialize string-input commands
     # instead of
+    # self, filename, usingarduino, usingvision, usinggyro, usingsim
     def __init__(self, filename, usingarduino, usingvision, usinggyro, usingsim):
         self.Input = False
         if filename == 0:
@@ -54,15 +55,15 @@ class TaskIO:
 
     def testData(self):
         for i in range(20):
-            self.Movement.ArduinoTesting()
+            # self.Movement.ArduinoTesting()
             self.Movement.GyroTesting()
+        self.Movement.BasicDriverControl()
         # self.Movement.ResetGyro()
         # for i in range(3000):
         #     self.Movement.GyroTesting()
 
     def testArduino(self):
         self.Movement.ArduinoTesting()
-
 
     # end processes and mission
     def terminate(self):

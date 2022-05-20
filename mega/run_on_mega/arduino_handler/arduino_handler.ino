@@ -54,8 +54,11 @@ String encodedCMD;
 String value;
 
 //gyro data
+//roll
 float Xangle_R;
+//pitch
 float Yangle_R;
+//yaw
 float Zangle_R;
 
 float Xangle_F;
@@ -266,7 +269,7 @@ int readCommand() {
           JY901_F.receiveSerialData();
           switch (str_array[0][2]){
             case 'h':
-              Zangle_offset_R = JY901_F.getYaw();
+              Zangle_offset_F = JY901_F.getYaw();
               Serial1.print("fh\n");
               break;
             case 'c':
@@ -276,12 +279,21 @@ int readCommand() {
               Serial1.print("fc\n");
               break;
             case 'a':
+            //test
+              Serial.print("Front A:");
+              Serial.print(JY901_F.getYaw());
+              Serial.print(":");
+              Serial.print(JY901_F.getPitch());
+              Serial.print(":");
+              Serial.print(JY901_F.getRoll());
+              Serial.print("\n");
+              
               Serial1.print("A:");
-              Serial1.print(JY901_F.getRoll());
+              Serial1.print(JY901_F.getYaw());
               Serial1.print(":");
               Serial1.print(JY901_F.getPitch());
               Serial1.print(":");
-              Serial1.print(JY901_F.getYaw());
+              Serial1.print(JY901_F.getRoll());
               Serial1.print("\n");
               break;
           }
@@ -301,11 +313,11 @@ int readCommand() {
               break;
             case 'a':
               Serial1.print("A:");
-              Serial1.print(JY901_R.getRoll());
+              Serial1.print(JY901_R.getYaw());
               Serial1.print(":");
               Serial1.print(JY901_R.getPitch());
               Serial1.print(":");
-              Serial1.print(JY901_R.getYaw());
+              Serial1.print(JY901_R.getRoll());
               Serial1.print("\n");
               break;
           }

@@ -112,11 +112,11 @@ class IMU:
         return self.Acceleration[DOWN]
 
     # gyro read when starting the RoboSub
-    def getStartingGyro(self):
+    def getStartingAngle(self):
         return self.StartingAngle
 
     # current gyro read
-    def getGyro(self):
+    def getAngle(self):
         return self.Angle
 
     def getPitch(self):
