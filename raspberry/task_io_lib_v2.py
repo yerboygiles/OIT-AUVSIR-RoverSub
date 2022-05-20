@@ -54,9 +54,9 @@ class TaskIO:
             self.CommandList.append(self.Input)
 
     def testData(self):
-        for i in range(20):
-            # self.Movement.ArduinoTesting()
-            self.Movement.GyroTesting()
+        # for i in range(20):
+        #     self.Movement.ArduinoTesting()
+        #     self.Movement.GyroTesting()
         self.Movement.BasicDriverControl()
         # self.Movement.ResetGyro()
         # for i in range(3000):

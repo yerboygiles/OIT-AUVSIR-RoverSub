@@ -13,15 +13,16 @@
 // #include <Wire.h>
 
 
-const byte RESET_PIN = 2;
-byte LBpin = 2; //left back
-byte LFpin = 3; //left front
-byte RBpin = 4; //right back
-byte RFpin = 5; //right front
-byte BLpin = 6; //back left
-byte BRpin = 7; //back right
-byte FLpin = 8; //front left
-byte FRpin = 9; //front right
+//const byte RESET_PIN = 2;
+byte LBpin = 8; //left back
+byte LFpin = 7; //left front
+byte RBpin = 9; //right back
+byte RFpin = 6; //right front
+
+byte BLpin = 5; //back left
+byte BRpin = 3; //back right
+byte FLpin = 4; //front left
+byte FRpin = 2; //front right
 
 ThrusterDriver LB_Thruster;
 ThrusterDriver LF_Thruster;
@@ -96,8 +97,8 @@ void setup() {
   // put your setup code here, to run once:
 
   // reset pin
-  digitalWrite(RESET_PIN, HIGH);
-  pinMode(RESET_PIN, OUTPUT);
+//  digitalWrite(RESET_PIN, HIGH);
+//  pinMode(RESET_PIN, OUTPUT);
 
   Serial.begin(9600);
   Serial.println("Configuring...");

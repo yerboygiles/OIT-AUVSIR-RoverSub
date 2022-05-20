@@ -7,36 +7,37 @@
 
 
 def get_wasdqerv_directional() -> int:
-    directval = input("MOVE: ")
+    directval = 0
+    charcommand = input("MOVE: ")
     # MOVING FORWARDS
-    if directval == "w" or directval == "W":
+    if charcommand == "w":
         directval = 1
     # STRAFING LEFT
-    elif directval == "a" or directval == "A":
+    elif charcommand == "a":
         directval = 2
     # MOVING BACKWARDS
-    elif directval == "s" or directval == "S":
+    elif charcommand == "s":
         directval = 3
     # STRAFING RIGHT
-    elif directval == "d" or directval == "D":
+    elif charcommand == "d":
         directval = 4
     # TURNING LEFT
-    elif directval == "q" or directval == "Q":
+    elif charcommand == "q":
         directval = 5
     # TURNING RIGHT
-    elif directval == "e" or directval == "E":
+    elif charcommand == "e":
         directval = 6
     # ASCENDING
-    elif directval == "r" or directval == "R":
+    elif charcommand == "r":
         directval = 7
     # DESCENDING
-    elif directval == "v" or directval == "V":
+    elif charcommand == "v":
         directval = 8
     # PAUSING
-    elif directval == "o" or directval == "O":
+    elif charcommand == "o":
         directval = -1
     # STOPPING
-    elif directval == "u" or directval == "U":
+    elif charcommand == "u":
         directval = -2
     #
     else:
