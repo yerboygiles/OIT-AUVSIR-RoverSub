@@ -1,7 +1,7 @@
 #!python3
 # Author: Theodor Giles
 # Created: 11/22/20
-# Last Edited 5/18/22
+# Last Edited 5/19/22
 # Description:
 # This node manages the commands/movement/physical
 # control of the RoboSub V2, 2020-21
@@ -12,6 +12,7 @@ import math
 import serial
 import imu
 import imu_rpi
+import imu_ard
 import vision_v1
 import remote_control
 
@@ -54,6 +55,7 @@ class NavigationCommander:
             self.JY62_1_IMU = imu_rpi.JY62('/dev/ttyUSB0', 0)
             # self.JY62_2_IMU = imu_rpi.JY62('/dev/ttyUSB1', 1)
             # self.IMU = imu.IMU_Group([self.JY62_1_IMU, self.JY62_2_IMU])
+            self.ArdIMU = imu_ard.ArduinoIMU
             self.IMU = imu.IMU_Group([self.JY62_1_IMU])
             # self.IMU = imu_ard_data.WT61P(self.serial)
 
@@ -211,8 +213,8 @@ class NavigationCommander:
         self.ArduinoCommander.getAngleRear()
 
     def ResetGyro(self):
-        self.JY62_1_IMU.resetGyro()
-        self.JY62_2_IMU.resetGyro()
+        # self.JY62_1_IMU.resetGyro()
+        # self.JY62_2_IMU.resetGyro()
 
     def ArduinoTesting(self):
         self.ArduinoCommander.CommunicateAllThrusters(100, 40, 40, 100, -25, 100, -25, 100)
@@ -257,16 +259,16 @@ class NavigationCommander:
         targeting = True
         navigating = True
         i = 0
-        self.StoreGyroOffsets()
+        self.StoreCommandGyroOffsets()
         while targeting:
+            self.UpdateThrustersGyroPID()
             self.CheckIfGyroDone(threshold=10, timethreshold=3)
             targeting = self.GyroRunning
-            self.UpdateThrustersGyroPID()
         print("TARGETED VECTOR.")
         while navigating:
+            self.UpdateThrustersGyroPID()
             navigating = self.CheckIfPositionDone(threshold=10, timethreshold=3)
             navigating = self.PositionRunning
-            self.UpdateThrustersGyroPID()
         print("ARRIVED TO VECTOR.")
 
     def BasicVectoring(self, yaw, pitch, roll):
@@ -278,6 +280,8 @@ class NavigationCommander:
         self.RollOffset = roll
         while targeting:
             targeting = self.CheckIfGyroDone(threshold=10, timethreshold=3)
+            self.UpdateGyro()
+            self.UpdateThrustersGyroPID()
             self.ArduinoCommander.CommunicateAllThrusters(100, 40, 40, 100, -25, 100, -25, 100)
         print("TARGETED VECTOR.")
         while navigating:
@@ -286,7 +290,7 @@ class NavigationCommander:
         print("ARRIVED TO VECTOR.")
 
     def WaypointVectoring(self):  # arc vectoring
-        self.StoreGyroOffsets()
+        self.StoreCommandGyroOffsets()
         self.Waypoints = []
         i = 1
         Waypointrange = int(((self.NorthOffset + self.EastOffset + self.DownOffset) / 3) / 15)
@@ -314,7 +318,7 @@ class NavigationCommander:
         print("WAYPOINTS PASSED, VECTOR REACHED.")
 
     def AdvancedVectoring(self):
-        self.StoreGyroOffsets()
+        self.StoreCommandGyroOffsets()
 
     def TargetMovement(self):
         print("Scanning for target...")
@@ -447,14 +451,13 @@ class NavigationCommander:
                             self.TargetMovement()
                         else:
                             print("Can't run target commands without Gyro and Vision functionality...")
-                        self.TargetMovement()
                     i += 2
                     self.CommandIndex += 1
                 self.CommandIndex = 0
             # print("Ran into issue parsing commands...")
             # self.Terminate()
 
-    def StoreGyroOffsets(self):
+    def StoreCommandGyroOffsets(self):
         i = 0
         for SuppParse in str(self.SuppCommand).split(':'):
             print("SuppParse: ", SuppParse)
@@ -469,7 +472,7 @@ class NavigationCommander:
                 break
             i = i + 1
 
-    def StorePositionOffsets(self):
+    def StoreCommandPositionOffsets(self):
         i = 0
         for SuppParse in str(self.SuppCommand).split(':'):
             print("SuppParse: ", SuppParse)
@@ -489,9 +492,9 @@ class NavigationCommander:
         self.GyroRunning = True
         integer = 0
         self.UpdateGyro()
-        self.YawLocked = (abs(self.IMU.getYaw() - abs(self.YawOffset)) < threshold)
-        self.PitchLocked = (abs(self.IMU.getPitch() - abs(self.PitchOffset)) < threshold)
-        self.RollLocked = (abs(self.IMU.getRoll() - abs(self.RollOffset)) < threshold)
+        self.YawLocked = (abs(self.IMU.getYaw() - self.YawOffset) < threshold)
+        self.PitchLocked = (abs(self.IMU.getPitch() - self.PitchOffset) < threshold)
+        self.RollLocked = (abs(self.IMU.getRoll() - self.RollOffset) < threshold)
 
         if self.YawLocked and self.PitchLocked and self.RollLocked:
             self.ElapsedTime = time.perf_counter() - self.InitialTime
