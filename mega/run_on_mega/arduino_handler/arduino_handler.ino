@@ -14,15 +14,26 @@
 
 
 //const byte RESET_PIN = 2;
-byte LBpin = 8; //left back
-byte LFpin = 7; //left front
-byte RBpin = 9; //right back
-byte RFpin = 6; //right front
+byte LBpin = 5; //left back
+byte LFpin = 4; //left front
+byte RBpin = 3; //right back
+byte RFpin = 2; //right front
 
-byte BLpin = 5; //back left
-byte BRpin = 3; //back right
-byte FLpin = 4; //front left
-byte FRpin = 2; //front right
+byte BLpin = 8; //back left
+byte FLpin = 7; //front left
+byte BRpin = 9; //back right
+byte FRpin = 6; //front right
+
+// old, ventral and lateral flipped?.. too tired to swap wires
+//byte LBpin = 8; //left back
+//byte LFpin = 7; //left front
+//byte RBpin = 9; //right back
+//byte RFpin = 6; //right front
+//
+//byte BLpin = 5; //back left
+//byte FLpin = 4; //front left
+//byte BRpin = 3; //back right
+//byte FRpin = 2; //front right
 
 ThrusterDriver LB_Thruster;
 ThrusterDriver LF_Thruster;
@@ -47,7 +58,7 @@ String JetsonCommand = ""; // serial string
 bool stringComplete = false;  // whether the string is complete
 
 int commandComplete = 0;
-String str_array[9]; // array of substrings
+String str_array[10]; // array of substrings
 int startIndex = 0;
 int endIndex = 0;
 int cmdIndex;
@@ -158,6 +169,7 @@ void loop() {
   // put your main code here, to run repeatedly:
   //Serial1.println("Hello!!");
   if (stringComplete) {
+    Serial1.flush();
     Serial.print("Command: ");
     Serial.println(JetsonCommand);
     
@@ -204,7 +216,7 @@ int readCommand() {
   encodedCMD = JetsonCommand.substring(0, cmdIndex);
 //  int i = 0;
   startIndex = cmdIndex;
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i <= 10; i++)
   {
     endIndex = JetsonCommand.indexOf(',', endIndex + 1);
     value = JetsonCommand.substring(startIndex + 1, endIndex);
@@ -220,10 +232,27 @@ int readCommand() {
       switch (encodedCMD.charAt(1))
       {
         case 'a': // all
+          Serial.print("BL:");
+          Serial.print(str_array[1]);
+          Serial.print(",FL:");
+          Serial.print(str_array[2]);
+          Serial.print(",BR:");
+          Serial.print(str_array[3]);
+          Serial.print(",FR:");
+          Serial.print(str_array[4]);
+          Serial.print(",LB:");
+          Serial.print(str_array[5]);
+          Serial.print(",LF:");
+          Serial.print(str_array[6]);
+          Serial.print(",RB:");
+          Serial.print(str_array[7]);
+          Serial.print(",RF:");
+          Serial.println(str_array[8]);
           BL_Thruster.Drive(str_array[1].toInt());
           FL_Thruster.Drive(str_array[2].toInt());
           BR_Thruster.Drive(str_array[3].toInt());
           FR_Thruster.Drive(str_array[4].toInt());
+          
           LB_Thruster.Drive(str_array[5].toInt());
           LF_Thruster.Drive(str_array[6].toInt());
           RB_Thruster.Drive(str_array[7].toInt());
@@ -232,17 +261,17 @@ int readCommand() {
           commandComplete = 1;
           break;
         case 'v': // ventral
-          LB_Thruster.Drive(str_array[1].toInt());
-          LF_Thruster.Drive(str_array[2].toInt());
-          RB_Thruster.Drive(str_array[3].toInt());
-          RF_Thruster.Drive(str_array[4].toInt());
+          LB_Thruster.Drive(str_array[3].toInt());
+          LF_Thruster.Drive(str_array[4].toInt());
+          RB_Thruster.Drive(str_array[5].toInt());
+          RF_Thruster.Drive(str_array[6].toInt());
           commandComplete = 1;
           break;
         case 'l': // lateral
-          BL_Thruster.Drive(str_array[1].toInt());
-          FL_Thruster.Drive(str_array[2].toInt());
-          BR_Thruster.Drive(str_array[3].toInt());
-          FR_Thruster.Drive(str_array[4].toInt());
+          BL_Thruster.Drive(str_array[3].toInt());
+          FL_Thruster.Drive(str_array[4].toInt());
+          BR_Thruster.Drive(str_array[5].toInt());
+          FR_Thruster.Drive(str_array[6].toInt());
           commandComplete = 1;
           break;
         case 'c': // calibrate
@@ -280,15 +309,6 @@ int readCommand() {
               Serial1.print("fc\n");
               break;
             case 'a':
-            //test
-              Serial.print("Front A:");
-              Serial.print(JY901_F.getYaw());
-              Serial.print(":");
-              Serial.print(JY901_F.getPitch());
-              Serial.print(":");
-              Serial.print(JY901_F.getRoll());
-              Serial.print("\n");
-              
               Serial1.print("A:");
               Serial1.print(JY901_F.getYaw());
               Serial1.print(":");

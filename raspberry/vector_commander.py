@@ -129,15 +129,15 @@ class NavigationCommander:
         self.VentralPowerLF = 0
 
         # horizontally oriented
-        self.LateralPowerBL_offset = 0
-        self.LateralPowerFL_offset = 0
-        self.LateralPowerBR_offset = 0
-        self.LateralPowerFR_offset = 0
+        self.LateralPowerBL_offset = -1
+        self.LateralPowerFL_offset = -1
+        self.LateralPowerBR_offset = -1
+        self.LateralPowerFR_offset = -1
         # vertically oriented
-        self.VentralPowerLB_offset = 0
-        self.VentralPowerRB_offset = 0
-        self.VentralPowerRF_offset = 0
-        self.VentralPowerLF_offset = 0
+        self.VentralPowerLB_offset = -2
+        self.VentralPowerRB_offset = -2
+        self.VentralPowerRF_offset = -2
+        self.VentralPowerLF_offset = -2
         # initialize thruster values to brake (self.PowerXX set to 0^)
         # self.UpdateThrusters()
 
@@ -245,6 +245,7 @@ class NavigationCommander:
             DriveCommand = remote_control.get_wasdqerv_directional()
             self.BasicDirectionPower(DriveCommand)
             DrivingWithControl = DriveCommand != -2
+            # DrivingWithControl = self.ControlIndividualMotor()
             print("Yaw PID: ", self.ArdIMU.getYawPID())
             # self.TradeWithArduino()
 
@@ -545,13 +546,42 @@ class NavigationCommander:
 
         return self.scanned_target_format
 
+    def ControlIndividualMotor(self):
+        running = True
+        motor, speed = remote_control.set_individual_motor()
+        if motor == -1:
+            running = False
+        elif motor == 0:
+            self.LateralPowerBL = 0
+            self.LateralPowerFL = 0
+            self.LateralPowerBR = 0
+            self.LateralPowerFR = 0
+            self.VentralPowerLB = 0
+            self.VentralPowerLF = 0
+            self.VentralPowerRB = 0
+            self.VentralPowerRF = 0
+        elif motor == 1:
+            self.LateralPowerBL = speed
+        elif motor == 2:
+            self.LateralPowerFL = speed
+        elif motor == 3:
+            self.LateralPowerBR = speed
+        elif motor == 4:
+            self.LateralPowerFR = speed
+        elif motor == 5:
+            self.VentralPowerLB = speed
+        elif motor == 6:
+            self.VentralPowerLF = speed
+        elif motor == 7:
+            self.VentralPowerRB = speed
+        elif motor == 8:
+            self.VentralPowerRF = speed
+        self.UpdateThrusters()
+        return running
+
     def BasicDirectionPower(self, index, power=15):
         # print("Index: ", index)
         # index = index + 1
-        self.VentralPowerLB = 0
-        self.VentralPowerLF = 0
-        self.VentralPowerRB = 0
-        self.VentralPowerRF = 0
         if index != 0:
             if index == 1:
                 # print("MOVING FORWARDS")
@@ -559,60 +589,101 @@ class NavigationCommander:
                 self.LateralPowerFL = power
                 self.LateralPowerBR = power
                 self.LateralPowerFR = power
+                self.VentralPowerLB = 0
+                self.VentralPowerLF = 0
+                self.VentralPowerRB = 0
+                self.VentralPowerRF = 0
             elif index == 2:
                 # print("STRAFING LEFT")
                 self.LateralPowerBL = power
                 self.LateralPowerFL = -power
                 self.LateralPowerBR = -power
                 self.LateralPowerFR = power
+                self.VentralPowerLB = 0
+                self.VentralPowerLF = 0
+                self.VentralPowerRB = 0
+                self.VentralPowerRF = 0
             elif index == 3:
                 # print("REVERSING")
                 self.LateralPowerBL = -power
                 self.LateralPowerFL = -power
                 self.LateralPowerBR = -power
                 self.LateralPowerFR = -power
+                self.VentralPowerLB = 0
+                self.VentralPowerLF = 0
+                self.VentralPowerRB = 0
+                self.VentralPowerRF = 0
             elif index == 4:
                 # print("STRAFING RIGHT")
                 self.LateralPowerBL = -power
                 self.LateralPowerFL = power
                 self.LateralPowerBR = power
                 self.LateralPowerFR = -power
+                self.VentralPowerLB = 0
+                self.VentralPowerLF = 0
+                self.VentralPowerRB = 0
+                self.VentralPowerRF = 0
             elif index == 5:
                 # print("TURNING LEFT")
                 self.LateralPowerBL = -power
                 self.LateralPowerFL = -power
                 self.LateralPowerBR = power
                 self.LateralPowerFR = power
+                self.VentralPowerLB = 0
+                self.VentralPowerLF = 0
+                self.VentralPowerRB = 0
+                self.VentralPowerRF = 0
             elif index == 6:
                 # print("TURNING RIGHT")
                 self.LateralPowerBL = power
                 self.LateralPowerFL = power
                 self.LateralPowerBR = -power
                 self.LateralPowerFR = -power
+                self.VentralPowerLB = 0
+                self.VentralPowerLF = 0
+                self.VentralPowerRB = 0
+                self.VentralPowerRF = 0
             elif index == 7:
                 # print("ASCENDING")
-                self.LateralPowerBL = power
-                self.LateralPowerFL = power
-                self.LateralPowerBR = -power
-                self.LateralPowerFR = -power
+                self.LateralPowerBL = 0
+                self.LateralPowerFL = 0
+                self.LateralPowerBR = 0
+                self.LateralPowerFR = 0
+                self.VentralPowerLB = power
+                self.VentralPowerLF = power
+                self.VentralPowerRB = power
+                self.VentralPowerRF = power
             elif index == 8:
                 # print("DESCENDING")
-                self.LateralPowerBL = power
-                self.LateralPowerFL = power
-                self.LateralPowerBR = -power
-                self.LateralPowerFR = -power
+                self.LateralPowerBL = 0
+                self.LateralPowerFL = 0
+                self.LateralPowerBR = 0
+                self.LateralPowerFR = 0
+                self.VentralPowerLB = -power
+                self.VentralPowerLF = -power
+                self.VentralPowerRB = -power
+                self.VentralPowerRF = -power
             elif index == -1:
                 # print("PAUSING")
                 self.LateralPowerBL = 0
                 self.LateralPowerFL = 0
                 self.LateralPowerBR = 0
                 self.LateralPowerFR = 0
+
+                self.VentralPowerLB = 0
+                self.VentralPowerLF = 0
+                self.VentralPowerRB = 0
+                self.VentralPowerRF = 0
             elif index == -2:
                 # print("STOPPING")
                 self.LateralPowerBL = 0
                 self.LateralPowerFL = 0
                 self.LateralPowerBR = 0
                 self.LateralPowerFR = 0
+                self.VentralPowerLB = 0
+                self.VentralPowerLF = 0
+                self.VentralPowerRB = 0
+                self.VentralPowerRF = 0
         if self.UsingGyro:
             self.UpdateGyro()
             self.UpdateThrustersGyroPID()
@@ -620,7 +691,7 @@ class NavigationCommander:
 
     def UpdateGyro(self):
         if self.UsingGyro:
-            self.ArdIMU.updateGyro()
+            self.ArdIMU.UpdateAngle()
             # print(self.Gyro.getGyro())
             self.ArdIMU.CalculateError(self.YawOffset,
                                        self.PitchOffset,
@@ -713,14 +784,14 @@ class NavigationCommander:
         # time.sleep(.1)
 
     def SendThrusterCommands(self):
-        self.ArduinoCommander.CommunicateAllThrusters(self.Thruster_LateralBL.getSpeed(),
-                                                      self.Thruster_LateralFL.getSpeed(),
-                                                      self.Thruster_LateralBR.getSpeed(),
-                                                      self.Thruster_LateralFR.getSpeed(),
-                                                      self.Thruster_VentralLB.getSpeed(),
-                                                      self.Thruster_VentralLF.getSpeed(),
-                                                      self.Thruster_VentralRB.getSpeed(),
-                                                      self.Thruster_VentralRF.getSpeed())
+        self.ArduinoCommander.CommunicateAllThrusters(self.Thruster_LateralBL.getSpeed() + self.LateralPowerBL_offset,
+                                                      self.Thruster_LateralFL.getSpeed() + self.LateralPowerFL_offset,
+                                                      self.Thruster_LateralBR.getSpeed() + self.LateralPowerBR_offset,
+                                                      self.Thruster_LateralFR.getSpeed() + self.LateralPowerFR_offset,
+                                                      self.Thruster_VentralLB.getSpeed() + self.VentralPowerLB_offset,
+                                                      self.Thruster_VentralLF.getSpeed() + self.VentralPowerLF_offset,
+                                                      self.Thruster_VentralRB.getSpeed() + self.VentralPowerRB_offset,
+                                                      self.Thruster_VentralRF.getSpeed() + self.VentralPowerRF_offset)
 
     def BrakeAllThrusters(self):
         # horizontal
