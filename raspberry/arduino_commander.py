@@ -62,10 +62,13 @@ class ArduinoCommander:
 
         # outdata += "}"
         outdata += "\n"
-
-        self.serial.reset_input_buffer()
-        self.serial.reset_output_buffer()
-        self.serial.write(outdata.encode('ascii'))
+        while 1:
+            try:
+                self.serial.write(outdata.encode('ascii'))
+                break
+            except:
+                self.serial.reset_input_buffer()
+                self.serial.reset_output_buffer()
         return confirm
 
     def Communicate_Thrusters(self, thrustid, speed):

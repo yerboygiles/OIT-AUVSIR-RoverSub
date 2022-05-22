@@ -129,7 +129,7 @@ class IMU:
         return self.Angle[YAW]
 
     # req for PID calculation
-    def CalculateError(self, yawoffset, pitchoffset, rolloffset, northoffset, eastoffset, downoffset):
+    def CalculateError(self, yawoffset=0, pitchoffset=0, rolloffset=0, northoffset=0, eastoffset=0, downoffset=0):
 
         # previous error for error delta
         # gyro

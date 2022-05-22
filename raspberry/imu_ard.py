@@ -25,6 +25,10 @@ class ArduinoIMU(IMU):
     FrontAngle = [0.0, 0.0, 0.0]
     RearAngle = [0.0, 0.0, 0.0]
 
+    Kp = [[0.2, 0.25, 0.25], [0.3, 0.4, 0.4]]  # constant to modify PID
+    Ki = [[0.0, 0.00, 0.00], [0.1, 0.1, 0.1]]  # constant to modify PID
+    Kd = [[0.3, 0.3, 0.3], [0.1, 0.1, 0.1]]  # constant to modify PID
+
     def __init__(self, serial):
         # read info from vehicle
         self.serial = serial
@@ -54,14 +58,22 @@ class ArduinoIMU(IMU):
         angleRear = self.getAngleRear()
         startFront = self.getStartingFrontAngle()
         startRear = self.getStartingRearAngle()
-        self.Angle[0] = ((angleFront[0]-startFront[0]) + (angleRear[0]-startRear[0])) / 2
-        self.Angle[1] = ((angleFront[1]-startFront[1]) - (angleRear[1]-startRear[1])) / 2
-        self.Angle[2] = ((angleFront[2]-startFront[2]) - (angleRear[2]-startRear[2])) / 2
+        self.Angle[0] = round(((angleFront[0]-startFront[0]) + (angleRear[0]-startRear[0])) / 2, 4)
+        self.Angle[1] = round(((angleFront[1]-startFront[1]) - (angleRear[1]-startRear[1])) / 2, 4)
+        self.Angle[2] = round(((angleFront[2]-startFront[2]) - (angleRear[2]-startRear[2])) / 2, 4)
 
     def CalibrateStart(self):
         angle = self.getAngleFront()
+        i = 0
+        for x in angle:
+            angle[i] = round(x,4)
+            i = i + 1
         self.StartingFrontAngle = angle
         angle = self.getAngleRear()
+        i = 0
+        for x in angle:
+            angle[i] = round(x,4)
+            i = i + 1
         self.StartingRearAngle = angle
 
     def UpdateFrontAngle(self):
@@ -85,15 +97,15 @@ class ArduinoIMU(IMU):
         pass
 
     def getAngleFront(self):
-        self.serial.write("gfa\n".encode('utf-8'))
+        self.serial.write("gfa\n".encode('ascii'))
         data = self.serial.read_until("\n")
-        time.sleep(0.05)
+        # time.sleep(0.05)
         return parseXYZDataToList(data)
 
     def getAngleRear(self):
-        self.serial.write("gra\n".encode('utf-8'))
+        self.serial.write("gra\n".encode('ascii'))
         data = self.serial.read_until("\n")
-        time.sleep(0.05)
+        # time.sleep(0.05)
         return parseXYZDataToList(data)
 
     def getStartingFrontAngle(self):
