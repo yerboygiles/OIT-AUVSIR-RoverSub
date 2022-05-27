@@ -54,10 +54,13 @@ class TaskIO:
             self.CommandList.append(self.Input)
 
     def testData(self):
-        # for i in range(30):
-        #     self.Movement.GyroTesting()
-        #     self.Movement.ArduinoTesting()
-        self.Movement.BasicDriverControl()
+        for i in range(50):
+            perftime = time.perf_counter()
+            self.Movement.GyroTesting()
+            self.Movement.ArduinoTesting()
+            print("Loop time: ", time.perf_counter() - perftime)
+        # perftime = time.perf_counter()
+        # self.Movement.BasicDriverControl()
         # self.Movement.ResetGyro()
         # for i in range(3000):
         #     self.Movement.GyroTesting()

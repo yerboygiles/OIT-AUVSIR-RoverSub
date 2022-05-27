@@ -148,22 +148,26 @@ void setup() {
   FL_Thruster = ThrusterDriver(FLsig, "FL");
   FR_Thruster = ThrusterDriver(FRsig, "FR");
 
-  //  LB_Thruster.Calibrate();
-  //  LF_Thruster.Calibrate();
-  //  RB_Thruster.Calibrate();
-  //  RF_Thruster.Calibrate();
-  //  BL_Thruster.Calibrate();
-  //  BR_Thruster.Calibrate();
-  //  FL_Thruster.Calibrate();
-  //  FR_Thruster.Calibrate();
-  //  delay(1000);
+  LB_Thruster.Calibrate();
+  LF_Thruster.Calibrate();
+  RB_Thruster.Calibrate();
+  RF_Thruster.Calibrate();
+  BL_Thruster.Calibrate();
+  BR_Thruster.Calibrate();
+  FL_Thruster.Calibrate();
+  FR_Thruster.Calibrate();
+  delay(1000);
   Serial.println("Configured.");
   //print("Done setting up.");
+  delay(5000);
   return;
 }
 
 
 void loop() {
+//  while (1){
+//    Test();
+//  }
   JY901_F.receiveSerialData();
   JY901_R.receiveSerialData();
   // put your main code here, to run repeatedly:
