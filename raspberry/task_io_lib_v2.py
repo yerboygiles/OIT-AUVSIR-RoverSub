@@ -54,7 +54,7 @@ class TaskIO:
             self.CommandList.append(self.Input)
 
     def testData(self):
-        for i in range(50):
+        for i in range(100):
             perftime = time.perf_counter()
             self.Movement.GyroTesting()
             self.Movement.ArduinoTesting()

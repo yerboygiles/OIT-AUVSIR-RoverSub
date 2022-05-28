@@ -29,12 +29,12 @@ except:
 MissionAlive = True
 #
 print("Button pushed... Starting up...")
-time.sleep(3)
-for i in range(3):
+# time.sleep(3)
+for i in range(5):
     GPIO.output(buzzer, GPIO.HIGH)
-    time.sleep(0.05)
+    time.sleep(0.4)
     GPIO.output(buzzer, GPIO.LOW)
-    time.sleep(0.01)
+    time.sleep(0.2)
 
 starttime = int(input("Seconds until start?"))
 print("Starting countdown.")

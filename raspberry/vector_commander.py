@@ -31,7 +31,7 @@ A_TARGET = 1
 A_POSITION = 2
 A_GYRO = 3
 
-MAX_THROTTLE = 30
+MAX_THROTTLE = 40
 
 GENERAL_THROTTLE = 17.5
 
@@ -46,8 +46,45 @@ class NavigationCommander:
         if self.UsingArduino:
             from arduino_commander import ArduinoCommander
             self.ArduinoCommander = ArduinoCommander()
-            print("MovementCommander is using Arduino, wait 3...")
-            time.sleep(3)
+            print("MovementCommander is using Arduino, wait 7 for thruster arm...")
+            # thruster hardpoint classes
+            # 'ventral' are the central, vertically oriented thrusters
+            # for roll/pitch and ascent/descent
+            self.Thruster_VentralLB = ThrusterDriver("LB")  # left back
+            self.Thruster_VentralLF = ThrusterDriver("LF")  # left front
+            self.Thruster_VentralRB = ThrusterDriver("RB")  # right back
+            self.Thruster_VentralRF = ThrusterDriver("RF")  # right front
+            # 'lateral' are the outer, 45 deg. oriented thrusters for
+            # yaw/turning and strafe movement
+            self.Thruster_LateralBL = ThrusterDriver("BL")  # back left
+            self.Thruster_LateralBR = ThrusterDriver("BR")  # back right
+            self.Thruster_LateralFL = ThrusterDriver("FL")  # front left !
+            self.Thruster_LateralFR = ThrusterDriver("FR")  # front right !
+            # power values to set to the thruster hardpoints
+            # horizontally oriented
+            self.LateralPowerBL = 0
+            self.LateralPowerFL = 0
+            self.LateralPowerBR = 0
+            self.LateralPowerFR = 0
+            # vertically oriented
+            self.VentralPowerLB = 0
+            self.VentralPowerRB = 0
+            self.VentralPowerRF = 0
+            self.VentralPowerLF = 0
+
+            # horizontally oriented
+            self.LateralPowerBL_offset = -1
+            self.LateralPowerFL_offset = -1
+            self.LateralPowerBR_offset = -1
+            self.LateralPowerFR_offset = -1
+            # vertically oriented
+            self.VentralPowerLB_offset = -2
+            self.VentralPowerRB_offset = -2
+            self.VentralPowerRF_offset = -2
+            self.VentralPowerLF_offset = -2
+
+            self.BrakeAllThrusters()
+            time.sleep(7)
         else:
             print("MovementCommander is not using Arduino...")
         self.UsingGyro = usinggyro
@@ -103,41 +140,6 @@ class NavigationCommander:
         else:
             print("MovementCommander is not using Telemetry...")
 
-        # thruster hardpoint classes
-        # 'ventral' are the central, vertically oriented thrusters
-        # for roll/pitch and ascent/descent
-        self.Thruster_VentralLB = ThrusterDriver("LB")  # left back
-        self.Thruster_VentralLF = ThrusterDriver("LF")  # left front
-        self.Thruster_VentralRB = ThrusterDriver("RB")  # right back
-        self.Thruster_VentralRF = ThrusterDriver("RF")  # right front
-        # 'lateral' are the outer, 45 deg. oriented thrusters for
-        # yaw/turning and strafe movement
-        self.Thruster_LateralBL = ThrusterDriver("BL")  # back left
-        self.Thruster_LateralBR = ThrusterDriver("BR")  # back right
-        self.Thruster_LateralFL = ThrusterDriver("FL")  # front left !
-        self.Thruster_LateralFR = ThrusterDriver("FR")  # front right !
-        # power values to set to the thruster hardpoints
-        # horizontally oriented
-        self.LateralPowerBL = 0
-        self.LateralPowerFL = 0
-        self.LateralPowerBR = 0
-        self.LateralPowerFR = 0
-        # vertically oriented
-        self.VentralPowerLB = 0
-        self.VentralPowerRB = 0
-        self.VentralPowerRF = 0
-        self.VentralPowerLF = 0
-
-        # horizontally oriented
-        self.LateralPowerBL_offset = -1
-        self.LateralPowerFL_offset = -1
-        self.LateralPowerBR_offset = -1
-        self.LateralPowerFR_offset = -1
-        # vertically oriented
-        self.VentralPowerLB_offset = -2
-        self.VentralPowerRB_offset = -2
-        self.VentralPowerRF_offset = -2
-        self.VentralPowerLF_offset = -2
         # initialize thruster values to brake (self.PowerXX set to 0^)
         # self.UpdateThrusters()
 
@@ -226,7 +228,7 @@ class NavigationCommander:
         # self.ArdIMU.UpdateRearAngle()
         # print("Rear angle, corrected: ", self.ArdIMU.getCorrectedRearAngle())
 
-        print("Yaw PID: ", self.ArdIMU.getYawPID())
+        # print("Yaw PID: ", self.ArdIMU.getYawPID())
         # print("Pitch PID: ", self.ArdIMU.getPitchPID())
         # print("Roll PID: ", self.ArdIMU.getRollPID())
         pass

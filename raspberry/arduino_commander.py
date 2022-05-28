@@ -11,7 +11,7 @@ import serial
 class ArduinoCommander:
 
     def __init__(self):
-        self.serial = serial.Serial('/dev/ttyS0', 115200, timeout=1)
+        self.serial = serial.Serial('/dev/ttyS0', 115200, timeout=0.3)
         try:
             self.serial.open()
         except serial.serialutil.SerialException:

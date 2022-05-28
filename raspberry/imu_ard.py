@@ -25,7 +25,7 @@ class ArduinoIMU(IMU):
     FrontAngle = [0.0, 0.0, 0.0]
     RearAngle = [0.0, 0.0, 0.0]
 
-    Kp = [[0.2, 0.25, 0.25], [0.3, 0.4, 0.4]]  # constant to modify PID
+    Kp = [[0.35, 0.5, 0.5], [0.3, 0.4, 0.4]]  # constant to modify PID
     Ki = [[0.0, 0.00, 0.00], [0.1, 0.1, 0.1]]  # constant to modify PID
     Kd = [[0.3, 0.3, 0.3], [0.1, 0.1, 0.1]]  # constant to modify PID
 
@@ -58,26 +58,27 @@ class ArduinoIMU(IMU):
         angleRear = self.getAngleRear()
         startFront = self.getStartingFrontAngle()
         startRear = self.getStartingRearAngle()
-        self.Angle[0] = round(((angleFront[0]-startFront[0]) + (angleRear[0]-startRear[0])) / 2, 4)
-        self.Angle[1] = round(((angleFront[1]-startFront[1]) - (angleRear[1]-startRear[1])) / 2, 4)
-        self.Angle[2] = round(((angleFront[2]-startFront[2]) - (angleRear[2]-startRear[2])) / 2, 4)
+        self.Angle[0] = round(((angleFront[0] - startFront[0]) + (angleRear[0] - startRear[0])) / 2, 4)
+        self.Angle[1] = round(((angleFront[1] - startFront[1]) - (angleRear[1] - startRear[1])) / 2, 4)
+        self.Angle[2] = round(((angleFront[2] - startFront[2]) - (angleRear[2] - startRear[2])) / 2, 4)
 
     def CalibrateStart(self):
         angle = self.getAngleFront()
         i = 0
         for x in angle:
-            angle[i] = round(x,4)
+            angle[i] = round(x, 4)
             i = i + 1
         self.StartingFrontAngle = angle
         angle = self.getAngleRear()
         i = 0
         for x in angle:
-            angle[i] = round(x,4)
+            angle[i] = round(x, 4)
             i = i + 1
         self.StartingRearAngle = angle
 
     def UpdateFrontAngle(self):
         angleFront = self.getAngleFront()
+        angle = [0.0, 0.0, 0.0]
         self.Angle[0] = (angleFront[0])
         self.Angle[1] = (angleFront[1])
         self.Angle[2] = (angleFront[2])
@@ -100,13 +101,13 @@ class ArduinoIMU(IMU):
         self.serial.write("gfa\n".encode('ascii'))
         data = self.serial.read_until("\n")
         # time.sleep(0.05)
-        return parseXYZDataToList(data)
+        return self.parseXYZDataToList(data)
 
     def getAngleRear(self):
         self.serial.write("gra\n".encode('ascii'))
         data = self.serial.read_until("\n")
         # time.sleep(0.05)
-        return parseXYZDataToList(data)
+        return self.parseXYZDataToList(data)
 
     def getStartingFrontAngle(self):
         return self.StartingFrontAngle
@@ -129,18 +130,22 @@ class ArduinoIMU(IMU):
         self.serial.write("STOP")
         self.serial.close()
 
-
-def parseXYZDataToList(xyz_data):
-    i = -1
-    xyz = [0.0, 0.0, 0.0]
-    # xyz_data_clean = xyz_data
-    # xyz_data_clean = xyz_data.replace('/n', '')
-    for xyz_data_clean in str(xyz_data).split('\\'):
-        for parsed in str(xyz_data_clean).split(':'):
-            if 3 > i >= 0:
-                xyz[i] = float(parsed)
-            i = i + 1
-    return xyz
+    def parseXYZDataToList(self, xyz_data):
+        i = -1
+        xyz = [0.0, 0.0, 0.0]
+        # xyz_data_clean = xyz_data
+        # xyz_data_clean = xyz_data.replace('/n', '')
+        # print(xyz_data)
+        try:
+            for xyz_data_clean in str(xyz_data).split('\\'):
+                for parsed in str(xyz_data_clean).split(':'):
+                    if 3 > i >= 0:
+                        xyz[i] = float(parsed)
+                    i = i + 1
+        except:
+            print("Error parsing angle data.")
+            xyz = self.Angle
+        return xyz
 
 #
 # class ArduinoHandler(IMU):

@@ -5,11 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2662d174-a621-4651-86ee-331f40745cec" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/OIT-AUVSIR-RoverSub.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/OIT-AUVSIR-RoverSub.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mega/run_on_mega/arduino_handler/arduino_handler.ino" beforeDir="false" afterPath="$PROJECT_DIR$/mega/run_on_mega/arduino_handler/arduino_handler.ino" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/raspberry/START_SUB.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/START_SUB.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/raspberry/START_SUB_WITH_TIME.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/START_SUB_WITH_TIME.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/raspberry/arduino_commander.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/arduino_commander.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/raspberry/imu_ard.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/imu_ard.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/raspberry/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/setup.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/raspberry/task_io_lib_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/task_io_lib_v2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/raspberry/vector_commander.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/vector_commander.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,6 +26,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Python Script" />
+        <option value="Setup Script" />
       </list>
     </option>
   </component>
@@ -41,6 +48,7 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Desktop\AUVSIR_21-22\OIT-AUVSIR-RoverSub\raspberry" />
       <recent name="C:\Users\farme\Desktop\AUVSIR 21-22\OIT-AUVSIR-RoverSub\mega\run_on_mega\run_on_mega_v4" />
       <recent name="C:\Users\farme\Desktop\AUVSIR 21-22\OIT-AUVSIR-RoverSub\mega\run_on_mega" />
     </key>
@@ -70,16 +78,5 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/raspberry/task_io_lib_v2.py</url>
-          <line>8</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>
