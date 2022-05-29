@@ -5,16 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2662d174-a621-4651-86ee-331f40745cec" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/OIT-AUVSIR-RoverSub.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/OIT-AUVSIR-RoverSub.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raspberry/START_SUB.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/START_SUB.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raspberry/START_SUB_WITH_TIME.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/START_SUB_WITH_TIME.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mega/run_on_mega/arduino_handler/arduino_handler.ino" beforeDir="false" afterPath="$PROJECT_DIR$/mega/run_on_mega/arduino_handler/arduino_handler.ino" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/raspberry/arduino_commander.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/arduino_commander.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/raspberry/imu_ard.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/imu_ard.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raspberry/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/setup.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/raspberry/task_io_lib_v2.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/task_io_lib_v2.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/raspberry/vector_commander.py" beforeDir="false" afterPath="$PROJECT_DIR$/raspberry/vector_commander.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

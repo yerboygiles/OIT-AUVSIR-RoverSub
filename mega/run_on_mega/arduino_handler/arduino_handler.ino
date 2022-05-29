@@ -174,8 +174,8 @@ void loop() {
   //Serial1.println("Hello!!");
   if (stringComplete) {
     Serial1.flush();
-    Serial.print("Command: ");
-    Serial.println(JetsonCommand);
+//    Serial.print("Command: ");
+//    Serial.println(JetsonCommand);
     
 //    Serial.println("Done with readCommand().");
 //    Serial.println(commandComplete);
@@ -236,22 +236,22 @@ int readCommand() {
       switch (encodedCMD.charAt(1))
       {
         case 'a': // all
-          Serial.print("BL:");
-          Serial.print(str_array[1]);
-          Serial.print(",FL:");
-          Serial.print(str_array[2]);
-          Serial.print(",BR:");
-          Serial.print(str_array[3]);
-          Serial.print(",FR:");
-          Serial.print(str_array[4]);
-          Serial.print(",LB:");
-          Serial.print(str_array[5]);
-          Serial.print(",LF:");
-          Serial.print(str_array[6]);
-          Serial.print(",RB:");
-          Serial.print(str_array[7]);
-          Serial.print(",RF:");
-          Serial.println(str_array[8]);
+//          Serial.print("BL:");
+//          Serial.print(str_array[1]);
+//          Serial.print(",FL:");
+//          Serial.print(str_array[2]);
+//          Serial.print(",BR:");
+//          Serial.print(str_array[3]);
+//          Serial.print(",FR:");
+//          Serial.print(str_array[4]);
+//          Serial.print(",LB:");
+//          Serial.print(str_array[5]);
+//          Serial.print(",LF:");
+//          Serial.print(str_array[6]);
+//          Serial.print(",RB:");
+//          Serial.print(str_array[7]);
+//          Serial.print(",RF:");
+//          Serial.println(str_array[8]);
           BL_Thruster.Drive(str_array[1].toInt());
           FL_Thruster.Drive(str_array[2].toInt());
           BR_Thruster.Drive(str_array[3].toInt());
@@ -344,6 +344,39 @@ int readCommand() {
               Serial1.print(":");
               Serial1.print(JY901_R.getRoll());
               Serial1.print("\n");
+              break;
+          }
+          break;
+        // all gyros
+        case 'a':
+          JY901_F.receiveSerialData();
+          JY901_R.receiveSerialData();
+          switch (str_array[0][2]){
+            case 'h':
+              Zangle_offset_R = JY901_R.getYaw();
+              Serial1.print("rh\n");
+              break;
+            case 'c':
+              Xangle_offset_R = JY901_R.getRoll();
+              Yangle_offset_R = JY901_R.getPitch();
+              Zangle_offset_R = JY901_R.getYaw();
+              Serial1.print("rc\n");
+              break;
+            case 'a':
+              String toprint = "A:";
+              toprint += JY901_F.getYaw();
+              toprint += ",";
+              toprint += JY901_R.getYaw();
+              toprint += ":";
+              toprint += JY901_F.getPitch();
+              toprint += ",";
+              toprint += JY901_R.getPitch();
+              toprint += ":";
+              toprint += JY901_F.getRoll();
+              toprint += ",";
+              toprint += JY901_R.getRoll();
+              toprint += "\n";
+              Serial1.print(toprint);
               break;
           }
           break;

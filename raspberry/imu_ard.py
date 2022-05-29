@@ -26,7 +26,7 @@ class ArduinoIMU(IMU):
     RearAngle = [0.0, 0.0, 0.0]
 
     Kp = [[0.35, 0.5, 0.5], [0.3, 0.4, 0.4]]  # constant to modify PID
-    Ki = [[0.0, 0.00, 0.00], [0.1, 0.1, 0.1]]  # constant to modify PID
+    Ki = [[0.05, 0.2, 0.2], [0.1, 0.1, 0.1]]  # constant to modify PID
     Kd = [[0.3, 0.3, 0.3], [0.1, 0.1, 0.1]]  # constant to modify PID
 
     def __init__(self, serial):
@@ -53,23 +53,37 @@ class ArduinoIMU(IMU):
         # print("Starting position: ", self.Position)
 
     # parse gyro object data from wt61p, can then pass to other programs
+    # def UpdateAngle(self):
+    #
+    #     anglefront = self.parseAngleFront()
+    #     anglerear = self.parseAngleRear()
+    #     startfront = self.getStartingFrontAngle()
+    #     startrear = self.getStartingRearAngle()
+    #
+    #     # anglerear[0]
+    #
+    #     self.Angle[0] = round(((anglefront[0] - startfront[0]) + (anglerear[0] - startrear[0])) / 2, 4)
+    #     self.Angle[1] = round(((anglefront[1] - startfront[1]) - (anglerear[1] - startrear[1])) / 2, 4)
+    #     self.Angle[2] = round(((anglefront[2] - startfront[2]) - (anglerear[2] - startrear[2])) / 2, 4)
+
     def UpdateAngle(self):
-        angleFront = self.getAngleFront()
-        angleRear = self.getAngleRear()
-        startFront = self.getStartingFrontAngle()
-        startRear = self.getStartingRearAngle()
-        self.Angle[0] = round(((angleFront[0] - startFront[0]) + (angleRear[0] - startRear[0])) / 2, 4)
-        self.Angle[1] = round(((angleFront[1] - startFront[1]) - (angleRear[1] - startRear[1])) / 2, 4)
-        self.Angle[2] = round(((angleFront[2] - startFront[2]) - (angleRear[2] - startRear[2])) / 2, 4)
+
+        startfront = self.getStartingFrontAngle()
+        startrear = self.getStartingRearAngle()
+        anglefront, anglerear = self.parseAngleFrontAndRear()
+
+        self.Angle[0] = round(((anglefront[0] - startfront[0]) + (anglerear[0] - startrear[0])) / 2, 4)
+        self.Angle[1] = round(((anglefront[1] - startfront[1]) - (anglerear[1] - startrear[1])) / 2, 4)
+        self.Angle[2] = round(((anglefront[2] - startfront[2]) - (anglerear[2] - startrear[2])) / 2, 4)
 
     def CalibrateStart(self):
-        angle = self.getAngleFront()
+        angle = self.parseAngleFront()
         i = 0
         for x in angle:
             angle[i] = round(x, 4)
             i = i + 1
         self.StartingFrontAngle = angle
-        angle = self.getAngleRear()
+        angle = self.parseAngleRear()
         i = 0
         for x in angle:
             angle[i] = round(x, 4)
@@ -77,7 +91,7 @@ class ArduinoIMU(IMU):
         self.StartingRearAngle = angle
 
     def UpdateFrontAngle(self):
-        angleFront = self.getAngleFront()
+        angleFront = self.parseAngleFront()
         angle = [0.0, 0.0, 0.0]
         self.Angle[0] = (angleFront[0])
         self.Angle[1] = (angleFront[1])
@@ -86,10 +100,10 @@ class ArduinoIMU(IMU):
         # print("Front Angle: ", self.Angle)
 
     def UpdateRearAngle(self):
-        angleRear = self.getAngleRear()
-        self.Angle[0] = (angleRear[0])
-        self.Angle[1] = (angleRear[1])
-        self.Angle[2] = (angleRear[2])
+        anglerear = self.parseAngleRear()
+        self.Angle[0] = (anglerear[0])
+        self.Angle[1] = (anglerear[1])
+        self.Angle[2] = (anglerear[2])
         return self.Angle
         # print("Rear Angle: ", self.Angle)
 
@@ -97,17 +111,30 @@ class ArduinoIMU(IMU):
     def UpdatePosition(self):
         pass
 
-    def getAngleFront(self):
+    def parseAngleFrontAndRear(self):
+        self.serial.write("gaa\n".encode('ascii'))
+        data = self.serial.read_until("\n")
+        # time.sleep(0.05)
+        angles = self.parseDoubleXYZDataToList(data)
+        return angles
+
+    def parseAngleFront(self):
         self.serial.write("gfa\n".encode('ascii'))
         data = self.serial.read_until("\n")
         # time.sleep(0.05)
-        return self.parseXYZDataToList(data)
+        angles = self.parseXYZDataToList(data)
+        return angles
 
-    def getAngleRear(self):
+    def parseAngleRear(self):
         self.serial.write("gra\n".encode('ascii'))
         data = self.serial.read_until("\n")
         # time.sleep(0.05)
-        return self.parseXYZDataToList(data)
+        angles = self.parseXYZDataToList(data)
+        # if angles[0] < 0:
+        #     angles[0] = angles[0] - 180
+        # if angles[0] > 0:
+        #     angles[0] = angles[0] + 180
+        return angles
 
     def getStartingFrontAngle(self):
         return self.StartingFrontAngle
@@ -125,6 +152,70 @@ class ArduinoIMU(IMU):
                 self.Angle[1] - self.StartingRearAngle[1],
                 self.Angle[2] - self.StartingRearAngle[2]]
 
+    # req for PID calculation
+    def CalculateError(self, yawoffset=0, pitchoffset=0, rolloffset=0, northoffset=0, eastoffset=0, downoffset=0):
+
+        # previous error for error delta
+        # gyro
+        self.Previous_Error[GYRO][YAW] = self.Error[GYRO][YAW]
+        self.Previous_Error[GYRO][PITCH] = self.Error[GYRO][PITCH]
+        self.Previous_Error[GYRO][ROLL] = self.Error[GYRO][ROLL]
+
+        # position
+        # self.Previous_Error[POSITION][NORTH] = self.Error[POSITION][NORTH]
+        # self.Previous_Error[POSITION][EAST] = self.Error[POSITION][EAST]
+        # self.Previous_Error[POSITION][DOWN] = self.Error[POSITION][DOWN]
+
+        # error for proportional control
+        # gyro
+        # slightly newer but still old calcs
+        self.Error[GYRO][YAW] = self.Angle[YAW] - yawoffset
+        # right side, going left side
+        if (self.Error[GYRO][YAW]) > 180:
+            self.Error[GYRO][YAW] = (self.Angle[YAW] - 180) - (abs(yawoffset) - 180)
+        # left side, going right side
+        elif (self.Error[GYRO][YAW]) < -180:
+            self.Error[GYRO][YAW] = (self.Angle[YAW] + 180) - (abs(yawoffset) - 180)
+        self.Error[GYRO][PITCH] = self.Angle[PITCH] - pitchoffset
+        self.Error[GYRO][ROLL] = self.Angle[ROLL] - rolloffset
+
+        # old calcs
+        # if ((180 - abs(yawoffset)) + (180 - abs(self.Angle[YAW]))) < 180:
+        #     self.Error[GYRO][YAW] = self.Angle[YAW] - yawoffset
+        # elif ((abs(yawoffset)) + (abs(self.Angle[YAW]))) < 180:
+        #     self.Error[GYRO][YAW] = self.Angle[YAW] + yawoffset
+
+        # position
+        # self.Error[POSITION][NORTH] = self.Acceleration[NORTH] - northoffset
+        # self.Error[POSITION][EAST] = self.Acceleration[EAST] - eastoffset
+        # self.Error[POSITION][DOWN] = self.Acceleration[DOWN] - downoffset
+
+        # sum of error for integral
+        # gyro
+        if abs(self.Error_Sum[GYRO][YAW]) > abs(self.Error[GYRO][YAW]*50) or abs(self.Error[GYRO][YAW]) < 3:
+            self.Error_Sum[GYRO][YAW] = 0
+        else:
+            self.Error_Sum[GYRO][YAW] = self.Error_Sum[GYRO][YAW] + self.Error[GYRO][YAW]
+        self.Error_Sum[GYRO][PITCH] = self.Error_Sum[GYRO][PITCH] + self.Error[GYRO][PITCH]
+        self.Error_Sum[GYRO][ROLL] = self.Error_Sum[GYRO][ROLL] + self.Error[GYRO][ROLL]
+
+        # position
+        # self.Error_Sum[POSITION][NORTH] = self.Error_Sum[POSITION][NORTH] + self.Error[POSITION][NORTH]
+        # self.Error_Sum[POSITION][EAST] = self.Error_Sum[POSITION][EAST] + self.Error[POSITION][EAST]
+        # self.Error_Sum[POSITION][DOWN] = self.Error_Sum[POSITION][DOWN] + self.Error[POSITION][DOWN]
+
+        # math for change in error to do derivative
+        # gyro
+        self.Error_Delta[GYRO][YAW] = self.Error[GYRO][YAW] - self.Previous_Error[GYRO][YAW]
+        self.Error_Delta[GYRO][PITCH] = self.Error[GYRO][PITCH] - self.Previous_Error[GYRO][PITCH]
+        self.Error_Delta[GYRO][ROLL] = self.Error[GYRO][ROLL] - self.Previous_Error[GYRO][ROLL]
+
+        # position
+        # self.Error_Delta[POSITION][NORTH] = self.Error[POSITION][NORTH] - self.Previous_Error[POSITION][NORTH]
+        # self.Error_Delta[POSITION][EAST] = self.Error[POSITION][EAST] - self.Previous_Error[POSITION][EAST]
+        # self.Error_Delta[POSITION][DOWN] = self.Error[POSITION][DOWN] - self.Previous_Error[POSITION][DOWN]
+
+    # pid calculation
     # end command/vehicle running
     def Terminate(self):
         self.serial.write("STOP")
@@ -146,6 +237,62 @@ class ArduinoIMU(IMU):
             print("Error parsing angle data.")
             xyz = self.Angle
         return xyz
+
+    def parseDoubleXYZDataToList(self, xyz_data):
+        i = -1
+        xyz = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
+        # xyz_data_clean = xyz_data
+        # xyz_data_clean = xyz_data.replace('/n', '')
+        # print(xyz_data)
+        try:
+            for xyz_data_clean in str(xyz_data).split('\\'):
+                for semiparsed in str(xyz_data_clean).split(':'):
+                    if 3 > i >= 0:
+                        j = 0
+                        for fullparsed in str(semiparsed).split(','):
+                            xyz[j][i] = float(fullparsed)
+                            j = j + 1
+                    i = i + 1
+        except:
+            print("Error parsing angle data.")
+            xyz = self.Angle
+        return xyz
+    def PID(self):
+        # Yaw PID variable setting
+        self.Yaw_P = (self.Error[GYRO][YAW] * self.Kp[GYRO][YAW])
+        self.Yaw_I = (self.Error_Sum[GYRO][YAW] * self.Ki[GYRO][YAW])
+        self.Yaw_D = (self.Error_Delta[GYRO][YAW] * self.Kd[GYRO][YAW])
+        self.Yaw_PID = self.Yaw_P + self.Yaw_I + self.Yaw_D
+
+        # Pitch PID variable setting
+        self.Pitch_P = (self.Error[GYRO][PITCH] * self.Kp[GYRO][PITCH])
+        self.Pitch_I = (self.Error_Sum[GYRO][PITCH] * self.Ki[GYRO][PITCH])
+        self.Pitch_D = (self.Error_Delta[GYRO][PITCH] * self.Kd[GYRO][PITCH])
+        self.Pitch_PID = self.Pitch_P + self.Pitch_I + self.Pitch_D
+
+        # Roll PID variable setting
+        self.Roll_P = (self.Error[GYRO][ROLL] * self.Kp[GYRO][ROLL])
+        self.Roll_I = (self.Error_Sum[GYRO][ROLL] * self.Ki[GYRO][ROLL])
+        self.Roll_D = (self.Error_Delta[GYRO][ROLL] * self.Kd[GYRO][ROLL])
+        self.Roll_PID = self.Roll_P + self.Roll_I + self.Roll_D
+
+        # # North PID variable setting
+        # self.North_P = (self.Error[POSITION][NORTH] * self.Kp[POSITION][NORTH])
+        # self.North_I = (self.Error_Sum[POSITION][NORTH] * self.Ki[POSITION][NORTH])
+        # self.North_D = (self.Error_Delta[POSITION][NORTH] * self.Kd[POSITION][NORTH])
+        # self.North_PID = self.North_P  # + self.North_I + self.North_D
+        #
+        # # East PID variable setting
+        # self.East_P = (self.Error[POSITION][EAST] * self.Kp[POSITION][EAST])
+        # self.East_I = (self.Error_Sum[POSITION][EAST] * self.Ki[POSITION][EAST])
+        # self.East_D = (self.Error_Delta[POSITION][EAST] * self.Kd[POSITION][EAST])
+        # self.East_PID = self.East_P  # + self.East_I + self.East_D
+        #
+        # # Down PID variable setting
+        # self.Down_P = (self.Error[POSITION][DOWN] * self.Kp[POSITION][DOWN])
+        # self.Down_I = (self.Error_Sum[POSITION][DOWN] * self.Ki[POSITION][DOWN])
+        # self.Down_D = (self.Error_Delta[POSITION][DOWN] * self.Kd[POSITION][DOWN])
+        # self.Down_PID = self.Down_P  # + self.Down_I + self.Down_D
 
 #
 # class ArduinoHandler(IMU):
