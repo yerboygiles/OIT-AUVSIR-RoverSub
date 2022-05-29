@@ -14,7 +14,7 @@ class TaskIO:
     # filename can first be sent a 0 to initialize string-input commands
     # instead of
     # self, filename, usingarduino, usingvision, usinggyro, usingsim
-    def __init__(self, filename, usingarduino, usingvision, usinggyro, usingsim):
+    def __init__(self, filename, usingarduino, usingvision, usinggyro, usingsim, usingping):
         self.Input = False
         if filename == 0:
             self.input = filename
@@ -24,11 +24,13 @@ class TaskIO:
         self.UsingVision = usingvision
         self.UsingGyro = usinggyro
         self.UsingSim = usingsim
+        self.UsingPing = usingping
         self.Active = False
         self.Movement = NavigationCommander(self.UsingArduino,
                                             self.UsingVision,
                                             self.UsingGyro,
                                             self.UsingSim,
+                                            self.UsingPing,
                                             False)
         self.CommandList = []
 

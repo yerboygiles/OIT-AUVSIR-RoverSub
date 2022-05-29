@@ -9,10 +9,8 @@
 import time
 import random
 import math
-import serial
-import imu
-import imu_rpi
 import imu_ard
+import pinger
 import vision_v1
 import remote_control
 
@@ -39,7 +37,12 @@ GENERAL_THROTTLE = 17.5
 class NavigationCommander:
 
     # initialize everything to supposed starting position
-    def __init__(self, usingarduino=False, usingvision=False, usinggyro=False, usingsim=False, resetheadingoncmd=False):
+    def __init__(self, usingarduino=False,
+                 usingvision=False,
+                 usinggyro=False,
+                 usingsim=False,
+                 usingping=False,
+                 resetheadingoncmd=False):
         # setting up board serial port
         self.UsingArduino = usingarduino
 
@@ -100,7 +103,9 @@ class NavigationCommander:
         else:
             print("Sending NOIMU")
             # self.SendToArduino("NOIMU")
-
+        if usingping:
+            print("Using Pinger")
+            self.Pinger = pinger.Pinger()
         if resetheadingoncmd:
             self.YawOffset = self.ArdIMU.StartingAngle[0]
             self.ResetHeadingOnCMD = resetheadingoncmd
@@ -732,6 +737,10 @@ class NavigationCommander:
                                        self.DownOffset)
             self.ArdIMU.PID()
 
+    def UpdateSensors(self):
+        self.UpdateGyro()
+        self.Pinger.UpdateDistance()
+
     def UpdateThrusters(self):
 
         self.Thruster_VentralLB.setSpeed(self.VentralPowerLB)
@@ -751,16 +760,20 @@ class NavigationCommander:
         #                            self.NorthOffset, self.EastOffset, self.DownOffset)
         self.Thruster_VentralLB.setSpeedPID(self.VentralPowerLB,
                                             -self.ArdIMU.getPitchPID()
-                                            - self.ArdIMU.getRollPID())
+                                            - self.ArdIMU.getRollPID()
+                                            + self.Pinger.getPID())
         self.Thruster_VentralRB.setSpeedPID(self.VentralPowerRB,
                                             -self.ArdIMU.getPitchPID()
-                                            + self.ArdIMU.getRollPID())
+                                            + self.ArdIMU.getRollPID()
+                                            + self.Pinger.getPID())
         self.Thruster_VentralLF.setSpeedPID(self.VentralPowerLF,
                                             self.ArdIMU.getPitchPID()
-                                            - self.ArdIMU.getRollPID())
+                                            - self.ArdIMU.getRollPID()
+                                            + self.Pinger.getPID())
         self.Thruster_VentralRF.setSpeedPID(self.VentralPowerRF,
                                             self.ArdIMU.getPitchPID()
-                                            + self.ArdIMU.getRollPID())
+                                            + self.ArdIMU.getRollPID()
+                                            + self.Pinger.getPID())
 
         self.Thruster_LateralBL.setSpeedPID(self.LateralPowerBL,
                                             self.ArdIMU.getYawPID())

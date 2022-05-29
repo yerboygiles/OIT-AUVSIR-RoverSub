@@ -28,10 +28,13 @@ def run():
         GPIO.output(buzzer, GPIO.LOW)
         time.sleep(0.2)
 
-    # self, filename, usingarduino, usingvision, usinggyro, usingsim
-    Mission = TaskIO("mission.txt", True, False, True, False)
-    # Mission.testArduino()
+    # self, mission filename, usingarduino, usingvision, usinggyro, usingsim, usingping
+    Mission = TaskIO("mission.txt", True, False, True, False, True)
+    # testing funcs
+
     Mission.testData()
+
+    # actual task/mission runner
     # Mission.get_tasks()
     Mission.terminate()
     print("done")
