@@ -1,7 +1,7 @@
 from brping import Ping1D
 
 
-class Pinger:
+class Sonar:
     StringIn = ""
     Distance = 0.0
     Confidence = 0.0

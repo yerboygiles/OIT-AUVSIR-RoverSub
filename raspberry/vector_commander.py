@@ -10,7 +10,7 @@ import time
 import random
 import math
 import imu_ard
-import pinger
+import sonar
 import vision_v1
 import remote_control
 
@@ -105,7 +105,7 @@ class NavigationCommander:
             # self.SendToArduino("NOIMU")
         if usingping:
             print("Using Pinger")
-            self.Pinger = pinger.Pinger()
+            self.Sonar = sonar.Sonar()
         if resetheadingoncmd:
             self.YawOffset = self.ArdIMU.StartingAngle[0]
             self.ResetHeadingOnCMD = resetheadingoncmd
@@ -739,7 +739,7 @@ class NavigationCommander:
 
     def UpdateSensors(self):
         self.UpdateGyro()
-        self.Pinger.UpdateDistance()
+        self.Sonar.UpdateDistance()
 
     def UpdateThrusters(self):
 
@@ -761,19 +761,19 @@ class NavigationCommander:
         self.Thruster_VentralLB.setSpeedPID(self.VentralPowerLB,
                                             -self.ArdIMU.getPitchPID()
                                             - self.ArdIMU.getRollPID()
-                                            + self.Pinger.getPID())
+                                            + self.Sonar.getPID())
         self.Thruster_VentralRB.setSpeedPID(self.VentralPowerRB,
                                             -self.ArdIMU.getPitchPID()
                                             + self.ArdIMU.getRollPID()
-                                            + self.Pinger.getPID())
+                                            + self.Sonar.getPID())
         self.Thruster_VentralLF.setSpeedPID(self.VentralPowerLF,
                                             self.ArdIMU.getPitchPID()
                                             - self.ArdIMU.getRollPID()
-                                            + self.Pinger.getPID())
+                                            + self.Sonar.getPID())
         self.Thruster_VentralRF.setSpeedPID(self.VentralPowerRF,
                                             self.ArdIMU.getPitchPID()
                                             + self.ArdIMU.getRollPID()
-                                            + self.Pinger.getPID())
+                                            + self.Sonar.getPID())
 
         self.Thruster_LateralBL.setSpeedPID(self.LateralPowerBL,
                                             self.ArdIMU.getYawPID())
