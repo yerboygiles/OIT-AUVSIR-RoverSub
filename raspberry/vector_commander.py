@@ -227,11 +227,13 @@ class NavigationCommander:
         # print("IMU 2 Angle: ", x2, y2, z2)
         # self.BrakeAllThrusters()
         self.Sonar.UpdateDistance()
-        self.ArdIMU.UpdateAngle()
-        print("Averaged Angle: ", self.ArdIMU.getAngle())
-        # print
-        self.ArdIMU.CalculateError(self.YawOffset, self.PitchOffset, self.RollOffset)
-        self.ArdIMU.PID()
+        # self.ArdIMU.UpdateAngle()
+        # print("Averaged Angle: ", self.ArdIMU.getAngle())
+        # # print
+        # self.ArdIMU.CalculateError(self.YawOffset, self.PitchOffset, self.RollOffset)
+        # self.ArdIMU.PID()
+        print("Sonar dist: ", self.Sonar.getDistance())
+        print("Sonar PID: ", self.Sonar.getPID())
         # self.ArdIMU.UpdateFrontAngle()
         # print("Front angle, corrected: ", self.ArdIMU.getCorrectedFrontAngle())
 
@@ -244,7 +246,7 @@ class NavigationCommander:
         # print("Yaw I: ", self.ArdIMU.Yaw_I)
         # print("Yaw D: ", self.ArdIMU.Yaw_D)
 
-        print("Yaw Error_Sum: ", self.ArdIMU.Error_Sum[0][0])
+        # print("Yaw Error_Sum: ", self.ArdIMU.Error_Sum[0][0])
         # print("Pitch PID: ", self.ArdIMU.getPitchPID())
         # print("Roll PID: ", self.ArdIMU.getRollPID())
         pass
