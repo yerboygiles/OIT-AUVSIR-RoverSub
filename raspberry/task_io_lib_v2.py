@@ -57,11 +57,12 @@ class TaskIO:
 
     def testData(self):
         self.Movement.ZeroSonar()
-        for i in range(100):
+        starttime = time.perf_counter()
+        while (time.perf_counter()-starttime) < 60:
             perftime = time.perf_counter()
             self.Movement.GyroTesting()
             self.Movement.ArduinoTesting()
-            print("Loop time: ", time.perf_counter() - perftime)
+            print("Runtime: ", time.perf_counter() - starttime)
         # perftime = time.perf_counter()
         # self.Movement.BasicDriverControl()
         # self.Movement.ResetGyro()

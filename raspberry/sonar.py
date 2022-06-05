@@ -1,4 +1,5 @@
 from brping import Ping1D
+import time
 
 
 class Sonar:
@@ -11,7 +12,7 @@ class Sonar:
     Error_Delta = 0.0
     PingDistance = 0.0
 
-    Kp = .3  # constant to modify PID
+    Kp = .1  # constant to modify PID
     Ki = .2  # constant to modify PID
     Kd = .3  # constant to modify PID
 
@@ -27,9 +28,30 @@ class Sonar:
 
         self.Ping = Ping1D()
         self.Ping.connect_serial(serial, 115200)
-        self.StartingDistance = self.getDistance()
-        self.DistanceOffset = self.StartingDistance
-        print('Starting Distance: ', self.StartingDistance)
+        # self.StartingDistance = self.getDistance()
+        self.DistanceOffset = 0
+        distances = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        i = 0
+        print("Calibrating sonar initial...")
+        while i < 10:
+            confidence = self.updateDistance()
+            distance = self.getDistance()
+            if confidence < 65 and distance != 0.0:
+                print("Confidence low...")
+                time.sleep(0.5)
+                i = i - 1
+            else:
+                distances[i] = self.getDistance()
+                print("calib distance: ", distances[i])
+            i = i + 1
+        sum = 0
+        for i in range(10):
+            sum = sum + distances[i]
+        self.DistanceOffset = sum / 10
+        # print('Starting Distance: ', self.StartingDistance)
+        self.Ping.set_speed_of_sound(1450000)
+        print('Starting sonar, wait 5...')
+        time.sleep(5)
 
         # - Read the actual depth:
         # time.sleep(3)
@@ -44,8 +66,17 @@ class Sonar:
 
     # current gyro read
     def getDistance(self):
+        return self.Distance
+
+    def updateDistance(self):
         data = self.Ping.get_distance()
-        return data["distance"]
+        distance = data["distance"]
+        confidence = data["confidence"]
+        if confidence > 65:
+            self.Distance = distance
+        self.CalculateError()
+        self.CalcPID()
+        return confidence
 
     # req for PID calculation
     def CalculateError(self):
@@ -54,7 +85,7 @@ class Sonar:
         self.Previous_Error = self.Error
 
         # error for proportional control
-        self.Error = self.PingDistance - self.DistanceOffset
+        self.Error = self.Distance - self.DistanceOffset
 
         # sum of error for integral
         self.Error_Sum = self.Error_Sum + self.Error
@@ -72,15 +103,11 @@ class Sonar:
     def CalcPID(self):
         # Yaw PID variable setting
         self.P = (self.Error * self.Kp)
-        self.I = (self.Error_Sum * self.Ki)
-        self.D = (self.Error_Delta * self.Kd)
+        self.I = 0
+        # self.I = (self.Error_Sum * self.Ki)
+        self.D = 0
+        # self.D = (self.Error_Delta * self.Kd)
         self.PID = self.P + self.I + self.D
-
-    def UpdateDistance(self):
-        distance = self.getDistance()
-        self.CalculateError()
-        self.CalcPID()
-        # return distance
 
     def getPID(self):
         return self.PID
@@ -93,3 +120,6 @@ class Sonar:
 
     def getD(self):
         return self.D
+
+    # def Terminate(self):
+    #     self.Ping.
