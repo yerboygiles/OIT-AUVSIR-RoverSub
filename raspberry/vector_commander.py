@@ -207,6 +207,9 @@ class NavigationCommander:
         print("MovementCommander initialized...")
         self.StartingTime = time.perf_counter()
 
+    def ZeroSonar(self):
+        self.Sonar.setOffsetCurrent()
+
     def GyroTesting(self):
         # self.IMU.updateGyro()
         # print("Angle: ", self.IMU.getGyro())
@@ -223,6 +226,7 @@ class NavigationCommander:
         # print("IMU 1 Angle: ", x1, y1, z1)
         # print("IMU 2 Angle: ", x2, y2, z2)
         # self.BrakeAllThrusters()
+        self.Sonar.UpdateDistance()
         self.ArdIMU.UpdateAngle()
         print("Averaged Angle: ", self.ArdIMU.getAngle())
         # print

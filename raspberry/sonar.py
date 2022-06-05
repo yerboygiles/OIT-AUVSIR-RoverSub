@@ -80,6 +80,7 @@ class Sonar:
         distance = self.getDistance()
         self.CalculateError()
         self.CalcPID()
+        # return distance
 
     def getPID(self):
         return self.PID
