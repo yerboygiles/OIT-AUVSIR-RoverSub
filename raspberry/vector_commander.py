@@ -795,19 +795,19 @@ class NavigationCommander:
         # self.ArdIMU.CalculateError(self.YawOffset, self.PitchOffset, self.RollOffset,
         #                            self.NorthOffset, self.EastOffset, self.DownOffset)
         self.Thruster_VentralLB.setSpeedPID(self.VentralPowerLB,
-                                            - self.ArdIMU.getPitchPID()
+                                            + self.ArdIMU.getPitchPID()
                                             + self.ArdIMU.getRollPID()
                                             + self.Sonar.getPID())
         self.Thruster_VentralRB.setSpeedPID(self.VentralPowerRB,
-                                            - self.ArdIMU.getPitchPID()
+                                            + self.ArdIMU.getPitchPID()
                                             - self.ArdIMU.getRollPID()
                                             + self.Sonar.getPID())
         self.Thruster_VentralLF.setSpeedPID(self.VentralPowerLF,
-                                            self.ArdIMU.getPitchPID()
+                                            - self.ArdIMU.getPitchPID()
                                             + self.ArdIMU.getRollPID()
                                             + self.Sonar.getPID())
         self.Thruster_VentralRF.setSpeedPID(self.VentralPowerRF,
-                                            self.ArdIMU.getPitchPID()
+                                            - self.ArdIMU.getPitchPID()
                                             - self.ArdIMU.getRollPID()
                                             + self.Sonar.getPID())
 
