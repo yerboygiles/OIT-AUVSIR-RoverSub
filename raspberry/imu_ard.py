@@ -25,7 +25,7 @@ class ArduinoIMU(IMU):
     FrontAngle = [0.0, 0.0, 0.0]
     RearAngle = [0.0, 0.0, 0.0]
 
-    Kp = [[0.35, 0.5, 0.5], [0.3, 0.4, 0.4]]  # constant to modify PID
+    Kp = [[0.35, 0.3, 0.3], [0.3, 0.4, 0.4]]  # constant to modify PID
     Ki = [[0.05, 0.2, 0.2], [0.1, 0.1, 0.1]]  # constant to modify PID
     Kd = [[0.3, 0.3, 0.3], [0.1, 0.1, 0.1]]  # constant to modify PID
 

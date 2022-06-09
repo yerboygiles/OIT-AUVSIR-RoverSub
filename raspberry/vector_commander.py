@@ -226,17 +226,11 @@ class NavigationCommander:
         # print("IMU 1 Angle: ", x1, y1, z1)
         # print("IMU 2 Angle: ", x2, y2, z2)
         # self.BrakeAllThrusters()
-        confidence = self.Sonar.updateDistance()
-        distance = self.Sonar.getDistance()
+
         self.ArdIMU.UpdateAngle()
-        # print("Averaged Angle: ", self.ArdIMU.getAngle())
-        # # print
-        self.ArdIMU.CalculateError(self.YawOffset, self.PitchOffset, self.RollOffset)
+        self.ArdIMU.CalculateError()
         self.ArdIMU.PID()
 
-        print("Sonar dist, confidence: ", distance, confidence)
-        print("Sonar PID: ", self.Sonar.getPID())
-        print("IMU angles: ", self.ArdIMU.getAngle())
         # print("Sonar PID: ", self.Sonar.getPID())
         # self.ArdIMU.UpdateFrontAngle()
         # print("Front angle, corrected: ", self.ArdIMU.getCorrectedFrontAngle())
@@ -801,20 +795,20 @@ class NavigationCommander:
         # self.ArdIMU.CalculateError(self.YawOffset, self.PitchOffset, self.RollOffset,
         #                            self.NorthOffset, self.EastOffset, self.DownOffset)
         self.Thruster_VentralLB.setSpeedPID(self.VentralPowerLB,
-                                            -self.ArdIMU.getPitchPID()
-                                            - self.ArdIMU.getRollPID()
+                                            - self.ArdIMU.getPitchPID()
+                                            + self.ArdIMU.getRollPID()
                                             + self.Sonar.getPID())
         self.Thruster_VentralRB.setSpeedPID(self.VentralPowerRB,
-                                            -self.ArdIMU.getPitchPID()
-                                            + self.ArdIMU.getRollPID()
+                                            - self.ArdIMU.getPitchPID()
+                                            - self.ArdIMU.getRollPID()
                                             + self.Sonar.getPID())
         self.Thruster_VentralLF.setSpeedPID(self.VentralPowerLF,
                                             self.ArdIMU.getPitchPID()
-                                            - self.ArdIMU.getRollPID()
+                                            + self.ArdIMU.getRollPID()
                                             + self.Sonar.getPID())
         self.Thruster_VentralRF.setSpeedPID(self.VentralPowerRF,
                                             self.ArdIMU.getPitchPID()
-                                            + self.ArdIMU.getRollPID()
+                                            - self.ArdIMU.getRollPID()
                                             + self.Sonar.getPID())
 
         self.Thruster_LateralBL.setSpeedPID(self.LateralPowerBL, 0)

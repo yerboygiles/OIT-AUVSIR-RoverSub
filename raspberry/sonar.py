@@ -12,8 +12,8 @@ class Sonar:
     Error_Delta = 0.0
     PingDistance = 0.0
 
-    Kp = .1  # constant to modify PID
-    Ki = .2  # constant to modify PID
+    Kp = .05  # constant to modify PID
+    Ki = .1  # constant to modify PID
     Kd = .3  # constant to modify PID
 
     P = 0.0
