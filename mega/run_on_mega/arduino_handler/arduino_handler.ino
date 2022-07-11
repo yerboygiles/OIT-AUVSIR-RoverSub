@@ -12,6 +12,8 @@
 #include "HMC5883L.h"
 // #include <Wire.h>
 
+// water probe
+byte waterProbe = 69;
 
 //const byte RESET_PIN = 2;
 byte LBpin = 5; //left back

@@ -58,7 +58,7 @@ class TaskIO:
     def testData(self):
         self.Movement.ZeroSonar()
         starttime = time.perf_counter()
-        with open('telemetry.txt', 'a') as f:
+        with open('telemetry_active.txt', 'w') as f:
             while (time.perf_counter() - starttime) < 60:
                 perftime = time.perf_counter()
                 confidence = self.Movement.Sonar.updateDistance()
