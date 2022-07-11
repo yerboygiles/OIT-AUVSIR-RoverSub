@@ -26,6 +26,10 @@ byte FLpin = 7; //front left
 byte BRpin = 9; //back right
 byte FRpin = 6; //front right
 
+int ledPin = 13; //pin for SOS Leak Board
+int leakPin = 10; //Leak Signal Pin
+int leak = 0; // 0 = dry, 1 = leak
+
 // old, ventral and lateral flipped?.. too tired to swap wires
 //byte LBpin = 8; //left back
 //byte LFpin = 7; //left front
@@ -113,6 +117,9 @@ void setup() {
 //  digitalWrite(RESET_PIN, HIGH);
 //  pinMode(RESET_PIN, OUTPUT);
 
+  pinMode(ledPin, OUTPUT);
+  pinMode(leakPin, INPUT);
+
   Serial.begin(9600);
   Serial.println("Configuring...");
 
@@ -170,6 +177,7 @@ void loop() {
 //  while (1){
 //    Test();
 //  }
+
   JY901_F.receiveSerialData();
   JY901_R.receiveSerialData();
   // put your main code here, to run repeatedly:
@@ -211,6 +219,15 @@ void loop() {
     if (stringComplete == false) {
       JetsonCommand += inChar;
     }
+  }
+
+  leak = digitalRead(leakPin); // Read Leak Sensor Pin
+  digitalWrite(ledPin, leak); // Set the LED to the sensor's value
+
+  if(leak == 1)
+  {
+
+    //Serial.println("X");
   }
   return;
 }
