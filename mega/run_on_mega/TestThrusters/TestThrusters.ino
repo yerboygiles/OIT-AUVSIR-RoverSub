@@ -10,7 +10,7 @@
 // #include <JY901.h>
 
 
-byte LBpin = 2; //left back
+byte LBpin = 7; //left back
 
 Servo LBthruster;
 
@@ -21,9 +21,6 @@ Servo LBthruster;
 void setup() {
   // put your setup code here, to run once:
   LBthruster.attach(LBpin);
-
-  
-  delay(7000);
   LBthruster.writeMicroseconds(1500);
   delay(7000);
 
@@ -31,5 +28,5 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  LBthruster.writeMicroseconds(1900);
+  LBthruster.writeMicroseconds(1850);
 }
