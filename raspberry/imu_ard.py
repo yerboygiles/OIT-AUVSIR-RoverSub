@@ -25,9 +25,11 @@ class ArduinoIMU(IMU):
     FrontAngle = [0.0, 0.0, 0.0]
     RearAngle = [0.0, 0.0, 0.0]
 
-    Kp = [[0.35, 0.3, 0.3], [0.3, 0.4, 0.4]]  # constant to modify PID
-    Ki = [[0.05, 0.2, 0.2], [0.1, 0.1, 0.1]]  # constant to modify PID
-    Kd = [[0.3, 0.3, 0.3], [0.1, 0.1, 0.1]]  # constant to modify PID
+    Kp = [[0.4, 0.4, 0.4], [0.3, 0.4, 0.4]]  # constant to modify PID
+    Ki = [[0.05, 0.15, 0.15], [0.1, 0.1, 0.1]]  # constant to modify PID
+    Kd = [[0.2, 0.2, 0.2], [0.1, 0.1, 0.1]]  # constant to modify PID
+
+    integral_overflow = 0
 
     def __init__(self, serial):
         # read info from vehicle
@@ -192,7 +194,7 @@ class ArduinoIMU(IMU):
 
         # sum of error for integral
         # gyro
-        if abs(self.Error_Sum[GYRO][YAW]) > abs(self.Error[GYRO][YAW]*50) or abs(self.Error[GYRO][YAW]) < 3:
+        if abs(self.Error_Sum[GYRO][YAW]) > abs(self.Error[GYRO][YAW] * 50) or abs(self.Error[GYRO][YAW]) < 3:
             self.Error_Sum[GYRO][YAW] = 0
         else:
             self.Error_Sum[GYRO][YAW] = self.Error_Sum[GYRO][YAW] + self.Error[GYRO][YAW]
@@ -257,7 +259,12 @@ class ArduinoIMU(IMU):
             print("Error parsing angle data.")
             xyz = self.Angle
         return xyz
+
     def PID(self):
+        if self.integral_overflow > 15:
+            self.Error_Sum[GYRO][YAW] = 0
+            self.Error_Sum[GYRO][PITCH] = 0
+            self.Error_Sum[GYRO][ROLL] = 0
         # Yaw PID variable setting
         self.Yaw_P = (self.Error[GYRO][YAW] * self.Kp[GYRO][YAW])
         self.Yaw_I = (self.Error_Sum[GYRO][YAW] * self.Ki[GYRO][YAW])
@@ -276,6 +283,7 @@ class ArduinoIMU(IMU):
         self.Roll_D = (self.Error_Delta[GYRO][ROLL] * self.Kd[GYRO][ROLL])
         self.Roll_PID = self.Roll_P + self.Roll_I + self.Roll_D
 
+        self.integral_overflow = self.integral_overflow + 1
         # # North PID variable setting
         # self.North_P = (self.Error[POSITION][NORTH] * self.Kp[POSITION][NORTH])
         # self.North_I = (self.Error_Sum[POSITION][NORTH] * self.Ki[POSITION][NORTH])

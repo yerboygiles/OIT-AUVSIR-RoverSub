@@ -73,10 +73,12 @@ class TaskIO:
                 # f.write(towrite)
                 # f.write("\n")
                 towrite = "IMU angles: " + str(self.Movement.ArdIMU.getAngle())
+                print(towrite)
                 f.write(towrite)
                 f.write("\n")
-                towrite = "IMU Pitch, Roll PID: " + str(self.Movement.ArdIMU.getPitchPID()) + \
+                towrite = "IMU Pitch, Roll PID: " + str(self.Movement.ArdIMU.getPitchPID()) + "," + \
                           str(self.Movement.ArdIMU.getRollPID())
+                print(towrite)
                 f.write(towrite)
                 f.write("\n")
                 f.write("Runtime: ")
