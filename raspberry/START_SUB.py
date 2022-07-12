@@ -29,7 +29,7 @@ def run():
         time.sleep(0.2)
 
     # self, mission filename, usingarduino, usingvision, usinggyro, usingsim, usingping
-    Mission = TaskIO("mission.txt", True, False, True, False, True)
+    Mission = TaskIO("mission.txt", True, False, True, False, False)
     # testing funcs
 
     Mission.testData()

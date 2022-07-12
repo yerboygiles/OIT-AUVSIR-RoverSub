@@ -98,11 +98,9 @@ class NavigationCommander:
             # self.SendToArduino("IMU")
             # self.JY62_1_IMU = imu_rpi.JY62('/dev/ttyUSB0', 0)
             # self.JY62_2_IMU = imu_rpi.JY62('/dev/ttyUSB1', 1)
+            print("Using Gyro")
             self.ArdIMU = imu_ard.ArduinoIMU(self.ArduinoCommander.getSerial())
 
-        else:
-            print("Sending NOIMU")
-            # self.SendToArduino("NOIMU")
         if usingping:
             print("Using Pinger")
             self.Sonar = sonar.Sonar()
