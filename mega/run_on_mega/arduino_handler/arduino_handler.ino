@@ -26,8 +26,9 @@ byte FLpin = 7; //front left
 byte BRpin = 9; //back right
 byte FRpin = 6; //front right
 
-int ledPin = 13; //pin for SOS Leak Board
-int leakPin = 10; //Leak Signal Pin
+byte ledPin = 13; //pin for SOS Leak Board
+byte leakPin = 10; //Leak Signal Pin
+byte OffPin = 11; //pin to turn off board
 int leak = 0; // 0 = dry, 1 = leak
 
 // old, ventral and lateral flipped?.. too tired to swap wires
@@ -119,6 +120,7 @@ void setup() {
 
   pinMode(ledPin, OUTPUT);
   pinMode(leakPin, INPUT);
+  pinMode(OffPin, OUTPUT);
 
   Serial.begin(9600);
   Serial.println("Configuring...");
@@ -226,8 +228,7 @@ void loop() {
 
   if(leak == 1)
   {
-
-    //Serial.println("X");
+    digitalWrite(OffPin, HIGH); //Turn off board
   }
   return;
 }
