@@ -340,12 +340,10 @@ class NavigationCommander:
         self.RollOffset = roll
         while targeting:
             self.UpdateThrusters_Gyro_PID()
-            self.ArduinoCommander.CommunicateAllThrusters(100, 40, 40, 100, -25, 100, -25, 100)
             targeting = self.CheckIfGyroDone(threshold=10, timethreshold=3)
         print("TARGETED VECTOR.")
         while navigating:
             targeting = self.CheckIfGyroDone(threshold=10, timethreshold=3)
-            self.ArduinoCommander.CommunicateAllThrusters(100, 40, 40, 100, -25, 100, -25, 100)
             navigating = self.CheckIfPositionDone(threshold=10, timethreshold=3)
         print("ARRIVED TO VECTOR.")
 
