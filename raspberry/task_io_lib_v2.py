@@ -56,27 +56,29 @@ class TaskIO:
             self.CommandList.append(self.Input)
 
     def testData(self):
-        self.Movement.ZeroSonar()
+        # self.Movement.ZeroSonar()
         starttime = time.perf_counter()
         with open('telemetry_active.txt', 'w') as f:
             while (time.perf_counter() - starttime) < 60:
                 perftime = time.perf_counter()
-                confidence = self.Movement.Sonar.updateDistance()
-                distance = self.Movement.Sonar.getDistance()
+                # confidence = self.Movement.Sonar.updateDistance()
+                # distance = self.Movement.Sonar.getDistance()
                 self.Movement.GyroTesting()
                 self.Movement.ArduinoTesting()
 
-                towrite = "Sonar dist, confidence" + str(distance) + str(confidence)
-                f.write(towrite)
-                f.write("\n")
-                towrite = "Sonar PID: " + str(self.Movement.Sonar.getPID())
-                f.write(towrite)
-                f.write("\n")
+                # towrite = "Sonar dist, confidence" + str(distance) + str(confidence)
+                # f.write(towrite)
+                # f.write("\n")
+                # towrite = "Sonar PID: " + str(self.Movement.Sonar.getPID())
+                # f.write(towrite)
+                # f.write("\n")
                 towrite = "IMU angles: " + str(self.Movement.ArdIMU.getAngle())
+                print(towrite)
                 f.write(towrite)
                 f.write("\n")
-                towrite = "IMU Pitch, Roll PID: " + str(self.Movement.ArdIMU.getPitchPID()) + \
+                towrite = "IMU Pitch, Roll PID: " + str(self.Movement.ArdIMU.getPitchPID()) + "," + \
                           str(self.Movement.ArdIMU.getRollPID())
+                print(towrite)
                 f.write(towrite)
                 f.write("\n")
                 f.write("Runtime: ")

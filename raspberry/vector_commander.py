@@ -255,7 +255,7 @@ class NavigationCommander:
     def ArduinoTesting(self):
         # self.ArduinoCommander.CommunicateAllThrusters(100, 40, 40, 100, -25, 100, -25, 100)
         # self.UpdateThrustersGyroPID()
-        self.UpdateThrustersGyroPID_NoYaw()
+        self.UpdateThrusters_Gyro_PID_NoCompass()
         # time.sleep(.1)
         pass
 
@@ -280,7 +280,7 @@ class NavigationCommander:
                 # self.UpdateGyro()
                 print("FL: ", self.Thruster_LateralFL.getSpeed(), "FR: ", self.Thruster_LateralFR.getSpeed())
                 print("Yaw PID: ", self.ArdIMU.getYawPID())
-                self.UpdateThrustersGyroPID()
+                self.UpdateThrusters_Gyro_PID()
             # DrivingWithControl = self.ControlIndividualMotor()
             # self.TradeWithArduino()
 
@@ -298,7 +298,7 @@ class NavigationCommander:
         DrivingWithGyro = True
         if self.SuppCommand == "":
             print("SuppCommand empty, defaulting to run for 5 seconds...")
-            self.SuppCommand = "x10" # 'x10' go 10 measures in the x direction
+            self.SuppCommand = "x10"  # 'x10' go 10 measures in the x direction
         elif self.SuppCommand[0] is 'x':
             usedAngle = 0
         elif self.SuppCommand[0] is 'y':
@@ -323,14 +323,13 @@ class NavigationCommander:
         navigating = True
         self.StoreCommandGyroOffsets()
         while targeting:
-            self.UpdateThrustersGyroPID()
+            self.UpdateThrusters_Gyro_PID()
             self.CheckIfGyroDone(threshold=10, timethreshold=3)
             targeting = self.GyroRunning
         print("TARGETED VECTOR.")
         while navigating:
-            self.UpdateThrustersGyroPID()
+            self.UpdateThrusters_Gyro_PID()
             navigating = self.CheckIfPositionDone(threshold=10, timethreshold=3)
-            navigating = self.PositionRunning
         print("ARRIVED TO VECTOR.")
 
     def BasicVectoring(self, yaw, pitch, roll):
@@ -340,14 +339,14 @@ class NavigationCommander:
         self.PitchOffset = pitch
         self.RollOffset = roll
         while targeting:
-            targeting = self.CheckIfGyroDone(threshold=10, timethreshold=3)
-            self.UpdateGyro()
-            self.UpdateThrustersGyroPID()
+            self.UpdateThrusters_Gyro_PID()
             self.ArduinoCommander.CommunicateAllThrusters(100, 40, 40, 100, -25, 100, -25, 100)
+            targeting = self.CheckIfGyroDone(threshold=10, timethreshold=3)
         print("TARGETED VECTOR.")
         while navigating:
-            navigating = self.CheckIfPositionDone(threshold=10, timethreshold=3)
+            targeting = self.CheckIfGyroDone(threshold=10, timethreshold=3)
             self.ArduinoCommander.CommunicateAllThrusters(100, 40, 40, 100, -25, 100, -25, 100)
+            navigating = self.CheckIfPositionDone(threshold=10, timethreshold=3)
         print("ARRIVED TO VECTOR.")
 
     def WaypointVectoring(self):  # arc vectoring
@@ -764,25 +763,21 @@ class NavigationCommander:
         self.SendThrusterCommands()
         # time.sleep(.1)
 
-    def UpdateThrustersGyroPID(self):
+    def UpdateThrusters_Gyro_PID(self):
         # self.ArdIMU.CalculateError(self.YawOffset, self.PitchOffset, self.RollOffset,
         #                            self.NorthOffset, self.EastOffset, self.DownOffset)
         self.Thruster_VentralLB.setSpeedPID(self.VentralPowerLB,
                                             -self.ArdIMU.getPitchPID()
-                                            - self.ArdIMU.getRollPID()
-                                            + self.Sonar.getPID())
+                                            - self.ArdIMU.getRollPID())
         self.Thruster_VentralRB.setSpeedPID(self.VentralPowerRB,
                                             -self.ArdIMU.getPitchPID()
-                                            + self.ArdIMU.getRollPID()
-                                            + self.Sonar.getPID())
+                                            + self.ArdIMU.getRollPID())
         self.Thruster_VentralLF.setSpeedPID(self.VentralPowerLF,
                                             self.ArdIMU.getPitchPID()
-                                            - self.ArdIMU.getRollPID()
-                                            + self.Sonar.getPID())
+                                            - self.ArdIMU.getRollPID())
         self.Thruster_VentralRF.setSpeedPID(self.VentralPowerRF,
                                             self.ArdIMU.getPitchPID()
-                                            + self.ArdIMU.getRollPID()
-                                            + self.Sonar.getPID())
+                                            + self.ArdIMU.getRollPID())
 
         self.Thruster_LateralBL.setSpeedPID(self.LateralPowerBL,
                                             self.ArdIMU.getYawPID())
@@ -795,7 +790,30 @@ class NavigationCommander:
         self.SendThrusterCommands()
         # time.sleep(.1)
 
-    def UpdateThrustersGyroPID_NoYaw(self):
+    def UpdateThrusters_Gyro_PID_NoCompass(self):
+        # self.ArdIMU.CalculateError(self.YawOffset, self.PitchOffset, self.RollOffset,
+        #                            self.NorthOffset, self.EastOffset, self.DownOffset)
+        self.Thruster_VentralLB.setSpeedPID(self.VentralPowerLB,
+                                            + self.ArdIMU.getPitchPID()
+                                            + self.ArdIMU.getRollPID())
+        self.Thruster_VentralRB.setSpeedPID(self.VentralPowerRB,
+                                            + self.ArdIMU.getPitchPID()
+                                            - self.ArdIMU.getRollPID())
+        self.Thruster_VentralLF.setSpeedPID(self.VentralPowerLF,
+                                            - self.ArdIMU.getPitchPID()
+                                            + self.ArdIMU.getRollPID())
+        self.Thruster_VentralRF.setSpeedPID(self.VentralPowerRF,
+                                            - self.ArdIMU.getPitchPID()
+                                            - self.ArdIMU.getRollPID())
+
+        self.Thruster_LateralBL.setSpeedPID(self.LateralPowerBL, 0)
+        self.Thruster_LateralFL.setSpeedPID(self.LateralPowerFL, 0)
+        self.Thruster_LateralBR.setSpeedPID(self.LateralPowerBR, 0)
+        self.Thruster_LateralFR.setSpeedPID(self.LateralPowerFR, 0)
+        self.SendThrusterCommands()
+        # time.sleep(.1)
+
+    def UpdateThrusters_GyroSonar_PID(self):
         # self.ArdIMU.CalculateError(self.YawOffset, self.PitchOffset, self.RollOffset,
         #                            self.NorthOffset, self.EastOffset, self.DownOffset)
         self.Thruster_VentralLB.setSpeedPID(self.VentralPowerLB,
