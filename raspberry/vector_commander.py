@@ -295,12 +295,20 @@ class NavigationCommander:
             self.BasicDirectionPower(self.CommandIndex)
 
     def BasicLinear(self):
-        DrivingWithTime = True
+        DrivingWithGyro = True
         if self.SuppCommand == "":
             print("SuppCommand empty, defaulting to run for 5 seconds...")
-            self.SuppCommand = "10"
-        while DrivingWithTime:
-            DrivingWithTime = (time.perf_counter() - self.InitialTime) < int(self.SuppCommand)
+            self.SuppCommand = "x10" # 'x10' go 10 measures in the x direction
+        elif self.SuppCommand[0] is 'x':
+            usedAngle = 0
+        elif self.SuppCommand[0] is 'y':
+            usedAngle = 1
+        elif self.SuppCommand[0] is 'z':
+            usedAngle = 2
+        measure = int(self.SuppCommand[1:])
+        while DrivingWithGyro:
+            angles = self.ArdIMU.getAngle()
+            DrivingWithGyro = (angles[usedAngle] - measure) > 0
             # print("Yaw, Roll, Pitch error: ", self.IMU.Yaw_PID, )
             # print("Time: ", time.perf_counter() - self.InitialTime)
             self.BasicDirectionPower(self.CommandIndex)
@@ -313,7 +321,6 @@ class NavigationCommander:
     def BasicVectoring(self):  # 'vector' should be a 3-integer array
         targeting = True
         navigating = True
-        i = 0
         self.StoreCommandGyroOffsets()
         while targeting:
             self.UpdateThrustersGyroPID()
@@ -329,7 +336,6 @@ class NavigationCommander:
     def BasicVectoring(self, yaw, pitch, roll):
         targeting = True
         navigating = True
-        i = 0
         self.YawOffset = yaw
         self.PitchOffset = pitch
         self.RollOffset = roll
