@@ -59,7 +59,7 @@ class TaskIO:
         # self.Movement.ZeroSonar()
         starttime = time.perf_counter()
         with open('telemetry_active.txt', 'w') as f:
-            while (time.perf_counter() - starttime) < 60:
+            while (time.perf_counter() - starttime) < 30:
                 perftime = time.perf_counter()
                 # confidence = self.Movement.Sonar.updateDistance()
                 # distance = self.Movement.Sonar.getDistance()
@@ -72,14 +72,14 @@ class TaskIO:
                 # towrite = "Sonar PID: " + str(self.Movement.Sonar.getPID())
                 # f.write(towrite)
                 # f.write("\n")
-                towrite = "IMU Position: " + str(self.Movement.ArdIMU.getPosition())
-                print(towrite)
+                towrite = "IMU Position: " + str(self.Movement.ArdIMU.Position)
+                # print(towrite)
                 f.write(towrite)
                 f.write("\n")
                 towrite = "IMU North, East, Down PID: " + str(self.Movement.ArdIMU.getNorthPID()) + "," + \
                           str(self.Movement.ArdIMU.getEastPID()) + "," + \
                           str(self.Movement.ArdIMU.getDownPID())
-                print(towrite)
+                # print(towrite)
                 f.write(towrite)
                 f.write("\n")
                 f.write("Runtime: ")
