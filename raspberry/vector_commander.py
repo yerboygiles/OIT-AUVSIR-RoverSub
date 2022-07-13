@@ -225,9 +225,10 @@ class NavigationCommander:
         # print("IMU 2 Angle: ", x2, y2, z2)
         # self.BrakeAllThrusters()
 
-        self.ArdIMU.UpdateAngle()
+        self.ArdIMU.UpdatePosition()
         self.ArdIMU.CalculateError()
         self.ArdIMU.PID()
+
 
         # print("Sonar PID: ", self.Sonar.getPID())
         # self.ArdIMU.UpdateFrontAngle()

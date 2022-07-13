@@ -72,7 +72,7 @@ class TaskIO:
                 # towrite = "Sonar PID: " + str(self.Movement.Sonar.getPID())
                 # f.write(towrite)
                 # f.write("\n")
-                towrite = "IMU angles: " + str(self.Movement.ArdIMU.getAngle())
+                towrite = "IMU Position: " + str(self.Movement.ArdIMU.getPosition())
                 print(towrite)
                 f.write(towrite)
                 f.write("\n")
