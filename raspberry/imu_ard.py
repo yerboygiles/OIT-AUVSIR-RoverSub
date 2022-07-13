@@ -227,7 +227,7 @@ class ArduinoIMU(IMU):
 
         # error for proportional control
         # gyro
-        # slightly newer but still old calcs
+        # brand new calcs
         self.Error[GYRO][YAW] = self.Angle[YAW] - yawoffset
         # right side, going left side
         if abs(self.Error[GYRO][YAW]) < 180:
@@ -235,6 +235,7 @@ class ArduinoIMU(IMU):
                 self.Error[GYRO][YAW] = self.Error[GYRO][YAW]
             else:
                 self.Error[GYRO][YAW] = -self.Error[GYRO][YAW]
+        # left side, going right
         else:
             if self.Angle[YAW] < yawoffset:
                 self.Error[GYRO][YAW] = -self.Error[GYRO][YAW]
@@ -242,11 +243,20 @@ class ArduinoIMU(IMU):
                 self.Error[GYRO][YAW] = self.Error[GYRO][YAW]
         self.Angle[YAW] = ((self.Angle[YAW] % 360) + 360) % 360
 
+<<<<<<< HEAD
         # if (self.Error[GYRO][YAW]) > 180:
         # self.Error[GYRO][YAW] = (self.Angle[YAW] - 180) - (abs(yawoffset) + 180)
         # left side, going right side
         # elif (self.Error[GYRO][YAW]) < -180:
         # self.Error[GYRO][YAW] = (self.Angle[YAW] + 180) - (abs(yawoffset) - 180)
+=======
+        # slightly newer calcs, but still old
+        # if (self.Error[GYRO][YAW]) > 180:
+            # self.Error[GYRO][YAW] = (self.Angle[YAW] - 180) - (abs(yawoffset) + 180)
+        # left side, going right side
+        # elif (self.Error[GYRO][YAW]) < -180:
+            # self.Error[GYRO][YAW] = (self.Angle[YAW] + 180) - (abs(yawoffset) - 180)
+>>>>>>> 97aa00d0cf54ce0b20fbf73fef4f2d8d3044ba6c
         # self.Error[GYRO][PITCH] = self.Angle[PITCH] - pitchoffset
         # self.Error[GYRO][ROLL] = self.Angle[ROLL] - rolloffset
 
