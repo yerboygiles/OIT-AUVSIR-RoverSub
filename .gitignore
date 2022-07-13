@@ -1,6 +1,6 @@
 /host
 /build
 /venv
-/.idea
+.idea
 workspace.xml
 misc.xml

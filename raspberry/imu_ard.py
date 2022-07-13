@@ -52,6 +52,7 @@ class ArduinoIMU(IMU):
 
         # - Read the actual depth:
         time.sleep(3)
+        self.dt = 0
         # print("Starting position: ", self.Position)
 
     # parse gyro object data from wt61p, can then pass to other programs
@@ -68,6 +69,11 @@ class ArduinoIMU(IMU):
     #     self.Angle[1] = round(((anglefront[1] - startfront[1]) - (anglerear[1] - startrear[1])) / 2, 4)
     #     self.Angle[2] = round(((anglefront[2] - startfront[2]) - (anglerear[2] - startrear[2])) / 2, 4)
 
+    def UpdateIMU(self):
+        self.dt = time.perf_counter() - self.dt
+        self.UpdateAngle()
+        self.UpdatePosition()
+
     def UpdateAngle(self):
 
         startfront = self.getStartingFrontAngle()
@@ -77,6 +83,23 @@ class ArduinoIMU(IMU):
         self.Angle[0] = round(((anglefront[0] - startfront[0]) + (anglerear[0] - startrear[0])) / 2, 4)
         self.Angle[1] = round(((anglefront[1] - startfront[1]) - (anglerear[1] - startrear[1])) / 2, 4)
         self.Angle[2] = round(((anglefront[2] - startfront[2]) - (anglerear[2] - startrear[2])) / 2, 4)
+
+    # parse position object data from wt61p, can then pass to other programs
+    def UpdatePosition(self, verlet=True):
+        i = 0
+        for velocity in self.Velocity:
+            velocity = self.Velocity[i] + 0.5 * (self.Acceleration[i]) * self.dt
+            i = i + 1
+        i = 0
+        if verlet:
+            # verlet integration
+            for position in self.Position:
+                position = self.Position[i] - self.Velocity[i] * self.dt + (self.Acceleration[i]*(self.dt**2)*0.5)
+        else:
+            # euler integration
+            for position in self.Position:
+                position = self.Position[i] + self.Velocity[i] * self.dt
+        pass
 
     def CalibrateStart(self):
         angle = self.parseAngleFront()
@@ -109,9 +132,12 @@ class ArduinoIMU(IMU):
         return self.Angle
         # print("Rear Angle: ", self.Angle)
 
-    # parse position object data from wt61p, can then pass to other programs
-    def UpdatePosition(self):
-        pass
+    def parseAccelFrontAndRear(self):
+        self.serial.write("gca\n".encode('ascii'))
+        data = self.serial.read_until("\n")
+        # time.sleep(0.05)
+        accelerations = self.parseDoubleXYZDataToList(data)
+        return accelerations
 
     def parseAngleFrontAndRear(self):
         self.serial.write("gaa\n".encode('ascii'))
@@ -185,13 +211,13 @@ class ArduinoIMU(IMU):
                 self.Error[GYRO][YAW] = self.Error[GYRO][YAW]
         self.Angle[YAW] = ((self.Angle[YAW] % 360) + 360) % 360
 
-        #if (self.Error[GYRO][YAW]) > 180:
-            #self.Error[GYRO][YAW] = (self.Angle[YAW] - 180) - (abs(yawoffset) + 180)
+        # if (self.Error[GYRO][YAW]) > 180:
+        # self.Error[GYRO][YAW] = (self.Angle[YAW] - 180) - (abs(yawoffset) + 180)
         # left side, going right side
-        #elif (self.Error[GYRO][YAW]) < -180:
-            #self.Error[GYRO][YAW] = (self.Angle[YAW] + 180) - (abs(yawoffset) - 180)
-        #self.Error[GYRO][PITCH] = self.Angle[PITCH] - pitchoffset
-        #self.Error[GYRO][ROLL] = self.Angle[ROLL] - rolloffset
+        # elif (self.Error[GYRO][YAW]) < -180:
+        # self.Error[GYRO][YAW] = (self.Angle[YAW] + 180) - (abs(yawoffset) - 180)
+        # self.Error[GYRO][PITCH] = self.Angle[PITCH] - pitchoffset
+        # self.Error[GYRO][ROLL] = self.Angle[ROLL] - rolloffset
 
         # old calcs
         # if ((180 - abs(yawoffset)) + (180 - abs(self.Angle[YAW]))) < 180:

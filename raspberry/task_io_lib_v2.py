@@ -76,9 +76,9 @@ class TaskIO:
                 print(towrite)
                 f.write(towrite)
                 f.write("\n")
-                towrite = "IMU Yaw, Pitch, Roll PID: " + str(self.Movement.ArdIMU.getYawPID()) + "," + \
-                          str(self.Movement.ArdIMU.getPitchPID()) + "," + \
-                          str(self.Movement.ArdIMU.getRollPID())
+                towrite = "IMU North, East, Down PID: " + str(self.Movement.ArdIMU.getNorthPID()) + "," + \
+                          str(self.Movement.ArdIMU.getEastPID()) + "," + \
+                          str(self.Movement.ArdIMU.getDownPID())
                 print(towrite)
                 f.write(towrite)
                 f.write("\n")
