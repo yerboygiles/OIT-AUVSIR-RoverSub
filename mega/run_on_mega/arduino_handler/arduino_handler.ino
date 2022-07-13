@@ -330,6 +330,7 @@ int readCommand() {
               Xangle_offset_F = JY901_F.getRoll();
               Yangle_offset_F = JY901_F.getPitch();
               Zangle_offset_F = JY901_F.getYaw();
+              JY901_F.autoCaliGyro(1);
               Serial1.print("fc\n");
               break;
             case 'a':
@@ -354,6 +355,7 @@ int readCommand() {
               Xangle_offset_R = JY901_R.getRoll();
               Yangle_offset_R = JY901_R.getPitch();
               Zangle_offset_R = JY901_R.getYaw();
+              JY901_R.autoCaliGyro(1);
               Serial1.print("rc\n");
               break;
             case 'a':
@@ -380,6 +382,11 @@ int readCommand() {
               Xangle_offset_R = JY901_R.getRoll();
               Yangle_offset_R = JY901_R.getPitch();
               Zangle_offset_R = JY901_R.getYaw();
+              Xangle_offset_F = JY901_F.getRoll();
+              Yangle_offset_F = JY901_F.getPitch();
+              Zangle_offset_F = JY901_F.getYaw();
+              JY901_R.autoCaliGyro(1);
+              JY901_F.autoCaliGyro(1);
               Serial1.print("rc\n");
               break;
             case 'a':
