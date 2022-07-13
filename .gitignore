@@ -1,7 +1,7 @@
 /host
 /build
 /venv
-/.idea
+.idea
 workspace.xml
 misc.xml
 OIT-AUVSIR_RoverSub.iml

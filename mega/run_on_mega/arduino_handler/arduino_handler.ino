@@ -12,9 +12,6 @@
 #include "HMC5883L.h"
 // #include <Wire.h>
 
-// water probe
-byte waterProbe = 69;
-
 //const byte RESET_PIN = 2;
 byte LBpin = 5; //left back
 byte LFpin = 4; //left front
@@ -180,8 +177,6 @@ void loop() {
 //    Test();
 //  }
 
-  JY901_F.receiveSerialData();
-  JY901_R.receiveSerialData();
   // put your main code here, to run repeatedly:
   //Serial1.println("Hello!!");
   if (stringComplete) {
@@ -319,6 +314,26 @@ int readCommand() {
     case 'g': // gyros
       switch (str_array[0][1])
       {
+        case 'c':
+          switch(str_array[0][2]){
+            case 'a':
+            JY901_F.receiveSerialData();
+            JY901_R.receiveSerialData();
+            String toprint = "C:";
+            toprint += JY901_F.getAccX();
+            toprint += ",";
+            toprint += JY901_R.getAccX();
+            toprint += ":";
+            toprint += JY901_F.getAccY();
+            toprint += ",";
+            toprint += JY901_R.getAccY();
+            toprint += ":";
+            toprint += JY901_F.getAccZ();
+            toprint += ",";
+            toprint += JY901_R.getAccZ();
+            toprint += "\n";
+            Serial1.print(toprint);
+          }
         case 'f':
           JY901_F.receiveSerialData();
           switch (str_array[0][2]){

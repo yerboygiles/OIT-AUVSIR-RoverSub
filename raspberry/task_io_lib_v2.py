@@ -1,7 +1,7 @@
 #!python3
 # Author: Theodor Giles
 # Created: 8/7/20
-# Last Edited 5/18/22
+# Last Edited 7/13/22
 # Description:
 # This program manages the conversion of the mission.txt into commands that the MovementCommander can understand
 # as well as the AI/TF/vision integration
@@ -59,7 +59,7 @@ class TaskIO:
         # self.Movement.ZeroSonar()
         starttime = time.perf_counter()
         with open('telemetry_active.txt', 'w') as f:
-            while (time.perf_counter() - starttime) < 60:
+            while (time.perf_counter() - starttime) < 30:
                 perftime = time.perf_counter()
                 # confidence = self.Movement.Sonar.updateDistance()
                 # distance = self.Movement.Sonar.getDistance()
@@ -72,14 +72,14 @@ class TaskIO:
                 # towrite = "Sonar PID: " + str(self.Movement.Sonar.getPID())
                 # f.write(towrite)
                 # f.write("\n")
-                towrite = "IMU angles: " + str(self.Movement.ArdIMU.getAngle())
-                print(towrite)
+                towrite = "IMU Position: " + str(self.Movement.ArdIMU.Position)
+                # print(towrite)
                 f.write(towrite)
                 f.write("\n")
-                towrite = "IMU Yaw, Pitch, Roll PID: " + str(self.Movement.ArdIMU.getYawPID()) + "," + \
-                          str(self.Movement.ArdIMU.getPitchPID()) + "," + \
-                          str(self.Movement.ArdIMU.getRollPID())
-                print(towrite)
+                towrite = "IMU North, East, Down PID: " + str(self.Movement.ArdIMU.getNorthPID()) + "," + \
+                          str(self.Movement.ArdIMU.getEastPID()) + "," + \
+                          str(self.Movement.ArdIMU.getDownPID())
+                # print(towrite)
                 f.write(towrite)
                 f.write("\n")
                 f.write("Runtime: ")
