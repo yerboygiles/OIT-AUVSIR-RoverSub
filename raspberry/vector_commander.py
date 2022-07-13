@@ -1,7 +1,7 @@
 #!python3
-# Author: Theodor Giles
+# Author: Theodor Giles, Colton Rhodes
 # Created: 11/22/20
-# Last Edited 5/19/22
+# Last Edited 7/13/22
 # Description:
 # This node manages the commands/movement/physical
 # control of the RoboSub V2, 2020-21
