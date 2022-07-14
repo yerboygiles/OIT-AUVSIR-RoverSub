@@ -96,6 +96,7 @@ class ArduinoIMU(IMU):
         self.Acceleration[0] = round((((accelfront[0]) - (accelrear[0])) / 2), 4)
         self.Acceleration[1] = round((((accelfront[1]) + (accelrear[1])) / 2), 4)
         self.Acceleration[2] = round((((accelfront[2]) + (accelrear[2])) / 2) - 0.99, 4)
+
         print("Accel: ", self.Acceleration)
         i = 0
         for velocity in self.Velocity:

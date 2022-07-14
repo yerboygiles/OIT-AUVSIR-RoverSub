@@ -481,10 +481,11 @@ class NavigationCommander:
                         self.InitialTime = time.perf_counter()
                         if self.UsingGyro:
                             print("Running basic command...")
-                            self.BasicLinear()
-                        else:
-                            print("Running basic command with time due to no Gyro functionality...")
+                            # self.BasicLinear()
                             self.BasicWithTime()
+                        else:
+                            pass
+                            print("Running N/A command with time due to no Gyro functionality...")
                     i += 2
                     self.CommandIndex += 1
                 self.CommandIndex = 0
@@ -492,6 +493,8 @@ class NavigationCommander:
                     i = 0
                     if self.MainCommand == advancedcommand:
                         self.InitialTime = time.perf_counter()
+                        self.StoreCommandGyroOffsets()
+                        # self.StoreCommandPositionOffsets()
                         if self.UsingGyro:
                             print("Running advanced command...")
                             self.BasicVectoring()

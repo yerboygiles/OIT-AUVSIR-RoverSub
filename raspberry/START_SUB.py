@@ -30,12 +30,13 @@ def run():
 
     # self, mission filename, usingarduino, usingvision, usinggyro, usingsim, usingping
     Mission = TaskIO("mission.txt", True, False, True, False, False)
-    # testing funcs
 
-    Mission.testData()
+    # testing funcs
+    # Mission.testData()
 
     # actual task/mission runner
-    # Mission.get_tasks()
+    Mission.get_tasks()
+
     Mission.terminate()
     print("done")
 
