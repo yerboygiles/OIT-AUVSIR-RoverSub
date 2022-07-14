@@ -255,7 +255,7 @@ class NavigationCommander:
 
     def ArduinoTesting(self):
         # self.ArduinoCommander.CommunicateAllThrusters(100, 40, 40, 100, -25, 100, -25, 100)
-        # self.UpdateThrustersGyroPID()
+        # self.UpdateThrusters_Gyro_PID()
         self.UpdateThrusters_Gyro_PID_NoCompass()
         # time.sleep(.1)
         pass
@@ -286,11 +286,13 @@ class NavigationCommander:
             # self.TradeWithArduino()
 
     def BasicWithTime(self):
+        self.InitialTime = time.perf_counter()
         DrivingWithTime = True
         if self.SuppCommand == "":
             print("SuppCommand empty, defaulting to run for 5 seconds...")
             self.SuppCommand = "10"
         while DrivingWithTime:
+            print("Time left: ",(time.perf_counter() - self.InitialTime))
             DrivingWithTime = (time.perf_counter() - self.InitialTime) < int(self.SuppCommand)
             # print("Time: ", time.perf_counter() - self.InitialTime)
             self.BasicDirectionPower(self.CommandIndex)
@@ -324,6 +326,7 @@ class NavigationCommander:
         navigating = True
         self.StoreCommandGyroOffsets()
         while targeting:
+            # self.ArdIMU.updateGyro()
             self.UpdateThrusters_Gyro_PID()
             self.CheckIfGyroDone()
             targeting = self.GyroRunning
@@ -333,20 +336,20 @@ class NavigationCommander:
             navigating = self.CheckIfPositionDone()
         print("ARRIVED TO VECTOR.")
 
-    def BasicVectoring(self, yaw, pitch, roll):
-        targeting = True
-        navigating = True
-        self.YawOffset = yaw
-        self.PitchOffset = pitch
-        self.RollOffset = roll
-        while targeting:
-            self.UpdateThrusters_Gyro_PID()
-            targeting = self.CheckIfGyroDone()
-        print("TARGETED VECTOR.")
-        while navigating:
-            targeting = self.CheckIfGyroDone()
-            navigating = self.CheckIfPositionDone()
-        print("ARRIVED TO VECTOR.")
+    # def BasicVectoring(self, yaw, pitch, roll):
+    #     targeting = True
+    #     navigating = True
+    #     self.YawOffset = yaw
+    #     self.PitchOffset = pitch
+    #     self.RollOffset = roll
+    #     while targeting:
+    #         self.UpdateThrusters_Gyro_PID()
+    #         targeting = self.CheckIfGyroDone()
+    #     print("TARGETED VECTOR.")
+    #     while navigating:
+    #         targeting = self.CheckIfGyroDone()
+    #         navigating = self.CheckIfPositionDone()
+    #     print("ARRIVED TO VECTOR.")
 
     def WaypointVectoring(self):  # arc vectoring
         self.StoreCommandGyroOffsets()
@@ -451,20 +454,28 @@ class NavigationCommander:
         # tell arduino to arm motors
         self.ArduinoCommander.SendToArduino("tc,")
         print("Calibrating and arming thrusters...")
-        time.sleep(8)
+        time.sleep(7)
+        self.ArduinoCommander.SendToArduino("gfc,")
+        print("Calibrating front IMU. Wait 5...")
+        time.sleep(5)
+        self.ArduinoCommander.SendToArduino("grc,")
+        print("Calibrating rear IMU. Wait 5...")
+        time.sleep(5)
         print("Calibrated and armed.")
         for command in commandlist:
             print("VectorCommander running: ", command)
             self.MainCommand = ""
             self.SuppCommand = ""
             j = 0
-            for commandParsed in str(command).split('\n'):
+            for commandParsed in str(command).split(','):
                 commandParsed.strip()
-                print("commandParsed")
+                # print("commandParsed")
                 if j == 0:
                     self.MainCommand = commandParsed
+                    print(command, " main: ", self.MainCommand)
                 if j == 1:
                     self.SuppCommand = commandParsed
+                    print(command, " supp: ", self.SuppCommand)
                 j = j + 1
             print("Main: ", self.MainCommand, ", Supplementary: ", self.SuppCommand)
             if self.MainCommand == "REMOTE":
@@ -557,7 +568,9 @@ class NavigationCommander:
         self.YawLocked = (abs(self.ArdIMU.getYawPID()) < threshold)
         self.PitchLocked = (abs(self.ArdIMU.getPitchPID()) < threshold)
         self.RollLocked = (abs(self.ArdIMU.getRollPID()) < threshold)
-        print("Yaw diff: ", abs(self.ArdIMU.getYaw() + self.YawOffset))
+        print("Yaw: ", self.ArdIMU.getYaw())
+        # print("Yaw PID: ", self.ArdIMU.getYawPID())
+        # print("ANGLE LOCK: ", self.YawLocked, self.PitchLocked, self.RollLocked)
         # if self.YawLocked and self.PitchLocked and self.RollLocked:
         if self.YawLocked:
             self.ElapsedTime = time.perf_counter() - self.InitialTime
@@ -622,7 +635,7 @@ class NavigationCommander:
         self.UpdateThrusters()
         return running
 
-    def BasicDirectionPower(self, index, power=15):
+    def BasicDirectionPower(self, index, power=30):
         # print("Index: ", index)
         # index = index + 1
         if index != 0:
@@ -729,11 +742,12 @@ class NavigationCommander:
                 self.VentralPowerLF = 0
                 self.VentralPowerRB = 0
                 self.VentralPowerRF = 0
-        # if self.UsingGyro:
-        #     self.UpdateGyro()
-        #     self.UpdateThrustersGyroPID()
-        # else:
-        #     self.UpdateThrusters()
+        if self.UsingGyro:
+            # self.UpdateGyro()
+            self.ArdIMU.UpdateAngle()
+            self.UpdateThrusters_Gyro_PID()
+        else:
+            self.UpdateThrusters()
 
     def UpdateGyro(self):
         if self.UsingGyro:

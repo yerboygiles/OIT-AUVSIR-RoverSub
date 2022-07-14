@@ -97,13 +97,13 @@ class ArduinoIMU(IMU):
         self.Acceleration[1] = round((((accelfront[1]) + (accelrear[1])) / 2), 4)
         self.Acceleration[2] = round((((accelfront[2]) + (accelrear[2])) / 2) - 0.99, 4)
 
-        print("Accel: ", self.Acceleration)
+        # print("Accel: ", self.Acceleration)
         i = 0
         for velocity in self.Velocity:
             self.Velocity[i] = round((self.storedAcceleration[i] + self.Acceleration[i]) * self.dt, 4)
             i = i + 1
         i = 0
-        print("Velocity: ", self.Velocity)
+        # print("Velocity: ", self.Velocity)
         if verlet:
             # verlet integration
             for position in self.Position:
@@ -243,6 +243,7 @@ class ArduinoIMU(IMU):
             else:
                 self.Error[GYRO][YAW] = self.Error[GYRO][YAW]
         self.Angle[YAW] = ((self.Angle[YAW] % 360) + 360) % 360
+        print("Yaw: ", self.Angle[YAW])
 
         # position
         # self.Error[POSITION][NORTH] = self.Acceleration[NORTH] - northoffset

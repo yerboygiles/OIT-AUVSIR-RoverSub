@@ -15,6 +15,7 @@ GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(buzzer, GPIO.OUT)
 
+
 def run():
     from task_io_lib_v2 import TaskIO
 
