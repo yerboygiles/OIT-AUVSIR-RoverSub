@@ -1,7 +1,7 @@
 /*
-    Author: Theodor Giles
+    Author: Theodor Giles, Colton Rhodes
     Created: 1/30/22
-    Last Edited 5/18/22
+    Last Edited 7/13/22
     Description:
     arduino mega controller
 */
