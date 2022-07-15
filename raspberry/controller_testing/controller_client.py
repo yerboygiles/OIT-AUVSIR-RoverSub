@@ -1,6 +1,6 @@
 import socket
 
-TCP_IP = '64.112.174.137' # this IP of my pc. When I want raspberry pi 2`s as a server, I replace it with its IP '169.254.54.195'
+TCP_IP = '192.168.137.31' # this IP of my pc. When I want raspberry pi 4`s as a server
 TCP_PORT = 5005
 BUFFER_SIZE = 1024 # Normally 1024, but I want fast response
 
