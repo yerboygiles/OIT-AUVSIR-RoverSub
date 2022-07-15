@@ -46,6 +46,8 @@ class NavigationCommander:
         # setting up board serial port
         self.UsingArduino = usingarduino
 
+        self.writeout = open('telemetry_active.txt', 'w')
+
         if self.UsingArduino:
             from arduino_commander import ArduinoCommander
             self.ArduinoCommander = ArduinoCommander()
@@ -153,6 +155,7 @@ class NavigationCommander:
         # advanced: these commands are much more complicated, will need to
         # develop pathing and a lot of vision/gyro/position integration
         self.BASIC_MOVEMENT_COMMANDS = [
+            "STALL",
             "FORWARDS",
             "STRAFE LEFT",
             "BACKWARDS",
@@ -229,7 +232,6 @@ class NavigationCommander:
         self.ArdIMU.CalculateError()
         self.ArdIMU.PID()
 
-
         # print("Sonar PID: ", self.Sonar.getPID())
         # self.ArdIMU.UpdateFrontAngle()
         # print("Front angle, corrected: ", self.ArdIMU.getCorrectedFrontAngle())
@@ -288,12 +290,14 @@ class NavigationCommander:
     def BasicWithTime(self):
         self.InitialTime = time.perf_counter()
         DrivingWithTime = True
+        print("Command index: ", self.CommandIndex)
         if self.SuppCommand == "":
             print("SuppCommand empty, defaulting to run for 5 seconds...")
             self.SuppCommand = "10"
         while DrivingWithTime:
-            print("Time left: ",(time.perf_counter() - self.InitialTime))
+            print("Time left: ", (time.perf_counter() - self.InitialTime))
             DrivingWithTime = (time.perf_counter() - self.InitialTime) < int(self.SuppCommand)
+            print("FL Speed: ", self.Thruster_LateralFL.getSpeed())
             # print("Time: ", time.perf_counter() - self.InitialTime)
             self.BasicDirectionPower(self.CommandIndex)
 
@@ -302,12 +306,12 @@ class NavigationCommander:
         if self.SuppCommand == "":
             print("SuppCommand empty, defaulting to run for 5 seconds...")
             self.SuppCommand = "x10"  # 'x10' go 10 measures in the x direction
-        elif self.SuppCommand[0] is 'x':
-            usedAngle = 0
         elif self.SuppCommand[0] is 'y':
             usedAngle = 1
         elif self.SuppCommand[0] is 'z':
             usedAngle = 2
+        else:
+            usedAngle = 0
         measure = int(self.SuppCommand[1:])
         while DrivingWithGyro:
             angles = self.ArdIMU.getAngle()
@@ -326,15 +330,15 @@ class NavigationCommander:
         navigating = True
         self.StoreCommandGyroOffsets()
         while targeting:
-            # self.ArdIMU.updateGyro()
+            self.ArdIMU.updateGyro()
             self.UpdateThrusters_Gyro_PID()
             self.CheckIfGyroDone()
             targeting = self.GyroRunning
         print("TARGETED VECTOR.")
-        while navigating:
-            self.UpdateThrusters_Gyro_PID()
-            navigating = self.CheckIfPositionDone()
-        print("ARRIVED TO VECTOR.")
+        # while navigating:
+        #     self.UpdateThrusters_Gyro_PID()
+        #     navigating = self.CheckIfPositionDone()
+        # print("ARRIVED TO VECTOR.")
 
     # def BasicVectoring(self, yaw, pitch, roll):
     #     targeting = True
@@ -462,6 +466,7 @@ class NavigationCommander:
         print("Calibrating rear IMU. Wait 5...")
         time.sleep(5)
         print("Calibrated and armed.")
+
         for command in commandlist:
             print("VectorCommander running: ", command)
             self.MainCommand = ""
@@ -568,7 +573,15 @@ class NavigationCommander:
         self.YawLocked = (abs(self.ArdIMU.getYawPID()) < threshold)
         self.PitchLocked = (abs(self.ArdIMU.getPitchPID()) < threshold)
         self.RollLocked = (abs(self.ArdIMU.getRollPID()) < threshold)
-        print("Yaw: ", self.ArdIMU.getYaw())
+        towrite = "Angles: " + str(self.ArdIMU.getAngle()) + "\n"
+        self.writeout.write(towrite)
+        towrite = "Angles PID: " + str(self.ArdIMU.getYawPID()) + ", " + \
+                  str(self.ArdIMU.getPitchPID()) + ", " + \
+                  str(self.ArdIMU.getRollPID()) + "\n"
+        self.writeout.write(towrite)
+        towrite = "Angles: " + str(time.perf_counter()) + "\n"
+        self.writeout.write(towrite)
+        # print("Yaw, YAW PID: ", self.ArdIMU.getYaw(),", ", self.ArdIMU.getYawPID())
         # print("Yaw PID: ", self.ArdIMU.getYawPID())
         # print("ANGLE LOCK: ", self.YawLocked, self.PitchLocked, self.RollLocked)
         # if self.YawLocked and self.PitchLocked and self.RollLocked:
@@ -746,6 +759,7 @@ class NavigationCommander:
             # self.UpdateGyro()
             self.ArdIMU.UpdateAngle()
             self.UpdateThrusters_Gyro_PID()
+            self.CheckIfGyroDone()
         else:
             self.UpdateThrusters()
 
@@ -763,7 +777,7 @@ class NavigationCommander:
 
     def UpdateSensors(self):
         self.UpdateGyro()
-        self.Sonar.UpdateDistance()
+        # self.Sonar.UpdateDistance()
 
     def UpdateThrusters(self):
 
@@ -948,6 +962,9 @@ class NavigationCommander:
         print("Disarming Thrusters. Wait 6...")
         self.BrakeAllThrusters()
         time.sleep(6)
+        print("Writing out file...")
+        self.writeout.close()
+        time.sleep(1)
         if self.UsingArduino:
             print("Killing Arduino. Wait 1...")
             # self.ArduinoCommander.SendToArduino("STOP")

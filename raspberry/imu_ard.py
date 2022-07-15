@@ -83,6 +83,7 @@ class ArduinoIMU(IMU):
         self.Angle[0] = round(((anglefront[0] - startfront[0]) + (anglerear[0] - startrear[0])) / 2, 4)
         self.Angle[1] = round(((anglefront[1] - startfront[1]) - (anglerear[1] - startrear[1])) / 2, 4)
         self.Angle[2] = round(((anglefront[2] - startfront[2]) - (anglerear[2] - startrear[2])) / 2, 4)
+        print("Angles: ", self.Angle)
 
     # parse position object data from wt61p, can then pass to other programs
     def UpdatePosition(self, verlet=True):
@@ -243,7 +244,7 @@ class ArduinoIMU(IMU):
             else:
                 self.Error[GYRO][YAW] = self.Error[GYRO][YAW]
         self.Angle[YAW] = ((self.Angle[YAW] % 360) + 360) % 360
-        print("Yaw: ", self.Angle[YAW])
+        # print("Yaw: ", self.Angle[YAW])
 
         # position
         # self.Error[POSITION][NORTH] = self.Acceleration[NORTH] - northoffset
@@ -319,7 +320,7 @@ class ArduinoIMU(IMU):
         return xyz
 
     def PID(self):
-        if self.integral_overflow > 15:
+        if self.integral_overflow > 30:
             self.Error_Sum[GYRO][YAW] = 0
             self.Error_Sum[GYRO][PITCH] = 0
             self.Error_Sum[GYRO][ROLL] = 0

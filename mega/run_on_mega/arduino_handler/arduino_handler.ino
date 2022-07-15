@@ -127,13 +127,16 @@ void setup() {
   value.reserve(5);
   
   Serial2.begin(115200);
-  JY901_F.attach(Serial2);
+  JY901_FC.attach(Serial2);
 
   Serial3.begin(115200);
-  JY901_R.attach(Serial3);
+  JY901_FR.attach(Serial3);
+  
+  Serial3.begin(115200);
+  JY901_FR.attach(Serial);
 
-  JY901_F.receiveSerialData();
-  JY901_R.receiveSerialData();
+  JY901_FC.receiveSerialData();
+  JY901_FR.receiveSerialData();
 
   LBsig.attach(LBpin);
   LFsig.attach(LFpin);
@@ -164,10 +167,9 @@ void setup() {
   BR_Thruster.Calibrate();
   FL_Thruster.Calibrate();
   FR_Thruster.Calibrate();
-  delay(1000);
-  Serial.println("Configured.");
+//  delay(1000);
   //print("Done setting up.");
-  delay(5000);
+  delay(7000);
   return;
 }
 
@@ -186,20 +188,7 @@ void loop() {
     
 //    Serial.println("Done with readCommand().");
 //    Serial.println(commandComplete);
-    switch (readCommand()) {
-      case 0:
-        Serial.println("No command run.");
-        break;
-      case 1:
-        Serial.println("Thrusters driven.");
-        break;
-      case 2:
-        Serial.println("Thrusters calibrated.");
-        break;
-      default:
-        Serial.println("Default...");
-        break;
-    }
+    readCommand()
     JetsonCommand = "";
     stringComplete = false;
   }
@@ -317,106 +306,107 @@ int readCommand() {
         case 'c':
           switch(str_array[0][2]){
             case 'a':
-            JY901_F.receiveSerialData();
-            JY901_R.receiveSerialData();
+            JY901_FC.receiveSerialData();
+            JY901_FR.receiveSerialData();
             String toprint = "C:";
-            toprint += JY901_F.getAccX();
+            toprint += JY901_FC.getAccX();
             toprint += ",";
-            toprint += JY901_R.getAccX();
+            toprint += JY901_FR.getAccX();
             toprint += ":";
-            toprint += JY901_F.getAccY();
+            toprint += JY901_FC.getAccY();
             toprint += ",";
-            toprint += JY901_R.getAccY();
+            toprint += JY901_FR.getAccY();
             toprint += ":";
-            toprint += JY901_F.getAccZ();
+            toprint += JY901_FC.getAccZ();
             toprint += ",";
-            toprint += JY901_R.getAccZ();
+            toprint += JY901_FR.getAccZ();
             toprint += "\n";
             Serial1.print(toprint);
           }
         case 'f':
-          JY901_F.receiveSerialData();
+          JY901_FC.receiveSerialData();
           switch (str_array[0][2]){
             case 'h':
-              Zangle_offset_F = JY901_F.getYaw();
+              Zangle_offset_F = JY901_FC.getYaw();
               Serial1.print("fh\n");
               break;
             case 'c':
-              Xangle_offset_F = JY901_F.getRoll();
-              Yangle_offset_F = JY901_F.getPitch();
-              Zangle_offset_F = JY901_F.getYaw();
-              JY901_F.autoCaliGyro(1);
+              Xangle_offset_F = JY901_FC.getRoll();
+              Yangle_offset_F = JY901_FC.getPitch();
+              Zangle_offset_F = JY901_FC.getYaw();
+              JY901_FC.autoCaliGyro(1);
               Serial1.print("fc\n");
               break;
             case 'a':
               Serial1.print("A:");
-              Serial1.print(JY901_F.getYaw());
+              Serial1.print(JY901_FC.getYaw());
               Serial1.print(":");
-              Serial1.print(JY901_F.getPitch());
+              Serial1.print(JY901_FC.getPitch());
               Serial1.print(":");
-              Serial1.print(JY901_F.getRoll());
+              Serial1.print(JY901_FC.getRoll());
               Serial1.print("\n");
               break;
           }
           break;
         case 'r':
-          JY901_R.receiveSerialData();
+          JY901_FR.receiveSerialData();
           switch (str_array[0][2]){
             case 'h':
-              Zangle_offset_R = JY901_R.getYaw();
+              Zangle_offset_R = JY901_FR.getYaw();
               Serial1.print("rh\n");
               break;
             case 'c':
-              Xangle_offset_R = JY901_R.getRoll();
-              Yangle_offset_R = JY901_R.getPitch();
-              Zangle_offset_R = JY901_R.getYaw();
-              JY901_R.autoCaliGyro(1);
+              Xangle_offset_R = JY901_FR.getRoll();
+              Yangle_offset_R = JY901_FR.getPitch();
+              Zangle_offset_R = JY901_FR.getYaw();
+              JY901_FR.autoCaliGyro(1);
               Serial1.print("rc\n");
               break;
             case 'a':
               Serial1.print("A:");
-              Serial1.print(JY901_R.getYaw());
+              Serial1.print(JY901_FR.getYaw());
               Serial1.print(":");
-              Serial1.print(JY901_R.getPitch());
+              Serial1.print(JY901_FR.getPitch());
               Serial1.print(":");
-              Serial1.print(JY901_R.getRoll());
+              Serial1.print(JY901_FR.getRoll());
               Serial1.print("\n");
               break;
           }
           break;
         // all gyros
         case 'a':
-          JY901_F.receiveSerialData();
-          JY901_R.receiveSerialData();
+          JY901_FL.receiveSerialData();
+          JY901_FC.receiveSerialData();
+          JY901_FR.receiveSerialData();
           switch (str_array[0][2]){
             case 'h':
-              Zangle_offset_R = JY901_R.getYaw();
+              Zangle_offset_R = JY901_FR.getYaw();
               Serial1.print("rh\n");
               break;
             case 'c':
-              Xangle_offset_R = JY901_R.getRoll();
-              Yangle_offset_R = JY901_R.getPitch();
-              Zangle_offset_R = JY901_R.getYaw();
-              Xangle_offset_F = JY901_F.getRoll();
-              Yangle_offset_F = JY901_F.getPitch();
-              Zangle_offset_F = JY901_F.getYaw();
-              JY901_R.autoCaliGyro(1);
-              JY901_F.autoCaliGyro(1);
+              Xangle_offset_R = JY901_FR.getRoll();
+              Yangle_offset_R = JY901_FR.getPitch();
+              Zangle_offset_R = JY901_FR.getYaw();
+              Xangle_offset_F = JY901_FC.getRoll();
+              Yangle_offset_F = JY901_FC.getPitch();
+              Zangle_offset_F = JY901_FC.getYaw();
+              JY901_FR.autoCaliGyro(1);
+              JY901_FC.autoCaliGyro(1);
               Serial1.print("rc\n");
               break;
             case 'a':
               String toprint = "A:";
-              toprint += JY901_F.getYaw();
+              toprint += JY901_FC.getYaw();
               toprint += ",";
-              toprint += JY901_R.getYaw();
+              toprint += JY901_FR.getYaw();
               toprint += ":";
-              toprint += JY901_F.getPitch();
+              toprint += JY901_FC.getPitch();
               toprint += ",";
-              toprint += JY901_R.getPitch();
+              toprint += JY901_FR.getPitch();
               toprint += ":";
-              toprint += JY901_F.getRoll();
+              toprint += JY901_FC.getRoll();
               toprint += ",";
-              toprint += JY901_R.getRoll();
+              toprint += JY901_FR.getRoll();
               toprint += "\n";
               Serial1.print(toprint);
               break;
@@ -432,9 +422,9 @@ int readCommand() {
 }
 
 void updateAccel(){
-  Xaccel = (JY901_R.getAccX() + JY901_F.getAccX())/2;
-  Yaccel = (JY901_R.getAccY() + JY901_F.getAccY())/2;
-  Zaccel = (JY901_R.getAccZ() + JY901_F.getAccZ())/2;
+  Xaccel = (JY901_FR.getAccX() + JY901_FC.getAccX())/2;
+  Yaccel = (JY901_FR.getAccY() + JY901_FC.getAccY())/2;
+  Zaccel = (JY901_FR.getAccZ() + JY901_FC.getAccZ())/2;
 }
 float integrateXaccel(){
   newTime = millis();

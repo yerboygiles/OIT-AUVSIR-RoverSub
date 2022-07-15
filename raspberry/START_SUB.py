@@ -34,9 +34,12 @@ def run():
 
     # testing funcs
     # Mission.testData()
-
-    # actual task/mission runner
-    Mission.get_tasks()
+    try:
+        # actual task/mission runner
+        Mission.get_tasks()
+    except KeyboardInterrupt:
+        print("Interrupt. Ctrl-C'ed out.")
+        Mission.terminate()
 
     Mission.terminate()
     print("done")
