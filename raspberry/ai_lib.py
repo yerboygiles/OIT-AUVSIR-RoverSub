@@ -21,5 +21,5 @@ class AI:
         return self.results[0], self.results[1], self.results[2], self.results[3], self.results[4]
 
     def terminate(self):
-        self.detector.finalize()
+        self.detector.terminate()
         return True

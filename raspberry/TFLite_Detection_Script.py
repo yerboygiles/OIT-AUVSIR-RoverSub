@@ -134,7 +134,7 @@ def init(model_dir, show_images=False, resolution='640x480', graph='model.tflite
     CELLPHONEXSIZE = 68.2
     TARGETYSIZE = 145.6
 
-    graph_def_file = model_dir+"/saved_model/saved_model.pb"
+    graph_def_file = model_dir + "/vision/saved_model1.pb"
 
     input_arrays = ["Input"]
     output_arrays = ["output"]
@@ -281,7 +281,7 @@ def process_image(searchingfor=None):
     return LateralDistanceMM, DistanceMM, OffCenterX, OffCenterY, FoundTarget
 
     print('Error! No image found...')
-    finalize()
+    terminate()
 
 
 # *************************************************************************************************
@@ -332,7 +332,7 @@ def draw_detected_frame(frame, imageheight, imagewidth, boxes, classes, scores):
     # NOT IN A LOOP ANYMORE, JUST SHOW IMAGES AND LET USER CALL FINALIZE TO CLOSE
     # --# Press any key to continue to next image, or press 'q' to quit
     if cv2.waitKey(1) == ord('q'):
-        finalize()
+        terminate()
     # Calculate framerate
     t2 = cv2.getTickCount()
     time1 = (t2 - t1) / freq
@@ -358,43 +358,12 @@ def process_distance_from(boxes, classes, scores, searchingfor):
             object_name = LabelsTF[int(classes[i])]  # Look up object name from "labels" array using class index
             if object_name == searchingfor:
                 FoundTarget = True
-                LateralDistance, Distance, OffCenterX, OffCenterY = distance3(MaxX, MinX, MaxY, MinY)
+                LateralDistance, Distance, OffCenterX, OffCenterY = findDistance(MaxX, MinX, MaxY, MinY)
                 break
     return LateralDistance, Distance, OffCenterX, OffCenterY, FoundTarget
 
 
-# distance function ergh, doesn't quite work. so close
-# def distance1(maxx, minx, maxy, miny):
-#     # my math is horrid but it works
-#     # To find the CONSTANT_distancetocm variable, I basically had to manually measure
-#     # distance of objects from the camera, then divided the distance from the camera with a number gained
-#     # from the equation (m/(1-(a/b))) m - distance between when a and b were measured, a -
-#     SizeX = (maxx - minx)
-#     SizeY = (maxy - miny)
-#     pixeltomm = 145.6 / SizeY
-#     ObjectCenterX = (minx - maxx) / 2
-#     CONSTANT_distancetocm = 698
-#     OffCenterX = int(maxx - (SizeX / 2)) - int(imageWidth / 2)
-#     OffCenterY = int(maxy - (SizeY / 2)) - int(imageHeight / 2)
-#     DistanceC = math.sqrt(pow(OffCenterX, 2) + pow(OffCenterY, 2))
-#     DistanceA = ((CELLPHONEYSIZE * FOCALLENGTH) / SizeY)
-#     DistanceB = math.sqrt(pow(DistanceA, 2) + pow(DistanceC, 2))
-#     Distance = ((CELLPHONEYSIZE * FOCALLENGTH) / SizeY)
-#     return LateralDistance, Distance, OffCenterX, OffCenterY
-#
-# not being used, maybe make another equation later on
-# def distance2(maxx, minx, maxy, miny):
-#     SizeX = (maxx - minx)
-#     SizeY = (maxy - miny)
-#     OffCenterX = int(maxx - (SizeX / 2)) - int(imageWidth / 2)
-#     OffCenterY = int(maxy - (SizeY / 2)) - int(imageHeight / 2)
-#     magnification = CELLPHONEYSIZE / (maxy - miny)
-#     Distance = FOCALLENGTH / magnification
-#     DistanceMM = Distance / 25.4
-#     return LateralDistance, Distance, OffCenterX, OffCenterY
-#
-
-def distance3(maxx, minx, maxy, miny):
+def findDistance(maxx, minx, maxy, miny):
     THEODORS_NUMBER = 0.0516657316
     SizeX = (maxx - minx)
     SizeY = (maxy - miny)
@@ -420,7 +389,7 @@ def distance3(maxx, minx, maxy, miny):
     return LateralDistance, Distance, OffCenterX, OffCenterY
 
 
-def finalize():
+def terminate():
     # Clean up
     cv2.destroyAllWindows()
     videostream.stop()

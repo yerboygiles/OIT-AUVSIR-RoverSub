@@ -20,8 +20,9 @@ DOWN: int = 2
 
 
 class ArduinoIMU(IMU):
-    StartingFrontAngle = [0.0, 0.0, 0.0]
-    StartingRearAngle = [0.0, 0.0, 0.0]
+    StartingLeftAngle = [0.0, 0.0, 0.0]
+    StartingCenterAngle = [0.0, 0.0, 0.0]
+    StartingRightAngle = [0.0, 0.0, 0.0]
     FrontAngle = [0.0, 0.0, 0.0]
     RearAngle = [0.0, 0.0, 0.0]
     Position = [0.0, 0.0, 0.0]
@@ -41,8 +42,9 @@ class ArduinoIMU(IMU):
         # - Read the actual attitude: Roll, Pitch, and Yaw
         # time.sleep(3)
         self.CalibrateStart()
-        print("Starting Front Angle: ", self.StartingFrontAngle)
-        print("Starting Rear Angle: ", self.StartingRearAngle)
+        print("Starting Center Angle: ", self.StartingCenterAngle)
+        print("Starting Right Angle: ", self.StartingRightAngle)
+        print("Starting Left Angle: ", self.StartingLeftAngle)
         # print('Orientation: ', self.getStartingAngle())
 
         # - Read the actual position North, East, and Down
@@ -76,13 +78,14 @@ class ArduinoIMU(IMU):
 
     def UpdateAngle(self):
 
-        startfront = self.getStartingFrontAngle()
-        startrear = self.getStartingRearAngle()
-        anglefront, anglerear = self.parseAngleFrontAndRear()
+        startcenter = self.getStartingCenterAngle()
+        startright = self.getStartingRightAngle()
+        startleft = self.getStartingLeftAngle()
+        anglecenter, anglerear = self.parseAngles()
 
-        self.Angle[0] = round(((anglefront[0] - startfront[0]) + (anglerear[0] - startrear[0])) / 2, 4)
-        self.Angle[1] = round(((anglefront[1] - startfront[1]) - (anglerear[1] - startrear[1])) / 2, 4)
-        self.Angle[2] = round(((anglefront[2] - startfront[2]) - (anglerear[2] - startrear[2])) / 2, 4)
+        self.Angle[0] = round(((anglecenter[0] - startcenter[0]) + (anglerear[0] - startright[0])) / 2, 4)
+        self.Angle[1] = round(((anglecenter[1] - startcenter[1]) + (anglerear[1] - startright[1])) / 2, 4)
+        self.Angle[2] = round(((anglecenter[2] - startcenter[2]) + (anglerear[2] - startright[2])) / 2, 4)
         print("Angles: ", self.Angle)
 
     # parse position object data from wt61p, can then pass to other programs
@@ -127,26 +130,26 @@ class ArduinoIMU(IMU):
         for x in angle:
             angle[i] = round(x, 4)
             i = i + 1
-        self.StartingFrontAngle = angle
+        self.StartingCenterAngle = angle
         angle = self.parseAngleRear()
         i = 0
         for x in angle:
             angle[i] = round(x, 4)
             i = i + 1
-        self.StartingRearAngle = angle
+        self.StartingRightAngle = angle
 
         angle = self.parseAngleFront()
         i = 0
         for x in angle:
             angle[i] = round(x, 4)
             i = i + 1
-        self.StartingFrontAngle = angle
+        self.StartingCenterAngle = angle
         angle = self.parseAngleRear()
         i = 0
         for x in angle:
             angle[i] = round(x, 4)
             i = i + 1
-        self.StartingRearAngle = angle
+        self.StartingRightAngle = angle
 
     def UpdateFrontAngle(self):
         angleFront = self.parseAngleFront()
@@ -165,14 +168,14 @@ class ArduinoIMU(IMU):
         return self.Angle
         # print("Rear Angle: ", self.Angle)
 
-    def parseAccelFrontAndRear(self):
-        self.serial.write("gca\n".encode('ascii'))
-        data = self.serial.read_until("\n")
-        # time.sleep(0.05)
-        accelerations = self.parseDoubleXYZDataToList(data)
-        return accelerations
+    # def parseAccelFrontAndRear(self):
+    #     self.serial.write("gca\n".encode('ascii'))
+    #     data = self.serial.read_until("\n")
+    #     # time.sleep(0.05)
+    #     accelerations = self.parseDoubleXYZDataToList(data)
+    #     return accelerations
 
-    def parseAngleFrontAndRear(self):
+    def parseAngles(self):
         self.serial.write("gaa\n".encode('ascii'))
         data = self.serial.read_until("\n")
         # time.sleep(0.05)
@@ -197,21 +200,26 @@ class ArduinoIMU(IMU):
         #     angles[0] = angles[0] + 180
         return angles
 
-    def getStartingFrontAngle(self):
-        return self.StartingFrontAngle
+    def getStartingCenterAngle(self):
+        return self.StartingCenterAngle
 
-    def getStartingRearAngle(self):
-        return self.StartingRearAngle
+    def getStartingRightAngle(self):
+        return self.StartingRightAngle
 
     def getCorrectedFrontAngle(self):
-        return [self.Angle[0] - self.StartingFrontAngle[0],
-                self.Angle[1] - self.StartingFrontAngle[1],
-                self.Angle[2] - self.StartingFrontAngle[2]]
+        return [self.Angle[0] - self.StartingCenterAngle[0],
+                self.Angle[1] - self.StartingCenterAngle[1],
+                self.Angle[2] - self.StartingCenterAngle[2]]
 
     def getCorrectedRearAngle(self):
-        return [self.Angle[0] - self.StartingRearAngle[0],
-                self.Angle[1] - self.StartingRearAngle[1],
-                self.Angle[2] - self.StartingRearAngle[2]]
+        return [self.Angle[0] - self.StartingRightAngle[0],
+                self.Angle[1] - self.StartingRightAngle[1],
+                self.Angle[2] - self.StartingRightAngle[2]]
+
+    def getCorrectedLeftAngle(self):
+        return [self.Angle[0] - self.StartingLeftAngle[0],
+                self.Angle[1] - self.StartingLeftAngle[1],
+                self.Angle[2] - self.StartingLeftAngle[2]]
 
     # req for PID calculation
     def CalculateError(self, yawoffset=0, pitchoffset=0, rolloffset=0, northoffset=0, eastoffset=0, downoffset=0):
@@ -302,6 +310,26 @@ class ArduinoIMU(IMU):
     def parseDoubleXYZDataToList(self, xyz_data):
         i = -1
         xyz = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
+        # xyz_data_clean = xyz_data
+        # xyz_data_clean = xyz_data.replace('/n', '')
+        # print(xyz_data)
+        try:
+            for xyz_data_clean in str(xyz_data).split('\\'):
+                for semiparsed in str(xyz_data_clean).split(':'):
+                    if 3 > i >= 0:
+                        j = 0
+                        for fullparsed in str(semiparsed).split(','):
+                            xyz[j][i] = float(fullparsed)
+                            j = j + 1
+                    i = i + 1
+        except:
+            print("Error parsing angle data.")
+            xyz = self.Angle
+        return xyz
+
+    def parseDoubleXYZDataToList(self, xyz_data):
+        i = -1
+        xyz = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
         # xyz_data_clean = xyz_data
         # xyz_data_clean = xyz_data.replace('/n', '')
         # print(xyz_data)
