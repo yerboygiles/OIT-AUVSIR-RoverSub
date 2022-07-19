@@ -1,7 +1,7 @@
 #!python3
 # Author: Theodor Giles
-# Created: 7/13/21
-# Last Edited 7/29/21
+# Created: 7/17/22
+# Last Edited 7/18/22
 # Description:
 # node for moving around data from the vision
 # processing system
@@ -22,6 +22,7 @@ import tensorflow as tf
 
 X: int = 0
 Y: int = 1
+
 
 # Define VideoStream class to handle streaming of video from webcam in separate processing thread
 # Source - Adrian Rosebrock, PyImageSearch: https://www.pyimagesearch.com/2015/12/28/increasing-raspberry-pi-fps-with-python-and-opencv/
@@ -97,9 +98,9 @@ class vision:
     left_cam_index = 0
     right_cam_index = 1
 
-    CWD_PATH
-    width
-    height
+    CWD_PATH = ""
+    width: float
+    height: float
     floating_model = True
     interpreter = 0
     input_details = []
@@ -107,18 +108,17 @@ class vision:
     frame_rate_calc = 0
     freq = 0
     videostream = VideoStream
-    t1
-    t2
-    time1
-    imageWidth
-    imageHeight
-    min_conf_threshold
+    t1: float
+    t2: float
+    imageWidth: int
+    imageHeight: int
+    min_conf_threshold: int
     frame_rate_calc
-    self.SHOW_IMAGES
-    LabelsTF
-    FOCALLENGTH
+    SHOW_IMAGES: bool
+    LabelsTF = []
+    FOCALLENGTH: float
 
-    def __init__(self, left=0, right=1, show_images=False, resolution='640x480', graph='model.tflite',
+    def __init__(self, left=0, right=1, show_images=True, resolution='640x480', graph='model.tflite',
                  labelmap_name='labelmap.txt', threshold=0.5, edgetpu=False, model_dir=""):
         # globals
 
@@ -142,7 +142,7 @@ class vision:
         open("converted_model.tflite", "wb").write(tflite_model)
 
         MODEL_NAME = 'model.tflite'
-        SHOW_IMAGES = show_images
+        self.SHOW_IMAGES = show_images
         GRAPH_NAME = graph
         LABELMAP_NAME = labelmap_name
         min_conf_threshold = float(threshold)
@@ -213,7 +213,7 @@ class vision:
 
         # Initialize video stream
 
-        # videostream = VideoStream(resolution=(imageWidth, imageHeight), framerate=30).start()
+        self.videostream = VideoStream(resolution=(imageWidth, imageHeight), framerate=30).start()
         print("Starting Stereo Stream...")
         self.right_cam_index = right
         self.left_cam_index = left
@@ -249,7 +249,7 @@ class vision:
         # Start timer (for calculating frame rate)
         self.t1 = cv2.getTickCount()
         # Grab frame from video stream
-        frame1 = videostream.read()
+        frame1 = self.videostream.read()
 
         retL, imgL = self.getImg(0)
         retR, imgR = self.getImg(1)
@@ -262,7 +262,7 @@ class vision:
         # Acquire frame and resize to expected shape [1xHxWx3]
         frame = frame1.copy()
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        frame_resized = cv2.resize(frame_rgb, (width, height))
+        frame_resized = cv2.resize(frame_rgb, (self.width, self.height))
         input_data = np.expand_dims(frame_resized, axis=0)
 
         # Normalize pixel values if using a floating model (i.e. if model is non-quantized)
@@ -278,15 +278,13 @@ class vision:
             0]  # Bounding box coordinates of detected objects
         ClassesTF = self.interpreter.get_tensor(self.output_details[1]['index'])[0]  # Class index of detected objects
         ScoresTF = self.interpreter.get_tensor(self.output_details[2]['index'])[0]  # Confidence of detected objects
-        # num = interpreter.get_tensor(output_details[3]['index'])[0]  # Total number of detected objects (inaccurate and not needed)
-
-        if self.SHOW_IMAGES:
-            draw_detected_frame(frame, imageHeight, imageWidth, BoxesTF, ClassesTF, ScoresTF)
+        # num = interpreter.get_tensor(output_details[3]['index'])[0]
+        # Total number of detected objects
 
         # checking for specific target
-        if searchingfor is not None:
-            LateralDistanceMM, DistanceMM, OffCenterX, OffCenterY, \
-            FoundTarget = process_distance_from(BoxesTF, ClassesTF, ScoresTF, searchingfor)
+        # if searchingfor is not None:
+        #     LateralDistanceMM, DistanceMM, OffCenterX, OffCenterY, \
+        #         FoundTarget = process_distance_from(BoxesTF, ClassesTF, ScoresTF, searchingfor)
 
         return LateralDistanceMM, DistanceMM, OffCenterX, OffCenterY, FoundTarget
 
@@ -294,51 +292,51 @@ class vision:
         self.ret, self.img = self.Captures[camindex].read()
         return self.ret, self.img
 
-    def getColorMaskContours(self, ret, img, extratelem=False):
-        # red values 179, 255,255
-        # min 105 0 0
-        hmin = 105
-        smin = 0
-        vmin = 0
-
-        hmax = 179
-        smax = 255
-        vmax = 255
-
-        # masking bounds
-        x = y = 30
-        w = h = 400
-
-        # contours
-        con = False
-
-        if ret:
-            hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-            lower = np.array([hmin, smin, vmin])
-            upper = np.array([hmax, smax, vmax])
-            mask = cv2.inRange(hsv, lower, upper)
-            # masked = cv2.bitwise_and(hsv,hsv,mask=mask)
-            con = cv2.findContours(mask.copy(),
-                                   cv2.RETR_EXTERNAL,
-                                   cv2.CHAIN_APPROX_SIMPLE)[-2]
-            while extratelem:
-                if len(con) > 0:
-                    i = 0
-                    for c in con:
-                        area = cv2.contourArea(c)
-                        if area > 20:
-                            (x, y, w, h) = cv2.boundingRect(c)
-                            cv2.rectangle(self.img, (x, y), (x + w, y + h), (0, 255, 255), 2)
-                            # the center fo the screen will half the resoltion hight and half the width
-                            # then just store the x and y components
-                            print('element:', i)
-                            print("x:", x)
-                cv2.imshow("result", self.img)
-                cv2.imshow("masked", mask)
-                # trak bars for other stuff
-                if cv2.waitKey(1) == ord('q'):
-                    break
-        return con
+    # def getColorMaskContours(self, ret, img, extratelem=False):
+    #     # red values 179, 255,255
+    #     # min 105 0 0
+    #     hmin = 105
+    #     smin = 0
+    #     vmin = 0
+    #
+    #     hmax = 179
+    #     smax = 255
+    #     vmax = 255
+    #
+    #     # masking bounds
+    #     x = y = 30
+    #     w = h = 400
+    #
+    #     # contours
+    #     con = False
+    #
+    #     if ret:
+    #         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    #         lower = np.array([hmin, smin, vmin])
+    #         upper = np.array([hmax, smax, vmax])
+    #         mask = cv2.inRange(hsv, lower, upper)
+    #         # masked = cv2.bitwise_and(hsv,hsv,mask=mask)
+    #         con = cv2.findContours(mask.copy(),
+    #                                cv2.RETR_EXTERNAL,
+    #                                cv2.CHAIN_APPROX_SIMPLE)[-2]
+    #         while extratelem:
+    #             if len(con) > 0:
+    #                 i = 0
+    #                 for c in con:
+    #                     area = cv2.contourArea(c)
+    #                     if area > 20:
+    #                         (x, y, w, h) = cv2.boundingRect(c)
+    #                         cv2.rectangle(self.img, (x, y), (x + w, y + h), (0, 255, 255), 2)
+    #                         # the center fo the screen will half the resoltion hight and half the width
+    #                         # then just store the x and y components
+    #                         print('element:', i)
+    #                         print("x:", x)
+    #             cv2.imshow("result", self.img)
+    #             cv2.imshow("masked", mask)
+    #             # trak bars for other stuff
+    #             if cv2.waitKey(1) == ord('q'):
+    #                 break
+    #     return con
 
     def seesTargetColorMask(self, target):
         # red values 179, 255,255
@@ -451,52 +449,55 @@ class vision:
         Distance = 0.0
         FoundTarget = False
         for i in range(len(scores)):
-            if (scores[i] > min_conf_threshold) and (scores[i] <= 1.0):
+            if (scores[i] > self.min_conf_threshold) and (scores[i] <= 1.0):
                 # Get bounding box coordinates and draw box
                 # Interpreter can return coordinates that are outside of image
                 # dimensions, need to force them to be within image using max() and min()
-                MinY = int(max(1, (boxes[i][0] * imageHeight)))
-                MinX = int(max(1, (boxes[i][1] * imageWidth)))
-                MaxY = int(min(imageHeight, (boxes[i][2] * imageHeight)))
-                MaxX = int(min(imageWidth, (boxes[i][3] * imageWidth)))
+                MinY = int(max(1, (boxes[i][0] * self.imageHeight)))
+                MinX = int(max(1, (boxes[i][1] * self.imageWidth)))
+                MaxY = int(min(self.imageHeight, (boxes[i][2] * self.imageHeight)))
+                MaxX = int(min(self.imageWidth, (boxes[i][3] * self.imageWidth)))
 
-                object_name = LabelsTF[int(classes[i])]  # Look up object name from "labels" array using class index
+                object_name = self.LabelsTF[
+                    int(classes[i])]  # Look up object name from "labels" array using class index
                 if object_name == searchingfor:
                     FoundTarget = True
-                    LateralDistance, Distance, OffCenterX, OffCenterY = findDistance(MaxX, MinX, MaxY, MinY)
+                    # LateralDistance, Distance, OffCenterX, OffCenterY = findDistance(MaxX, MinX, MaxY, MinY)
                     break
         return LateralDistance, Distance, OffCenterX, OffCenterY, FoundTarget
 
-    def findDistance(self, maxx, minx, maxy, miny):
-        THEODORS_NUMBER = 0.0516657316
-        SizeX = (maxx - minx)
-        SizeY = (maxy - miny)
-        OffCenterX = int(maxx - (SizeX / 2)) - int(imageWidth / 2)
-        OffCenterY = int(maxy - (SizeY / 2)) - int(imageHeight / 2)
-        # lateral distance of camera from object
-        LateralDistance = (TARGETYSIZE * FOCALLENGTH) / SizeY
-        LateralDistance = (LateralDistance / THEODORS_NUMBER) * 10
-        # a side of mm travel laterally triangle
+        # old function for finding size of a test object.
+        # need to repurpose into system for calibrating camera distance algo.
 
-        TargetPX = SizeY / 2
-        TargetMM = TARGETYSIZE
-        # ratio of pixel to mm
-        MM__PX = TargetPX / TargetMM
-        # b side of mm travel laterally triangle
-        Bpx = math.sqrt(pow(OffCenterX, 2) + pow(OffCenterY, 2))
-        Bmm = Bpx * MM__PX
-        # c side of mm travel laterally triangle
-        # true exact distance of camera from object, no matter
-        # where it is on the plane
-        Distance = math.sqrt(pow(Bmm, 2) + pow(LateralDistance, 2))
-
-        return LateralDistance, Distance, OffCenterX, OffCenterY
+    # def findDistance(self, maxx, minx, maxy, miny):
+    #     THEODORS_NUMBER = 0.0516657316
+    #     SizeX = (maxx - minx)
+    #     SizeY = (maxy - miny)
+    #     OffCenterX = int(maxx - (SizeX / 2)) - int(imageWidth / 2)
+    #     OffCenterY = int(maxy - (SizeY / 2)) - int(imageHeight / 2)
+    #     # lateral distance of camera from object
+    #     LateralDistance = (TARGETYSIZE * FOCALLENGTH) / SizeY
+    #     LateralDistance = (LateralDistance / THEODORS_NUMBER) * 10
+    #     # a side of mm travel laterally triangle
+    #
+    #     TargetPX = SizeY / 2
+    #     TargetMM = TARGETYSIZE
+    #     # ratio of pixel to mm
+    #     MM__PX = TargetPX / TargetMM
+    #     # b side of mm travel laterally triangle
+    #     Bpx = math.sqrt(pow(OffCenterX, 2) + pow(OffCenterY, 2))
+    #     Bmm = Bpx * MM__PX
+    #     # c side of mm travel laterally triangle
+    #     # true exact distance of camera from object, no matter
+    #     # where it is on the plane
+    #     Distance = math.sqrt(pow(Bmm, 2) + pow(LateralDistance, 2))
+    #
+    #     return LateralDistance, Distance, OffCenterX, OffCenterY
 
     def terminate(self):
         # Clean up
         cv2.destroyAllWindows()
-        videostream.stop()
-        sys.exit()
+        self.videostream.stop()
 
     # req for PID calculation
     def CalculateError(self):
@@ -558,5 +559,3 @@ class vision:
 
     # while True:
     #     Vision.StereoGetTarget(12)
-
-
