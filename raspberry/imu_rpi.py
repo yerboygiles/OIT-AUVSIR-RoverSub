@@ -12,9 +12,7 @@ import numpy as np
 from numpy import pi
 import serial
 
-from imu import IMU
-import re
-import math
+from raspberry.current_scripts.imu import IMU
 
 GYRO: int = 0
 POSITION: int = 1
@@ -208,9 +206,6 @@ class JY62(IMU):
     FrameState = 0
     Bytenum = 0
     CheckSum = 0
-
-    import numpy as np
-    from numpy import pi
 
     def __init__(self, port, id=0):
 

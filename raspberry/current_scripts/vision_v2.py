@@ -15,10 +15,57 @@ import argparse
 import cv2
 import numpy as np
 from math import *
-from matplotlib import pyplot as plt
+from threading import Thread
+import tensorflow as tf
+
+# from matplotlib import pyplot as plt
 
 X: int = 0
 Y: int = 1
+
+# Define VideoStream class to handle streaming of video from webcam in separate processing thread
+# Source - Adrian Rosebrock, PyImageSearch: https://www.pyimagesearch.com/2015/12/28/increasing-raspberry-pi-fps-with-python-and-opencv/
+
+class VideoStream:
+    """Camera object that controls video streaming from the Picamera"""
+
+    def __init__(self, resolution=(640, 480), framerate=30):
+        # Initialize the PiCamera and the camera image stream
+        self.stream = cv2.VideoCapture(0)
+        ret = self.stream.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
+        ret = self.stream.set(3, resolution[0])
+        ret = self.stream.set(4, resolution[1])
+
+        # Read first frame from the stream
+        (self.grabbed, self.frame) = self.stream.read()
+
+        # Variable to control when the camera is stopped
+        self.stopped = False
+
+    def start(self):
+        # Start the thread that reads frames from the video stream
+        self.thread = Thread(target=self.stopped, args=()).start()
+        return self
+
+    def update(self):
+        # Keep looping indefinitely until the thread is stopped
+        while True:
+            # If the camera is stopped, stop the thread
+            if self.stopped:
+                # Close camera resources
+                self.stream.release()
+                return
+
+            # Otherwise, grab the next frame from the stream
+            (self.grabbed, self.frame) = self.stream.read()
+
+    def read(self):
+        # Return the most recent frame
+        return self.frame
+
+    def stop(self):
+        # Indicate that the camera and thread should be stopped
+        self.stopped = True
 
 
 class vision:
@@ -50,38 +97,39 @@ class vision:
     left_cam_index = 0
     right_cam_index = 1
 
+    CWD_PATH
+    width
+    height
+    floating_model = True
+    interpreter = 0
+    input_details = []
+    output_details = []
+    frame_rate_calc = 0
+    freq = 0
+    videostream = VideoStream
+    t1
+    t2
+    time1
+    imageWidth
+    imageHeight
+    min_conf_threshold
+    frame_rate_calc
+    self.SHOW_IMAGES
+    LabelsTF
+    FOCALLENGTH
+
     def __init__(self, left=0, right=1, show_images=False, resolution='640x480', graph='model.tflite',
                  labelmap_name='labelmap.txt', threshold=0.5, edgetpu=False, model_dir=""):
         # globals
-        global CWD_PATH
-        global width
-        global height
-        global floating_model
-        global interpreter
-        global input_details
-        global output_details
-        global frame_rate_calc
-        global freq
-        global videostream
-        global t1
-        global t2
-        global time1
-        global imageWidth
-        global imageHeight
-        global min_conf_threshold
-        global frame_rate_calc
-        global SHOW_IMAGES
-        global LabelsTF
 
-        global FOCALLENGTH
         # in mm
         FOCALLENGTH = 4.8
 
         # in mm
-        global CELLPHONEXSIZE
-        global TARGETYSIZE
-        CELLPHONEXSIZE = 68.2
-        TARGETYSIZE = 145.6
+        # global CELLPHONEXSIZE
+        # global TARGETYSIZE
+        # CELLPHONEXSIZE = 68.2
+        # TARGETYSIZE = 145.6
 
         graph_def_file = model_dir + "/vision/saved_model1.pb"
 
@@ -143,25 +191,25 @@ class vision:
         # Load the Tensorflow Lite model.
         # If using Edge TPU, use special load_delegate argument
         if use_TPU:
-            interpreter = Interpreter(model_path=PATH_TO_CKPT,
-                                      experimental_delegates=[load_delegate('libedgetpu.so.1.0')])
+            self.interpreter = Interpreter(model_path=PATH_TO_CKPT,
+                                           experimental_delegates=[load_delegate('libedgetpu.so.1.0')])
             print(PATH_TO_CKPT)
         else:
-            interpreter = Interpreter(model_path=PATH_TO_CKPT)
+            self.interpreter = Interpreter(model_path=PATH_TO_CKPT)
 
-        interpreter.allocate_tensors()
+        self.interpreter.allocate_tensors()
 
         # Get model details
-        input_details = interpreter.get_input_details()
-        output_details = interpreter.get_output_details()
-        height = input_details[0]['shape'][1]
-        width = input_details[0]['shape'][2]
+        self.input_details = self.interpreter.get_input_details()
+        self.output_details = self.interpreter.get_output_details()
+        self.height = self.input_details[0]['shape'][1]
+        self.width = self.input_details[0]['shape'][2]
 
-        floating_model = (input_details[0]['dtype'] == np.float32)
+        self.floating_model = (self.input_details[0]['dtype'] == np.float32)
 
         # Initialize frame rate calculation
-        frame_rate_calc = 1
-        freq = cv2.getTickFrequency()
+        self.frame_rate_calc = 1
+        self.freq = cv2.getTickFrequency()
 
         # Initialize video stream
 
@@ -174,7 +222,6 @@ class vision:
             self.Captures.append(cv2.VideoCapture(i))
             i = i + 1
         time.sleep(1)
-
 
     # *************************************************************************************************
     # Processes a single image with the specified file name
@@ -191,7 +238,7 @@ class vision:
     # Thread Safety: None
     # *************************************************************************************************
     def process_image(self, searchingfor=None):
-        global t1
+        # global t1
         OffCenterX = 0
         OffCenterY = 0
         LateralDistanceMM = 0.0
@@ -200,8 +247,7 @@ class vision:
         input_mean = 127.5
         input_std = 127.5
         # Start timer (for calculating frame rate)
-        t1 = cv2.getTickCount()
-
+        self.t1 = cv2.getTickCount()
         # Grab frame from video stream
         frame1 = videostream.read()
 
@@ -211,8 +257,8 @@ class vision:
         stereo = cv2.StereoBM(1, 16, 15)
         disparity = stereo.compute(imgL, imgR)
 
-        plt.imshow(disparity, 'gray')
-        plt.show()
+        # plt.imshow(disparity, 'gray')
+        # plt.show()
         # Acquire frame and resize to expected shape [1xHxWx3]
         frame = frame1.copy()
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -220,20 +266,21 @@ class vision:
         input_data = np.expand_dims(frame_resized, axis=0)
 
         # Normalize pixel values if using a floating model (i.e. if model is non-quantized)
-        if floating_model:
+        if self.floating_model:
             input_data = (np.float32(input_data) - input_mean) / input_std
 
         # Perform the actual detection by running the model with the image as input
-        interpreter.set_tensor(input_details[0]['index'], input_data)
-        interpreter.invoke()
+        self.interpreter.set_tensor(self.input_details[0]['index'], input_data)
+        self.interpreter.invoke()
 
         # Retrieve detection results
-        BoxesTF = interpreter.get_tensor(output_details[0]['index'])[0]  # Bounding box coordinates of detected objects
-        ClassesTF = interpreter.get_tensor(output_details[1]['index'])[0]  # Class index of detected objects
-        ScoresTF = interpreter.get_tensor(output_details[2]['index'])[0]  # Confidence of detected objects
+        BoxesTF = self.interpreter.get_tensor(self.output_details[0]['index'])[
+            0]  # Bounding box coordinates of detected objects
+        ClassesTF = self.interpreter.get_tensor(self.output_details[1]['index'])[0]  # Class index of detected objects
+        ScoresTF = self.interpreter.get_tensor(self.output_details[2]['index'])[0]  # Confidence of detected objects
         # num = interpreter.get_tensor(output_details[3]['index'])[0]  # Total number of detected objects (inaccurate and not needed)
 
-        if SHOW_IMAGES:
+        if self.SHOW_IMAGES:
             draw_detected_frame(frame, imageHeight, imageWidth, BoxesTF, ClassesTF, ScoresTF)
 
         # checking for specific target
@@ -342,9 +389,9 @@ class vision:
         gray_right = cv2.cvtColor(img_right, cv2.COLOR_BGR2GRAY)
         stereo = cv2.StereoBM_create(numDisparities=16, blockSize=15)
         disparity = stereo.compute(gray_left, gray_right)
-        if showim:
-            plt.imshow(disparity, 'gray')
-            plt.show()
+        # if showim:
+        #     plt.imshow(disparity, 'gray')
+        #     plt.show()
         return disparity
 
     # this should create a second object confirmer that can also use the depth map
@@ -420,7 +467,7 @@ class vision:
                     break
         return LateralDistance, Distance, OffCenterX, OffCenterY, FoundTarget
 
-    def findDistance(self,maxx, minx, maxy, miny):
+    def findDistance(self, maxx, minx, maxy, miny):
         THEODORS_NUMBER = 0.0516657316
         SizeX = (maxx - minx)
         SizeY = (maxy - miny)
@@ -450,6 +497,7 @@ class vision:
         cv2.destroyAllWindows()
         videostream.stop()
         sys.exit()
+
     # req for PID calculation
     def CalculateError(self):
         self.Error = [0, 0]
@@ -510,54 +558,5 @@ class vision:
 
     # while True:
     #     Vision.StereoGetTarget(12)
-# This is a sample Python script.
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-#
-# def on_change_hmax(value):
-#     global hmax
-#     hmax = value
-#     print (hmax)
-# def on_change_smax(value):
-#     global smax
-#     smax = value
-#     print (smax)
-# def on_change_vmax(value):
-#     global vmax
-#     vmax = value
-#     print (vmax)
-# def on_change_hmin(value):
-#     global hmin
-#     hmin= value
-#     print (hmin)
-# def on_change_smin(value):
-#     global smin
-#     smin = value
-#     print (smin)
-# def on_change_vmin(value):
-#     global vmin
-#     vmin = value
-#     print (vmin)
-# name_bars = 'trackbar window'
-# cv2.namedWindow('trackbar window',cv2.WINDOW_NORMAL)
-# cv2.createTrackbar("hue max",name_bars,179,179,on_change_hmax)
-# cv2.createTrackbar("sat max",name_bars,255,255,on_change_smax)
-# cv2.createTrackbar("val max",name_bars,255,255,on_change_vmax)
-# cv2.createTrackbar("hue min",name_bars,130,179,on_change_hmin)
-# cv2.createTrackbar("sat min",name_bars,166,255,on_change_smin)
-# cv2.createTrackbar("val min",name_bars,0,255,on_change_vmin)
-# track bars
-# cv2.namedWindow("parms")
-# cv2.createTrackbar("thresh1","parms",88,255,empty)
-# cv2.createTrackbar("thresh2","parms",20,255,empty)
-# cv2.createTrackbar("thresh3","parms",88,255,empty)
-# cv2.createTrackbar("thresh4","parms",20,255,empty)
 
-# Press the green button in the gutter to run the script.
-# if __name__ == '__main__':
-#     #find_closest_corner()
-#     #find_contour('dasub.mp4')
-#      color_masking('dasub2.mp4')
-#     #split_vid('dasub.mp4')
-#     # show_img_func('fortesting.jpg')
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+

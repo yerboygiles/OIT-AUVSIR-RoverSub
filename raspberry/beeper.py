@@ -1,6 +1,4 @@
 import RPi.GPIO as GPIO
-import time
-import START_SUB as Mission
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)

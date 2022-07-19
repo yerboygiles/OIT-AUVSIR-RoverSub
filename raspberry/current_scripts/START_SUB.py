@@ -17,7 +17,7 @@ GPIO.setup(buzzer, GPIO.OUT)
 
 
 def run():
-    from task_io_lib_v2 import TaskIO
+    from raspberry.current_scripts.task_io_lib_v2 import TaskIO
 
     print(' ===== -ROVERSUB- v3.0 ===== ')
 
@@ -30,7 +30,7 @@ def run():
         time.sleep(0.2)
 
     # self, mission filename, usingarduino, usingvision, usinggyro, usingsim, usingping
-    Mission = TaskIO("mission.txt", True, False, True, False, False)
+    Mission = TaskIO("../mission.txt", True, False, True, False, False)
 
     # testing funcs
     # Mission.testData()

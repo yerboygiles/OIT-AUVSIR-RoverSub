@@ -9,7 +9,7 @@
 #
 import RPi.GPIO as GPIO
 import time
-import START_SUB as Mission
+from raspberry.current_scripts import START_SUB as Mission
 
 button = 22
 buzzer = 26

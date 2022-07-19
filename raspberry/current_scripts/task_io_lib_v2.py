@@ -7,7 +7,7 @@
 # as well as the AI/TF/vision integration
 # Allows the movement_commander to update at all times, causing no lag for switching commands
 import time
-from vector_commander import NavigationCommander
+from raspberry.current_scripts.vector_commander import NavigationCommander
 
 
 class TaskIO:
