@@ -14,17 +14,6 @@
 # I added my own method of drawing boxes and labels using OpenCV.
 #
 # ----------------------------------------------------------------------------
-# 
-# Modified By: Dillon Wall
-# dillon.wall@oit.edu
-# Date: 4/26/2020
-#
-#
-# We can use the C++ Python API to embed a python interpreter into C++ which will allow us to get the return value
-# from a specific python function, and therefore run inference on single images using this script
-#
-# I refactored the code to be completely wrapped in functions so that we can call image processing on demand 
-#       to evaluate an image and get a value returned to C++
 #
 # Modified By: Theodor Giles
 # farmergilest@outlook.com
@@ -32,7 +21,7 @@
 # Last Edited 8/3/20
 #
 #
-# Distance calculation and integration into other programs/classes/handlers for running the RoboSub
+# Vision algos and deprecated fns
 # Some standardization and future algorithms possibly not using the Tensorflow AI
 #
 
