@@ -95,15 +95,9 @@ class vision:
 
     Captures = []
 
-<<<<<<< HEAD
-=======
     left_cam_index = 0
     right_cam_index = 1
 
-<<<<<<< HEAD
->>>>>>> d92dc4bd35857c2ca355f76943205c6a0a36e195
-=======
->>>>>>> d92dc4bd35857c2ca355f76943205c6a0a36e195
     CWD_PATH = ""
     width: float
     height: float
@@ -113,28 +107,13 @@ class vision:
     output_details = []
     frame_rate_calc = 0
     freq = 0
-<<<<<<< HEAD
     VideostreamL = VideoStream
     VideostreamR = VideoStream
-=======
-    videostream = VideoStream
-<<<<<<< HEAD
->>>>>>> d92dc4bd35857c2ca355f76943205c6a0a36e195
-=======
->>>>>>> d92dc4bd35857c2ca355f76943205c6a0a36e195
     t1: float
     t2: float
     imageWidth: int
     imageHeight: int
     min_conf_threshold: int
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-    frame_rate_calc
->>>>>>> d92dc4bd35857c2ca355f76943205c6a0a36e195
-=======
-    frame_rate_calc
->>>>>>> d92dc4bd35857c2ca355f76943205c6a0a36e195
     SHOW_IMAGES: bool
     LabelsTF = []
     FOCALLENGTH: float
@@ -234,16 +213,8 @@ class vision:
 
         # Initialize video stream
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> d92dc4bd35857c2ca355f76943205c6a0a36e195
         self.videostream = VideoStream(resolution=(imageWidth, imageHeight), framerate=30).start()
         print("Starting Stereo Stream...")
->>>>>>> d92dc4bd35857c2ca355f76943205c6a0a36e195
-        self.right_cam_index = right
-        self.left_cam_index = left
         print("Starting Stereo Stream...")
         self.VideostreamL = VideoStream(resolution=(imageWidth, imageHeight), framerate=30, camindex=left).start()
         self.VideostreamR = VideoStream(resolution=(imageWidth, imageHeight), framerate=30, camindex=right).start()
@@ -275,18 +246,8 @@ class vision:
         # Start timer (for calculating frame rate)
         self.t1 = cv2.getTickCount()
         # Grab frame from video stream
-<<<<<<< HEAD
-<<<<<<< HEAD
         retL, imgL = self.VideostreamL.read()
         retR, imgR = self.VideostreamR.read()
-=======
-=======
->>>>>>> d92dc4bd35857c2ca355f76943205c6a0a36e195
-        frame1 = self.videostream.read()
-
-        retL, imgL = self.getImg(0)
-        retR, imgR = self.getImg(1)
->>>>>>> d92dc4bd35857c2ca355f76943205c6a0a36e195
 
         stereo = cv2.StereoBM(1, 16, 15)
         disparity = stereo.compute(imgL, imgR)
