@@ -171,22 +171,6 @@ void setup() {
 
 
 void loop() {
-  JY901_FC.receiveSerialData();
-  JY901_FR.receiveSerialData();
-  String toprint = "C:";
-  toprint += JY901_FC.getAccX();
-  toprint += ",";
-  toprint += JY901_FR.getAccX();
-  toprint += ":";
-  toprint += JY901_FC.getAccY();
-  toprint += ",";
-  toprint += JY901_FR.getAccY();
-  toprint += ":";
-  toprint += JY901_FC.getAccZ();
-  toprint += ",";
-  toprint += JY901_FR.getAccZ();
-  toprint += "\n";
-  Serial.print(toprint);
 //  while (1){
 //    Test();
 //  }

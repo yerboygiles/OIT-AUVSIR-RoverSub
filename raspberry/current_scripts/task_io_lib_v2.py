@@ -75,8 +75,8 @@ class TaskIO:
                 # f.write("\n")
 
                 towrite = "IMU Acceleration: " + str(self.Movement.ArdIMU.getAcceleration())
-                #towrite = "IMU Position: " + str(self.Movement.ArdIMU.getPosition())
-                # print(towrite)
+                f.write(towrite)
+                towrite = "IMU Position: " + str(self.Movement.ArdIMU.getPosition())
                 f.write(towrite)
                 f.write("\n")
                 towrite = "IMU North, East, Down PID: " + str(self.Movement.ArdIMU.getNorthPID()) + "," + \
