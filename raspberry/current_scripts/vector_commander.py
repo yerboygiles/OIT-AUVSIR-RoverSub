@@ -11,7 +11,7 @@ import random
 import math
 import imu_ard
 import sonar
-import vision_v1
+import vision_v2
 import remote_control
 
 # from threading import Thread

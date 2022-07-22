@@ -80,8 +80,9 @@ class ArduinoIMU(IMU):
 
         startcenter = self.getStartingCenterAngle()
         startright = self.getStartingRightAngle()
-        startleft = self.getStartingLeftAngle()
-        anglecenter, anglerear = self.parseAngles()
+        # startleft = self.getStartingLeftAngle()
+        anglecenter = self.parseAngleFront()
+        anglerear = self.parseAngleRear()
 
         self.Angle[0] = round(((anglecenter[0] - startcenter[0]) + (anglerear[0] - startright[0])) / 2, 4)
         self.Angle[1] = round(((anglecenter[1] - startcenter[1]) + (anglerear[1] - startright[1])) / 2, 4)

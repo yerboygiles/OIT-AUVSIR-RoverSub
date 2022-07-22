@@ -17,7 +17,7 @@ GPIO.setup(buzzer, GPIO.OUT)
 
 
 def run():
-    from raspberry.current_scripts.task_io_lib_v2 import TaskIO
+    from task_io_lib_v2 import TaskIO
 
     print(' ===== -ROVERSUB- v3.0 ===== ')
 

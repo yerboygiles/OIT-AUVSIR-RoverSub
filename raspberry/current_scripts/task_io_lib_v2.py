@@ -7,7 +7,7 @@
 # as well as the AI/TF/vision integration
 # Allows the movement_commander to update at all times, causing no lag for switching commands
 import time
-from raspberry.current_scripts.vector_commander import NavigationCommander
+from vector_commander import NavigationCommander
 
 
 class TaskIO:
@@ -58,8 +58,11 @@ class TaskIO:
     def testData(self):
         # self.Movement.ZeroSonar()
         starttime = time.perf_counter()
+        count: int = 0
         with open('telemetry_active.txt', 'w') as f:
             while (time.perf_counter() - starttime) < 30:
+                count = count + count
+                print(count)
                 perftime = time.perf_counter()
                 # confidence = self.Movement.Sonar.updateDistance()
                 # distance = self.Movement.Sonar.getDistance()
