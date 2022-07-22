@@ -234,6 +234,12 @@ class IMU:
     def getDownPID(self):
         return self.Roll_PID
 
+    def getPosition(self):
+        return self.Position
+
+    def getAcceleration(self):
+        return self.Acceleration
+
 
 class IMU_Group(IMU):
     IMU_count: int = 0

@@ -46,7 +46,7 @@ class NavigationCommander:
         # setting up board serial port
         self.UsingArduino = usingarduino
 
-        self.writeout = open('telemetry_active.txt', 'w')
+        # self.writeout = open('telemetry_active.txt', 'w')
 
         if self.UsingArduino:
             from arduino_commander import ArduinoCommander
@@ -228,7 +228,10 @@ class NavigationCommander:
         # print("IMU 2 Angle: ", x2, y2, z2)
         # self.BrakeAllThrusters()
 
-        self.ArdIMU.UpdatePosition()
+        #self.ArdIMU.UpdatePosition()
+        self.ArdIMU.UpdateAngle()
+        self.ArdIMU.UpdateAcceleration()
+        #self.ArdIMU.UpdatePosition()
         self.ArdIMU.CalculateError()
         self.ArdIMU.PID()
 
@@ -573,14 +576,14 @@ class NavigationCommander:
         self.YawLocked = (abs(self.ArdIMU.getYawPID()) < threshold)
         self.PitchLocked = (abs(self.ArdIMU.getPitchPID()) < threshold)
         self.RollLocked = (abs(self.ArdIMU.getRollPID()) < threshold)
-        towrite = "Angles: " + str(self.ArdIMU.getAngle()) + "\n"
-        self.writeout.write(towrite)
-        towrite = "Angles PID: " + str(self.ArdIMU.getYawPID()) + ", " + \
-                  str(self.ArdIMU.getPitchPID()) + ", " + \
-                  str(self.ArdIMU.getRollPID()) + "\n"
-        self.writeout.write(towrite)
-        towrite = "Angles: " + str(time.perf_counter()) + "\n"
-        self.writeout.write(towrite)
+        # towrite = "Angles: " + str(self.ArdIMU.getAngle()) + "\n"
+        # self.writeout.write(towrite)
+        # towrite = "Angles PID: " + str(self.ArdIMU.getYawPID()) + ", " + \
+        #           str(self.ArdIMU.getPitchPID()) + ", " + \
+        #           str(self.ArdIMU.getRollPID()) + "\n"
+        # self.writeout.write(towrite)
+        # towrite = "Angles: " + str(time.perf_counter()) + "\n"
+        # self.writeout.write(towrite)
         # print("Yaw, YAW PID: ", self.ArdIMU.getYaw(),", ", self.ArdIMU.getYawPID())
         # print("Yaw PID: ", self.ArdIMU.getYawPID())
         # print("ANGLE LOCK: ", self.YawLocked, self.PitchLocked, self.RollLocked)

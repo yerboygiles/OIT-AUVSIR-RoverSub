@@ -81,8 +81,7 @@ class ArduinoIMU(IMU):
         startcenter = self.getStartingCenterAngle()
         startright = self.getStartingRightAngle()
         # startleft = self.getStartingLeftAngle()
-        anglecenter = self.parseAngleFront()
-        anglerear = self.parseAngleRear()
+        anglecenter, anglerear = self.parseAngles()
 
         self.Angle[0] = round(((anglecenter[0] - startcenter[0]) + (anglerear[0] - startright[0])) / 2, 4)
         self.Angle[1] = round(((anglecenter[1] - startcenter[1]) + (anglerear[1] - startright[1])) / 2, 4)
@@ -98,7 +97,7 @@ class ArduinoIMU(IMU):
 
         accelfront, accelrear = self.parseAccelFrontAndRear()
 
-        self.Acceleration[0] = round((((accelfront[0]) - (accelrear[0])) / 2), 4)
+        self.Acceleration[0] = round((((accelfront[0]) + (accelrear[0])) / 2), 4)
         self.Acceleration[1] = round((((accelfront[1]) + (accelrear[1])) / 2), 4)
         self.Acceleration[2] = round((((accelfront[2]) + (accelrear[2])) / 2) - 0.99, 4)
 
@@ -124,6 +123,13 @@ class ArduinoIMU(IMU):
         pass
         # print("Position: ", self.Position)
         self.dt = time.perf_counter() - self.dt
+
+    def UpdateAcceleration(self):
+        accelfront, accelrear = self.parseAccelFrontAndRear()
+
+        self.Acceleration[0] = round((((accelfront[0]) + (accelrear[0])) / 2), 4)
+        self.Acceleration[1] = round((((accelfront[1]) + (accelrear[1])) / 2), 4)
+        self.Acceleration[2] = round((((accelfront[2]) + (accelrear[2])) / 2) - 0.99, 4)
 
     def CalibrateStart(self):
         angle = self.parseAngleFront()
@@ -169,12 +175,12 @@ class ArduinoIMU(IMU):
         return self.Angle
         # print("Rear Angle: ", self.Angle)
 
-    # def parseAccelFrontAndRear(self):
-    #     self.serial.write("gca\n".encode('ascii'))
-    #     data = self.serial.read_until("\n")
-    #     # time.sleep(0.05)
-    #     accelerations = self.parseDoubleXYZDataToList(data)
-    #     return accelerations
+    def parseAccelFrontAndRear(self):
+        self.serial.write("gca\n".encode('ascii'))
+        data = self.serial.read_until("\n")
+        # time.sleep(0.05)
+        accelerations = self.parseDoubleXYZDataToList(data)
+        return accelerations
 
     def parseAngles(self):
         self.serial.write("gaa\n".encode('ascii'))
@@ -311,26 +317,6 @@ class ArduinoIMU(IMU):
     def parseDoubleXYZDataToList(self, xyz_data):
         i = -1
         xyz = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
-        # xyz_data_clean = xyz_data
-        # xyz_data_clean = xyz_data.replace('/n', '')
-        # print(xyz_data)
-        try:
-            for xyz_data_clean in str(xyz_data).split('\\'):
-                for semiparsed in str(xyz_data_clean).split(':'):
-                    if 3 > i >= 0:
-                        j = 0
-                        for fullparsed in str(semiparsed).split(','):
-                            xyz[j][i] = float(fullparsed)
-                            j = j + 1
-                    i = i + 1
-        except:
-            print("Error parsing angle data.")
-            xyz = self.Angle
-        return xyz
-
-    def parseDoubleXYZDataToList(self, xyz_data):
-        i = -1
-        xyz = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
         # xyz_data_clean = xyz_data
         # xyz_data_clean = xyz_data.replace('/n', '')
         # print(xyz_data)

@@ -233,6 +233,7 @@ class CJY901 {
   } JY901_data;
 };
 
-extern CJY901 JY901_F;
-extern CJY901 JY901_R;
+extern CJY901 JY901_FC;
+extern CJY901 JY901_FR;
+extern CJY901 JY901_FL;
 #endif

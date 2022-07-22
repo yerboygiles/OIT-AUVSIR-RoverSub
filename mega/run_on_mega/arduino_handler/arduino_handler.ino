@@ -9,7 +9,6 @@
 #include "JY901_Serial.h"
 #include "ThrusterDriver.h"
 #include "kArmDriver.h"
-#include "HMC5883L.h"
 // #include <Wire.h>
 
 //const byte RESET_PIN = 2;
@@ -131,9 +130,6 @@ void setup() {
 
   Serial3.begin(115200);
   JY901_FR.attach(Serial3);
-  
-  Serial3.begin(115200);
-  JY901_FR.attach(Serial);
 
   JY901_FC.receiveSerialData();
   JY901_FR.receiveSerialData();
@@ -175,6 +171,22 @@ void setup() {
 
 
 void loop() {
+  JY901_FC.receiveSerialData();
+  JY901_FR.receiveSerialData();
+  String toprint = "C:";
+  toprint += JY901_FC.getAccX();
+  toprint += ",";
+  toprint += JY901_FR.getAccX();
+  toprint += ":";
+  toprint += JY901_FC.getAccY();
+  toprint += ",";
+  toprint += JY901_FR.getAccY();
+  toprint += ":";
+  toprint += JY901_FC.getAccZ();
+  toprint += ",";
+  toprint += JY901_FR.getAccZ();
+  toprint += "\n";
+  Serial.print(toprint);
 //  while (1){
 //    Test();
 //  }
@@ -188,7 +200,7 @@ void loop() {
     
 //    Serial.println("Done with readCommand().");
 //    Serial.println(commandComplete);
-    readCommand()
+    readCommand();
     JetsonCommand = "";
     stringComplete = false;
   }
@@ -321,7 +333,7 @@ int readCommand() {
             toprint += ",";
             toprint += JY901_FR.getAccZ();
             toprint += "\n";
-            Serial1.print(toprint);
+            Serial.print(toprint);
           }
         case 'f':
           JY901_FC.receiveSerialData();
@@ -375,7 +387,7 @@ int readCommand() {
           break;
         // all gyros
         case 'a':
-          JY901_FL.receiveSerialData();
+          //JY901_FL.receiveSerialData();
           JY901_FC.receiveSerialData();
           JY901_FR.receiveSerialData();
           switch (str_array[0][2]){

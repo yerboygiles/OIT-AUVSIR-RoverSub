@@ -58,16 +58,14 @@ class TaskIO:
     def testData(self):
         # self.Movement.ZeroSonar()
         starttime = time.perf_counter()
-        count: int = 0
         with open('telemetry_active.txt', 'w') as f:
             while (time.perf_counter() - starttime) < 30:
-                count = count + count
-                print(count)
+                print(time.perf_counter() - starttime)
                 perftime = time.perf_counter()
                 # confidence = self.Movement.Sonar.updateDistance()
                 # distance = self.Movement.Sonar.getDistance()
                 self.Movement.GyroTesting()
-                self.Movement.ArduinoTesting()
+                # self.Movement.ArduinoTesting()
 
                 # towrite = "Sonar dist, confidence" + str(distance) + str(confidence)
                 # f.write(towrite)
@@ -75,7 +73,9 @@ class TaskIO:
                 # towrite = "Sonar PID: " + str(self.Movement.Sonar.getPID())
                 # f.write(towrite)
                 # f.write("\n")
-                towrite = "IMU Position: " + str(self.Movement.ArdIMU.Position)
+
+                towrite = "IMU Acceleration: " + str(self.Movement.ArdIMU.getAcceleration())
+                #towrite = "IMU Position: " + str(self.Movement.ArdIMU.getPosition())
                 # print(towrite)
                 f.write(towrite)
                 f.write("\n")
