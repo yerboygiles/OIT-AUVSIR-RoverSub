@@ -33,13 +33,13 @@ def run():
     Mission = TaskIO("../mission.txt", True, False, True, False, False)
 
     # testing funcs
-    # Mission.testData()
-    try:
-        # actual task/mission runner
-        Mission.get_tasks()
-    except KeyboardInterrupt:
-        print("Interrupt. Ctrl-C'ed out.")
-        Mission.terminate()
+    Mission.testData()
+    # try:
+    #     # actual task/mission runner
+    #     Mission.get_tasks()
+    # except KeyboardInterrupt:
+    #     print("Interrupt. Ctrl-C'ed out.")
+    #     Mission.terminate()
 
     Mission.terminate()
     print("done")

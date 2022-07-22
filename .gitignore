@@ -1,8 +1,9 @@
 /host
 /build
 /venv
-/vision_testing/
-/vision_testing/stereoDepth-master.zip
+raspberry/vision_testing
+raspberry/vision_testing/*
+raspberry/vision_testing/stereoDepth-master.zip
 .idea
 workspace.xml
 misc.xml

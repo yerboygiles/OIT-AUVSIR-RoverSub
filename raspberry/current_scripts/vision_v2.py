@@ -93,8 +93,15 @@ class vision:
     Y_D = 0.0
 
     Captures = []
+<<<<<<< HEAD
     left_cam_index = 0
     right_cam_index = 1
+=======
+
+    left_cam_index = 0
+    right_cam_index = 1
+
+>>>>>>> 0ca6b9e5801a66a393bbdb82895ddfcdc642d7ed
     CWD_PATH = ""
     width: float
     height: float
@@ -106,7 +113,10 @@ class vision:
     freq = 0
     VideostreamL = VideoStream
     VideostreamR = VideoStream
+<<<<<<< HEAD
     videostream = VideoStream
+=======
+>>>>>>> 0ca6b9e5801a66a393bbdb82895ddfcdc642d7ed
     t1: float
     t2: float
     imageWidth: int
@@ -211,10 +221,16 @@ class vision:
         self.freq = cv2.getTickFrequency()
 
         # Initialize video stream
+<<<<<<< HEAD
         self.videostream = VideoStream(resolution=(imageWidth, imageHeight), framerate=30).start()
         print("Starting Stereo Stream...")
         self.right_cam_index = right
         self.left_cam_index = left
+=======
+
+        self.videostream = VideoStream(resolution=(imageWidth, imageHeight), framerate=30).start()
+        print("Starting Stereo Stream...")
+>>>>>>> 0ca6b9e5801a66a393bbdb82895ddfcdc642d7ed
         print("Starting Stereo Stream...")
         self.VideostreamL = VideoStream(resolution=(imageWidth, imageHeight), framerate=30, camindex=left).start()
         self.VideostreamR = VideoStream(resolution=(imageWidth, imageHeight), framerate=30, camindex=right).start()
@@ -248,10 +264,13 @@ class vision:
         # Grab frame from video stream
         retL, imgL = self.VideostreamL.read()
         retR, imgR = self.VideostreamR.read()
+<<<<<<< HEAD
         frame1 = self.videostream.read()
 
         retL, imgL = self.getImg(0)
         retR, imgR = self.getImg(1)
+=======
+>>>>>>> 0ca6b9e5801a66a393bbdb82895ddfcdc642d7ed
 
         stereo = cv2.StereoBM(1, 16, 15)
         disparity = stereo.compute(imgL, imgR)
