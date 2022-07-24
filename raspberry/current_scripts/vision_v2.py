@@ -16,6 +16,7 @@ import cv2
 import numpy as np
 from math import *
 from threading import Thread
+import tensorflow as tf
 
 # from matplotlib import pyplot as plt
 
@@ -100,10 +101,6 @@ class vision:
     CWD_PATH = ""
     width: float
     height: float
-    floating_model = True
-    interpreter = 0
-    input_details = []
-    output_details = []
     frame_rate_calc = 0
     freq = 0
     VideostreamL = VideoStream
@@ -132,94 +129,35 @@ class vision:
         # CELLPHONEXSIZE = 68.2
         # TARGETYSIZE = 145.6
 
-        graph_def_file = model_dir + "/vision/saved_model1.pb"
+        MODEL_PATH = "D:/Desktop/AUVSIR_21-22/OIT-AUVSIR-RoverSub/raspberry/vision_testing/StereoVision_2" \
+                     "/stereoVisionCalibration/models/Tensorflow/data/models/robosub1/saved_model "
 
-        input_arrays = ["Input"]
-        output_arrays = ["output"]
+        self.model = tf.saved_model.load(MODEL_PATH)
+        self.infer = self.model.signatures["serving_default"]
+        print("infer: ", self.infer.structured_outputs)
 
-        converter = tf.contrib.lite.TocoConverter.from_frozen_graph(graph_def_file, input_arrays, output_arrays)
 
-        tflite_model = converter.convert()
-        open("converted_model.tflite", "wb").write(tflite_model)
-
-        MODEL_NAME = 'model.tflite'
-        self.SHOW_IMAGES = show_images
-        GRAPH_NAME = graph
-        LABELMAP_NAME = labelmap_name
         min_conf_threshold = float(threshold)
-        use_TPU = edgetpu
-        resW, resH = resolution.split('x')
-        imageWidth, imageHeight = int(resW), int(resH)
-
-        # Import TensorFlow libraries
-        # If tensorflow is not installed, import interpreter from tflite_runtime, else import from regular tensorflow
-        # If using Coral Edge TPU, import the load_delegate library
-        pkg = importlib.util.find_spec('tensorflow')
-        if pkg is None:
-            from tflite_runtime.interpreter import Interpreter
-            if use_TPU:
-                from tflite_runtime.interpreter import load_delegate
-        else:
-            from tensorflow.lite.python.interpreter import Interpreter
-            if use_TPU:
-                from tensorflow.lite.python.interpreter import load_delegate
-
-        # If using Edge TPU, assign filename for Edge TPU model
-        if use_TPU:
-            # If user has specified the name of the .tflite file, use that name, otherwise use default 'edgetpu.tflite'
-            if (GRAPH_NAME == 'detect.tflite'):
-                GRAPH_NAME = 'edgetpu.tflite'
 
         # Get path to current working directory
         CWD_PATH = os.getcwd()
-
-        # Path to .tflite file, which contains the model that is used for object detection
-        PATH_TO_CKPT = os.path.join(CWD_PATH, MODEL_NAME, GRAPH_NAME)
-
-        # Path to label map file
-        PATH_TO_LABELS = os.path.join(CWD_PATH, MODEL_NAME, LABELMAP_NAME)
-
-        # Load the label map
-        with open(PATH_TO_LABELS, 'r') as f:
-            LabelsTF = [line.strip() for line in f.readlines()]
-
-        # Have to do a weird fix for label map if using the COCO "starter model" from
-        # https://www.tensorflow.org/lite/models/object_detection/overview
-        # First label is '???', which has to be removed.
-        if LabelsTF[0] == '???':
-            del (LabelsTF[0])
-
-        # Load the Tensorflow Lite model.
-        # If using Edge TPU, use special load_delegate argument
-        if use_TPU:
-            self.interpreter = Interpreter(model_path=PATH_TO_CKPT,
-                                           experimental_delegates=[load_delegate('libedgetpu.so.1.0')])
-            print(PATH_TO_CKPT)
-        else:
-            self.interpreter = Interpreter(model_path=PATH_TO_CKPT)
-
-        self.interpreter.allocate_tensors()
-
-        # Get model details
-        self.input_details = self.interpreter.get_input_details()
-        self.output_details = self.interpreter.get_output_details()
-        self.height = self.input_details[0]['shape'][1]
-        self.width = self.input_details[0]['shape'][2]
-
-        self.floating_model = (self.input_details[0]['dtype'] == np.float32)
 
         # Initialize frame rate calculation
         self.frame_rate_calc = 1
         self.freq = cv2.getTickFrequency()
 
-        # Initialize video stream
-        self.videostream = VideoStream(resolution=(imageWidth, imageHeight), framerate=30).start()
-        print("Starting Stereo Stream...")
-        self.right_cam_index = right
-        self.left_cam_index = left
+        resW, resH = resolution.split('x')
+        imageWidth, imageHeight = int(resW), int(resH)
 
-        self.videostream = VideoStream(resolution=(imageWidth, imageHeight), framerate=30).start()
-        print("Starting Stereo Stream...")
+        cv_file = cv2.FileStorage()
+        cv_file.open('stereoMap.xml', cv2.FileStorage_READ)
+
+        self.stereoMapL_x = cv_file.getNode('stereoMapL_x').mat()
+        self.stereoMapL_y = cv_file.getNode('stereoMapL_y').mat()
+        self.stereoMapR_x = cv_file.getNode('stereoMapR_x').mat()
+        self.stereoMapR_y = cv_file.getNode('stereoMapR_y').mat()
+
+        # Initialize video stream
         print("Starting Stereo Stream...")
         self.VideostreamL = VideoStream(resolution=(imageWidth, imageHeight), framerate=30, camindex=left).start()
         self.VideostreamR = VideoStream(resolution=(imageWidth, imageHeight), framerate=30, camindex=right).start()
@@ -264,27 +202,18 @@ class vision:
         # plt.imshow(disparity, 'gray')
         # plt.show()
         # Acquire frame and resize to expected shape [1xHxWx3]
-        frame = imgL.copy()
-        frame.getCvFrame()
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        frame_resized = cv2.resize(frame_rgb, (self.width, self.height))
-        input_data = np.expand_dims(frame_resized, axis=0)
 
-        # Normalize pixel values if using a floating model (i.e. if model is non-quantized)
-        if self.floating_model:
-            input_data = (np.float32(input_data) - input_mean) / input_std
+        infer = self.model.signatures["serving_default"]
+        output_details = infer.structured_outputs
 
-        # Perform the actual detection by running the model with the image as input
-        self.interpreter.set_tensor(self.input_details[0]['index'], input_data)
-        self.interpreter.invoke()
-
+        image_np = np.asarray(np.array(imgL))
+        input_tensor = tf.convert_to_tensor(image_np)
+        input_tensor = input_tensor[tf.newaxis, ...]
+        input_tensor = input_tensor[:, :, :, :3]  # <= add this line
         # Retrieve detection results
-        BoxesTF = self.interpreter.get_tensor(self.output_details[0]['index'])[
-            0]  # Bounding box coordinates of detected objects
-        ClassesTF = self.interpreter.get_tensor(self.output_details[1]['index'])[0]  # Class index of detected objects
-        ScoresTF = self.interpreter.get_tensor(self.output_details[2]['index'])[0]  # Confidence of detected objects
-        # num = interpreter.get_tensor(output_details[3]['index'])[0]
-        # Total number of detected objects
+        BoxesTF = self.infer(input_tensor)["detection_boxes"][0].numpy()
+        ClassesTF = self.infer(input_tensor)["detection_classes"][0].numpy()
+        ScoresTF = self.infer(input_tensor)["detection_scores"][0].numpy()
 
         # checking for specific target
         # if searchingfor is not None:
@@ -388,8 +317,13 @@ class vision:
     def StereoTarget(self, showim):
         ret_left, img_left = self.Captures[self.left_cam_index].read()
         ret_right, img_right = self.Captures[self.left_cam_index].read()
+
+        frame_right = cv2.remap(img_right, self.stereoMapR_x, self.stereoMapR_y, cv2.INTER_LANCZOS4, cv2.BORDER_CONSTANT, 0)
+        frame_left = cv2.remap(img_left, self.stereoMapL_x, self.stereoMapL_y, cv2.INTER_LANCZOS4, cv2.BORDER_CONSTANT, 0)
+
         gray_left = cv2.cvtColor(img_left, cv2.COLOR_BGR2GRAY)
         gray_right = cv2.cvtColor(img_right, cv2.COLOR_BGR2GRAY)
+
         stereo = cv2.StereoBM_create(numDisparities=16, blockSize=15)
         disparity = stereo.compute(gray_left, gray_right)
         # if showim:
@@ -515,6 +449,10 @@ class vision:
                     FoundTarget = True
                     # LateralDistance, Distance, OffCenterX, OffCenterY = findDistance(MaxX, MinX, MaxY, MinY)
                     break
+
+        t2 = cv2.getTickCount()
+        time1 = (t2 - self.t1) / self.freq
+        frame_rate_calc = 1 / time1
         return LateralDistance, Distance, OffCenterX, OffCenterY, FoundTarget
 
         # old function for finding size of a test object.
@@ -547,6 +485,8 @@ class vision:
 
     def terminate(self):
         # Clean up
+        # video telem
+        # out.release()
         cv2.destroyAllWindows()
         self.videostream.stop()
 
