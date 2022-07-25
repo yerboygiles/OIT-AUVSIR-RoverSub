@@ -56,17 +56,23 @@ class TaskIO:
             self.CommandList.append(self.Input)
 
     def testData(self):
+        loopi = 0
         # self.Movement.ZeroSonar()
         starttime = time.perf_counter()
         with open('telemetry_active.txt', 'w') as f:
+            self.Movement.Vision.startStream()
             while (time.perf_counter() - starttime) < 30:
+                print("Loop num: ", loopi)
+                loopi = loopi + 1
                 print(time.perf_counter() - starttime)
                 perftime = time.perf_counter()
                 # confidence = self.Movement.Sonar.updateDistance()
                 # distance = self.Movement.Sonar.getDistance()
                 # self.Movement.GyroTesting()
                 self.Movement.VisionTesting()
+                print("Vision ran...")
                 self.Movement.GyroTesting()
+                print("Gyro ran...")
                 # self.Movement.ArduinoTesting()
                 if self.Movement.Vision.SeenTarget:
                     towrite = "Seen target: " + self.Movement.Vision.SeenTarget

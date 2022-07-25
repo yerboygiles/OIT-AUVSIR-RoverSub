@@ -45,7 +45,7 @@ def get_wasdqerv_directional() -> int:
     return directval
 
 
-def set_individual_motor() -> tuple[int, float]:
+def set_individual_motor():
     directval = 0
     motor = input("MOTOR: ")
     speed = input("speed: ")

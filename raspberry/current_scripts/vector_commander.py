@@ -215,9 +215,9 @@ class NavigationCommander:
     def VisionTesting(self):
 
         self.Vision.process_image(searchingfor=2)  # 2 - buoys, 1 - gate
+        print("Post-image process")
         self.Vision.CalculateError()
-        self.ArdIMU.CalculateError()
-        self.ArdIMU.PID()
+        print("Post-calculate")
         pass
 
     def GyroTesting(self):

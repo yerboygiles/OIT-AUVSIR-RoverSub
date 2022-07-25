@@ -37,7 +37,7 @@ Y: int = 1
 
 class VideoStream:
 
-    def __init__(self, resolution=(640, 480), framerate=30, camindex=0):
+    def __init__(self, resolution=(640, 480), framerate=30, camindex="/dev/video1"):
         # Initialize the PiCamera and the camera image stream
         self.stream = cv2.VideoCapture(camindex)
         ret = self.stream.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'MJPG'))
@@ -70,7 +70,8 @@ class VideoStream:
     def read(self):
         # Return the most recent frame
         return self.frame
-
+    def isActive(self):
+        return self.grabbed
     def stop(self):
         # Indicate that the camera and thread should be stopped
         self.stopped = True
@@ -123,17 +124,18 @@ class vision:
 
     def __init__(self, left=0, right=1, show_images=True, resolution='640x480', graph='model.tflite',
                  labelmap_name='labelmap.txt', threshold=0.5, edgetpu=False, model_dir=""):
+        print("Loading tensorflow...")
         import tensorflow as tf
 
         # in mm
         FOCALLENGTH = 4.8
 
-        MODEL_PATH = "D:/Desktop/AUVSIR_21-22/OIT-AUVSIR-RoverSub/raspberry/vision_testing/StereoVision_2" \
-                     "/stereoVisionCalibration/models/Tensorflow/data/models/robosub1/saved_model "
+        MODEL_PATH = "/home/robogod/main_rov_software/current_scripts/model/"
 
         self.model = tf.saved_model.load(MODEL_PATH)
         self.infer = self.model.signatures["serving_default"]
-        print("infer: ", self.infer.structured_outputs)
+        print("Loading signatures...")
+        # print("infer: ", self.infer.structured_outputs)
 
         self.min_conf_threshold = float(threshold)
 
@@ -144,18 +146,21 @@ class vision:
         resW, resH = resolution.split('x')
         imageWidth, imageHeight = int(resW), int(resH)
 
+        print("Loading stereoMap filestorage...")
         cv_file = cv2.FileStorage()
         cv_file.open('stereoMap.xml', cv2.FileStorage_READ)
 
+        print("Setting stereoMap mats...")
         self.stereoMapL_x = cv_file.getNode('stereoMapL_x').mat()
         self.stereoMapL_y = cv_file.getNode('stereoMapL_y').mat()
         self.stereoMapR_x = cv_file.getNode('stereoMapR_x').mat()
         self.stereoMapR_y = cv_file.getNode('stereoMapR_y').mat()
 
+    def startStream(self):
         # Initialize video stream
         print("Starting Stereo Stream...")
-        self.VideostreamL = VideoStream(resolution=(imageWidth, imageHeight), framerate=30, camindex=left).start()
-        self.VideostreamR = VideoStream(resolution=(imageWidth, imageHeight), framerate=30, camindex=right).start()
+        self.VideostreamL = VideoStream(resolution=(640, 480), framerate=30, camindex="/dev/video1").start()
+        self.VideostreamR = VideoStream(resolution=(640, 480), framerate=30, camindex="/dev/video3").start()
         time.sleep(1)
 
     # *************************************************************************************************
@@ -173,6 +178,7 @@ class vision:
     # Thread Safety: None
     # *************************************************************************************************
     def process_image(self, searchingfor=None):
+        print("beginning processing...")
         # global t1
         OffCenterX = 0
         OffCenterY = 0
@@ -184,24 +190,30 @@ class vision:
         # Start timer (for calculating frame rate)
         self.t1 = cv2.getTickCount()
         # Grab frame from video stream
-        retL, imgL = self.VideostreamL.read()
-        retR, imgR = self.VideostreamR.read()
-
+        print("grabbing frame")
+        imgL = self.VideostreamL.read()
+        imgR = self.VideostreamR.read()
+        while not self.VideostreamL.isActive():
+            self.VideostreamL.update()
+            print("frame invalid...")
+            pass
         stereo = cv2.StereoBM(1, 16, 15)
-        disparity = stereo.compute(imgL, imgR)
-
+        print("stereo setup")
+        # disparity = stereo.compute(imgL, imgR)
+        print("disparity computed")
         # plt.imshow(disparity, 'gray')
         # plt.show()
         # Acquire frame and resize to expected shape [1xHxWx3]
 
         infer = self.model.signatures["serving_default"]
         output_details = infer.structured_outputs
-
+        print("pre-image np")
         image_np = np.asarray(np.array(imgL))
         input_tensor = tf.convert_to_tensor(image_np)
         input_tensor = input_tensor[tf.newaxis, ...]
         input_tensor = input_tensor[:, :, :, :3]  # <= add this line
         # Retrieve detection results
+        print("retrieving detect results")
         BoxesTF = self.infer(input_tensor)["detection_boxes"][0].numpy()
         ClassesTF = self.infer(input_tensor)["detection_classes"][0].numpy()
         ScoresTF = self.infer(input_tensor)["detection_scores"][0].numpy()
@@ -379,6 +391,7 @@ class vision:
     def process_tensor(self, boxes, classes, scores, searchingfor=2, stereo=False):
         LateralDistance = 0.0
         Distance = 0.0
+        print("Tensor process...")
         self.SeenTarget = False
         for i in range(len(scores)):
             if (scores[i] > self.min_conf_threshold) and (scores[i] <= 1.0):
