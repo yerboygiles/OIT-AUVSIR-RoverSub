@@ -1,3 +1,10 @@
+#!python3
+# Author: Theodor Giles
+# Created: 8/7/20
+# Last Edited 7/23/22
+# Description:
+# manages sonar data, updates, calls, passing to other nodes, etc.
+
 from brping import Ping1D
 import time
 

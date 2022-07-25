@@ -1,7 +1,7 @@
 #!python3
 # Author: Theodor Giles, Colton Rhodes
 # Created: 7/15/20
-# Last Edited 7/12/22
+# Last Edited 7/23/22
 # Description:
 # node for moving around IMU data from the arduino
 

@@ -1,7 +1,7 @@
 #!python3
 # Author: Theodor Giles, Colton Rhodes
 # Created: 11/22/20
-# Last Edited 7/13/22
+# Last Edited 7/23/22
 # Description:
 # This node manages the commands/movement/physical
 # control of the RoboSub V2, 2020-21
@@ -92,6 +92,7 @@ class NavigationCommander:
             time.sleep(7)
         else:
             print("MovementCommander is not using Arduino...")
+        self.UsingVision = usingvision
         self.UsingGyro = usinggyro
         # arduino. omitting for now, in favor of pure rpi gyro reads
         # self.serial = serial.Serial('/dev/ttyAMA0', 115200)
@@ -134,7 +135,7 @@ class NavigationCommander:
             # import Theos_Really_Good_Detection_Script as obj_det
             # self.VisionAI = obj_det.Detector("TensorFlow_Graph/Tflite", False)
             # print("MovementCommander is using Vision AI...")
-            self.Vision = vision_v1.vision()
+            self.Vision = vision_v2.vision()
         else:
             print("MovementCommander is not using Vision AI...")
 
@@ -211,6 +212,14 @@ class NavigationCommander:
     def ZeroSonar(self):
         self.Sonar.setOffsetCurrent()
 
+    def VisionTesting(self):
+
+        self.Vision.process_image(searchingfor=2)  # 2 - buoys, 1 - gate
+        self.Vision.CalculateError()
+        self.ArdIMU.CalculateError()
+        self.ArdIMU.PID()
+        pass
+
     def GyroTesting(self):
         # self.IMU.updateGyro()
         # print("Angle: ", self.IMU.getGyro())
@@ -228,10 +237,10 @@ class NavigationCommander:
         # print("IMU 2 Angle: ", x2, y2, z2)
         # self.BrakeAllThrusters()
 
-        #self.ArdIMU.UpdatePosition()
+        # self.ArdIMU.UpdatePosition()
         self.ArdIMU.UpdateAngle()
         self.ArdIMU.UpdateAcceleration()
-        #self.ArdIMU.UpdatePosition()
+        # self.ArdIMU.UpdatePosition()
         self.ArdIMU.CalculateError()
         self.ArdIMU.PID()
 
@@ -389,7 +398,7 @@ class NavigationCommander:
     def AdvancedVectoring(self):
         self.StoreCommandGyroOffsets()
 
-    def TargetMovement(self):
+    def ApproachTarget(self):
         print("Scanning for target...")
         # while self.SearchAndLockTarget(self.SuppCommand):
         #     pass
@@ -529,7 +538,7 @@ class NavigationCommander:
 
                         if self.UsingGyro:
                             print("Running target-based command...")
-                            self.TargetMovement()
+                            self.ApproachTarget()
                         else:
                             print("Can't run target commands without Gyro and Vision functionality...")
                     i += 2

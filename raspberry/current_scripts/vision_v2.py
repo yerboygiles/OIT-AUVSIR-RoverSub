@@ -1,20 +1,26 @@
 #!python3
-# Author: Theodor Giles
+# Author: Theodor Giles, JayCe Leonard
 # Created: 7/17/22
-# Last Edited 7/18/22
+# Last Edited 7/24/22
 # Description:
 # node for moving around data from the vision
 # processing system
 
-import serial
+# used github references/code -
+# https://github.com/niconielsen32/ComputerVision (the stereo subdirecs)
+# https://github.com/AndreYonadam/OpenCV-stereo-vision
+# https://github.com/aliyasineser/stereoDepth
+# https://github.com/nicknochnack/TFODCourse
+
+# import serial
+# import re
+# import math
+# import argparse
+# from math import *
 import time
-import re
-import math
 import os
-import argparse
 import cv2
 import numpy as np
-from math import *
 from threading import Thread
 import tensorflow as tf
 
@@ -24,11 +30,12 @@ X: int = 0
 Y: int = 1
 
 
-# Define VideoStream class to handle streaming of video from webcam in separate processing thread
-# Source - Adrian Rosebrock, PyImageSearch: https://www.pyimagesearch.com/2015/12/28/increasing-raspberry-pi-fps-with-python-and-opencv/
+# info about base videostream class -
+# Define VideoStream class to handle streaming of video from webcam in separate processing thread Source - Adrian
+# Rosebrock, PyImageSearch: https://www.pyimagesearch.com/2015/12/28/increasing-raspberry-pi-fps-with-python-and
+# -opencv/
 
 class VideoStream:
-    """Camera object that controls video streaming from the Picamera"""
 
     def __init__(self, resolution=(640, 480), framerate=30, camindex=0):
         # Initialize the PiCamera and the camera image stream
@@ -96,8 +103,6 @@ class vision:
     Captures = []
     left_cam_index = 0
     right_cam_index = 1
-    left_cam_index = 0
-    right_cam_index = 1
     CWD_PATH = ""
     width: float
     height: float
@@ -114,20 +119,14 @@ class vision:
     SHOW_IMAGES: bool
     LabelsTF = []
     FOCALLENGTH: float
+    SeenTarget: bool
 
     def __init__(self, left=0, right=1, show_images=True, resolution='640x480', graph='model.tflite',
                  labelmap_name='labelmap.txt', threshold=0.5, edgetpu=False, model_dir=""):
         import tensorflow as tf
-        # globals
 
         # in mm
         FOCALLENGTH = 4.8
-
-        # in mm
-        # global CELLPHONEXSIZE
-        # global TARGETYSIZE
-        # CELLPHONEXSIZE = 68.2
-        # TARGETYSIZE = 145.6
 
         MODEL_PATH = "D:/Desktop/AUVSIR_21-22/OIT-AUVSIR-RoverSub/raspberry/vision_testing/StereoVision_2" \
                      "/stereoVisionCalibration/models/Tensorflow/data/models/robosub1/saved_model "
@@ -136,11 +135,7 @@ class vision:
         self.infer = self.model.signatures["serving_default"]
         print("infer: ", self.infer.structured_outputs)
 
-
-        min_conf_threshold = float(threshold)
-
-        # Get path to current working directory
-        CWD_PATH = os.getcwd()
+        self.min_conf_threshold = float(threshold)
 
         # Initialize frame rate calculation
         self.frame_rate_calc = 1
@@ -191,10 +186,6 @@ class vision:
         # Grab frame from video stream
         retL, imgL = self.VideostreamL.read()
         retR, imgR = self.VideostreamR.read()
-        frame1 = self.videostream.read()
-
-        retL, imgL = self.getImg(0)
-        retR, imgR = self.getImg(1)
 
         stereo = cv2.StereoBM(1, 16, 15)
         disparity = stereo.compute(imgL, imgR)
@@ -215,6 +206,7 @@ class vision:
         ClassesTF = self.infer(input_tensor)["detection_classes"][0].numpy()
         ScoresTF = self.infer(input_tensor)["detection_scores"][0].numpy()
 
+        self.process_tensor(imgL, BoxesTF, ClassesTF, ScoresTF)
         # checking for specific target
         # if searchingfor is not None:
         #     LateralDistanceMM, DistanceMM, OffCenterX, OffCenterY, \
@@ -225,52 +217,6 @@ class vision:
     def getImg(self, camindex):
         self.ret, self.img = self.Captures[camindex].read()
         return self.ret, self.img
-
-    # def getColorMaskContours(self, ret, img, extratelem=False):
-    #     # red values 179, 255,255
-    #     # min 105 0 0
-    #     hmin = 105
-    #     smin = 0
-    #     vmin = 0
-    #
-    #     hmax = 179
-    #     smax = 255
-    #     vmax = 255
-    #
-    #     # masking bounds
-    #     x = y = 30
-    #     w = h = 400
-    #
-    #     # contours
-    #     con = False
-    #
-    #     if ret:
-    #         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    #         lower = np.array([hmin, smin, vmin])
-    #         upper = np.array([hmax, smax, vmax])
-    #         mask = cv2.inRange(hsv, lower, upper)
-    #         # masked = cv2.bitwise_and(hsv,hsv,mask=mask)
-    #         con = cv2.findContours(mask.copy(),
-    #                                cv2.RETR_EXTERNAL,
-    #                                cv2.CHAIN_APPROX_SIMPLE)[-2]
-    #         while extratelem:
-    #             if len(con) > 0:
-    #                 i = 0
-    #                 for c in con:
-    #                     area = cv2.contourArea(c)
-    #                     if area > 20:
-    #                         (x, y, w, h) = cv2.boundingRect(c)
-    #                         cv2.rectangle(self.img, (x, y), (x + w, y + h), (0, 255, 255), 2)
-    #                         # the center fo the screen will half the resoltion hight and half the width
-    #                         # then just store the x and y components
-    #                         print('element:', i)
-    #                         print("x:", x)
-    #             cv2.imshow("result", self.img)
-    #             cv2.imshow("masked", mask)
-    #             # trak bars for other stuff
-    #             if cv2.waitKey(1) == ord('q'):
-    #                 break
-    #     return con
 
     def seesTargetColorMask(self, target):
         # red values 179, 255,255
@@ -289,8 +235,8 @@ class vision:
 
         # contours
         seen = False
-
-        self.getImg(self.right_cam_index)
+        self.img = self.VideostreamL.read()
+        # self.getImg(self.right_cam_index)
 
         if self.ret:
             hsv = cv2.cvtColor(self.img, cv2.COLOR_BGR2HSV)
@@ -315,14 +261,17 @@ class vision:
         return seen
 
     def StereoTarget(self, showim):
-        ret_left, img_left = self.Captures[self.left_cam_index].read()
-        ret_right, img_right = self.Captures[self.left_cam_index].read()
+        ret_right, img_right = self.VideostreamR.read()
+        ret_left, img_left = self.VideostreamL.read()
 
-        frame_right = cv2.remap(img_right, self.stereoMapR_x, self.stereoMapR_y, cv2.INTER_LANCZOS4, cv2.BORDER_CONSTANT, 0)
-        frame_left = cv2.remap(img_left, self.stereoMapL_x, self.stereoMapL_y, cv2.INTER_LANCZOS4, cv2.BORDER_CONSTANT, 0)
+        img_right_rm = cv2.remap(img_right, self.stereoMapR_x, self.stereoMapR_y, cv2.INTER_LANCZOS4,
+                                 cv2.BORDER_CONSTANT, 0)
+        frame_left_rm = cv2.remap(img_left, self.stereoMapL_x, self.stereoMapL_y, cv2.INTER_LANCZOS4,
+                                  cv2.BORDER_CONSTANT,
+                                  0)
 
-        gray_left = cv2.cvtColor(img_left, cv2.COLOR_BGR2GRAY)
-        gray_right = cv2.cvtColor(img_right, cv2.COLOR_BGR2GRAY)
+        gray_right = cv2.cvtColor(img_right_rm, cv2.COLOR_BGR2GRAY)
+        gray_left = cv2.cvtColor(frame_left_rm, cv2.COLOR_BGR2GRAY)
 
         stereo = cv2.StereoBM_create(numDisparities=16, blockSize=15)
         disparity = stereo.compute(gray_left, gray_right)
@@ -427,33 +376,37 @@ class vision:
                     break
         return con
 
-    def process_distance_from(self, boxes, classes, scores, searchingfor):
-        OffCenterX = 0
-        OffCenterY = 0
+    def process_tensor(self, boxes, classes, scores, searchingfor=2, stereo=False):
         LateralDistance = 0.0
         Distance = 0.0
-        FoundTarget = False
+        self.SeenTarget = False
         for i in range(len(scores)):
             if (scores[i] > self.min_conf_threshold) and (scores[i] <= 1.0):
+                self.SeenTarget = True
                 # Get bounding box coordinates and draw box
                 # Interpreter can return coordinates that are outside of image
                 # dimensions, need to force them to be within image using max() and min()
-                MinY = int(max(1, (boxes[i][0] * self.imageHeight)))
-                MinX = int(max(1, (boxes[i][1] * self.imageWidth)))
-                MaxY = int(min(self.imageHeight, (boxes[i][2] * self.imageHeight)))
-                MaxX = int(min(self.imageWidth, (boxes[i][3] * self.imageWidth)))
 
-                object_name = self.LabelsTF[
-                    int(classes[i])]  # Look up object name from "labels" array using class index
+                # image center coordinates subtracted by detected box coordinates - difference in detected object
+                # position in image and the vision origin/"middle" of image
+                object_name = int(classes[i])
                 if object_name == searchingfor:
-                    FoundTarget = True
+                    MinY = int(max(1, (boxes[i][0] * self.imageHeight)))
+                    MinX = int(max(1, (boxes[i][1] * self.imageWidth)))
+                    MaxY = int(min(self.imageHeight, (boxes[i][2] * self.imageHeight)))
+                    MaxX = int(min(self.imageWidth, (boxes[i][3] * self.imageWidth)))
+                    self.SeenTarget = True
+                    self.Error[Y] = (self.imageHeight / 2) - MaxY - (MaxY - MinY) / 2
+                    self.Error[X] = (self.imageWidth / 2) - MaxX - (MaxX - MinX) / 2
+                    self.CalculateError()
                     # LateralDistance, Distance, OffCenterX, OffCenterY = findDistance(MaxX, MinX, MaxY, MinY)
-                    break
+                else:
+                    self.SeenTarget = False
 
         t2 = cv2.getTickCount()
         time1 = (t2 - self.t1) / self.freq
         frame_rate_calc = 1 / time1
-        return LateralDistance, Distance, OffCenterX, OffCenterY, FoundTarget
+        return LateralDistance, Distance, self.Error[X], self.Error[Y], FoundTarget, self.SeenTarget
 
         # old function for finding size of a test object.
         # need to repurpose into system for calibrating camera distance algo.
@@ -490,25 +443,19 @@ class vision:
         cv2.destroyAllWindows()
         self.videostream.stop()
 
-    # req for PID calculation
-    def CalculateError(self):
-        self.Error = [0, 0]
-        self.Error_Sum = [0, 0]
-        self.Error_Delta = [0, 0]
-        self.Previous_Error = [0, 0]
+    def CalculateError(self, ):
+
         # previous error for error delta
         # gyro
         self.Previous_Error[X] = self.Error[X]
         self.Previous_Error[Y] = self.Error[Y]
-        # error for proportional control
-        self.Error[X] = self.XOffset
-        self.Error[Y] = self.YOffset
 
         # sum of error for integral
+        # gyro
         self.Error_Sum[X] = self.Error_Sum[X] + self.Error[X]
         self.Error_Sum[Y] = self.Error_Sum[Y] + self.Error[Y]
-
         # math for change in error to do derivative
+        # gyro
         self.Error_Delta[X] = self.Error[X] - self.Previous_Error[X]
         self.Error_Delta[Y] = self.Error[Y] - self.Previous_Error[Y]
 

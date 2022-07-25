@@ -1,7 +1,9 @@
 /host
 /build
 /venv
-raspberry/vision_testing
+/utility/*
+/vision_testing/
+raspberry/vision_testing/
 raspberry/vision_testing/*
 raspberry/vision_testing/stereoDepth-master.zip
 .idea

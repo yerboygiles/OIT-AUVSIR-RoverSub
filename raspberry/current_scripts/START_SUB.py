@@ -2,18 +2,17 @@
 
 # Author: Theodor Giles
 # Created: 7/14/20
-# Last Edited 5/18/22
+# Last Edited 7/23/22
 # Description:
 # This program is very basic, just so we can mess with a variable or two. will be integrated into gui?
 #
 
-import RPi.GPIO as GPIO
 import time
 
-buzzer = 26
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(buzzer, GPIO.OUT)
+# buzzer = 26
+# GPIO.setwarnings(False)
+# GPIO.setmode(GPIO.BCM)
+# GPIO.setup(buzzer, GPIO.OUT)
 
 
 def run():
@@ -23,11 +22,11 @@ def run():
 
     print("Button pushed... Starting up...")
     # time.sleep(3)
-    for i in range(5):
-        GPIO.output(buzzer, GPIO.HIGH)
-        time.sleep(0.4)
-        GPIO.output(buzzer, GPIO.LOW)
-        time.sleep(0.2)
+    # for i in range(5):
+    #     GPIO.output(buzzer, GPIO.HIGH)
+    #     time.sleep(0.4)
+    #     GPIO.output(buzzer, GPIO.LOW)
+    #     time.sleep(0.2)
 
     # self, mission filename, usingarduino, usingvision, usinggyro, usingsim, usingping
     Mission = TaskIO("../mission.txt", True, False, True, False, False)

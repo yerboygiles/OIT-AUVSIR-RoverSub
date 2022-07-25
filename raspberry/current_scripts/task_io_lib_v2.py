@@ -1,7 +1,7 @@
 #!python3
 # Author: Theodor Giles
 # Created: 8/7/20
-# Last Edited 7/13/22
+# Last Edited 7/23/22
 # Description:
 # This program manages the conversion of the mission.txt into commands that the MovementCommander can understand
 # as well as the AI/TF/vision integration
@@ -64,8 +64,22 @@ class TaskIO:
                 perftime = time.perf_counter()
                 # confidence = self.Movement.Sonar.updateDistance()
                 # distance = self.Movement.Sonar.getDistance()
+                # self.Movement.GyroTesting()
+                self.Movement.VisionTesting()
                 self.Movement.GyroTesting()
                 # self.Movement.ArduinoTesting()
+                if self.Movement.Vision.SeenTarget:
+                    towrite = "Seen target: " + self.Movement.Vision.SeenTarget
+                    print(towrite)
+                    f.write(towrite)
+                    f.write("\n")
+                    towrite = "X, Y vision offset: " + self.Movement.Vision.getXOffset() + ", " + self.Movement.Vision.getYOffset()
+                    print(towrite)
+                else:
+                    towrite = "Target not visible."
+                    print(towrite)
+                f.write(towrite)
+                f.write("\n")
 
                 # towrite = "Sonar dist, confidence" + str(distance) + str(confidence)
                 # f.write(towrite)
@@ -74,16 +88,21 @@ class TaskIO:
                 # f.write(towrite)
                 # f.write("\n")
 
-                towrite = "IMU Acceleration: " + str(self.Movement.ArdIMU.getAcceleration())
-                f.write(towrite)
-                towrite = "IMU Position: " + str(self.Movement.ArdIMU.getPosition())
+                towrite = "IMU Angles: " + str(self.Movement.ArdIMU.getAngle())
                 f.write(towrite)
                 f.write("\n")
-                towrite = "IMU North, East, Down PID: " + str(self.Movement.ArdIMU.getNorthPID()) + "," + \
-                          str(self.Movement.ArdIMU.getEastPID()) + "," + \
-                          str(self.Movement.ArdIMU.getDownPID())
-                # print(towrite)
-                f.write(towrite)
+
+                # towrite = "IMU Acceleration: " + str(self.Movement.ArdIMU.getAcceleration())
+                # f.write(towrite)
+                # towrite = "IMU Position: " + str(self.Movement.ArdIMU.getPosition())
+                # f.write(towrite)
+                # f.write("\n")
+                # towrite = "IMU North, East, Down PID: " + str(self.Movement.ArdIMU.getNorthPID()) + "," + \
+                #           str(self.Movement.ArdIMU.getEastPID()) + "," + \
+                #           str(self.Movement.ArdIMU.getDownPID())
+                # # print(towrite)
+                # f.write(towrite)
+
                 f.write("\n")
                 f.write("Runtime: ")
                 f.write(str(time.perf_counter() - starttime))

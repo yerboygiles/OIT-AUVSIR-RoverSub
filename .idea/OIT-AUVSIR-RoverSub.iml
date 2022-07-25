@@ -4,7 +4,7 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/venv" />
       <excludeFolder url="file://$MODULE_DIR$/OIT-AUVSIR-RoverSub-main/venv" />
-      <excludeFolder url="file://$MODULE_DIR$/raspberry/vision_testing/stereoDepth-master/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/utility/stereoDepth-master/.idea" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.9 (OIT-AUVSIR-RoverSub)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
