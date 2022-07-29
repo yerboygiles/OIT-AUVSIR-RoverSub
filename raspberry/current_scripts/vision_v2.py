@@ -185,8 +185,8 @@ class vision:
         LateralDistanceMM = 0.0
         DistanceMM = 0.0
         FoundTarget = False
-        input_mean = 127.5
-        input_std = 127.5
+        # input_mean = 127.5
+        # input_std = 127.5
         # Start timer (for calculating frame rate)
         self.t1 = cv2.getTickCount()
         # Grab frame from video stream
@@ -197,7 +197,7 @@ class vision:
             self.VideostreamL.update()
             print("frame invalid...")
             pass
-        stereo = cv2.StereoBM(1, 16, 15)
+        # stereo = cv2.StereoBM(1, 16, 15)
         print("stereo setup")
         # disparity = stereo.compute(imgL, imgR)
         print("disparity computed")
@@ -206,7 +206,7 @@ class vision:
         # Acquire frame and resize to expected shape [1xHxWx3]
 
         infer = self.model.signatures["serving_default"]
-        output_details = infer.structured_outputs
+        # output_details = infer.structured_outputs
         print("pre-image np")
         image_np = np.asarray(np.array(imgL))
         input_tensor = tf.convert_to_tensor(image_np)

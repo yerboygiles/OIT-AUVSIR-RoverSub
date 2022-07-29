@@ -14,13 +14,17 @@ import time
 # GPIO.setmode(GPIO.BCM)
 # GPIO.setup(buzzer, GPIO.OUT)
 
+from task_io_lib_v2 import TaskIO
+
+# def run_Nard_Nvis_Ngyr_Nsim_Npng():
+#     pass
+# def run_Yard_Nvis_Ngyr_Nsim_Npng():
+#     pass
+# def run_Yard_Yvis_Ngyr_Nsim_Npng():
+#     pass
+
 
 def run():
-    from task_io_lib_v2 import TaskIO
-
-    print(' ===== -ROVERSUB- v3.0 ===== ')
-
-    print("Button pushed... Starting up...")
     # time.sleep(3)
     # for i in range(5):
     #     GPIO.output(buzzer, GPIO.HIGH)
@@ -28,8 +32,8 @@ def run():
     #     GPIO.output(buzzer, GPIO.LOW)
     #     time.sleep(0.2)
 
-    # self, mission filename, usingarduino, usingvision, usinggyro, usingsim, usingping
-    Mission = TaskIO("../mission.txt", True, True, True, False, False)
+    # self, mission filename, usingvision, usinggyro, usingsim, usingping, usingsonar
+    Mission = TaskIO("../mission.txt", False, True, False, False, False)
 
     # testing funcs
     Mission.testData()
@@ -44,4 +48,8 @@ def run():
     print("done")
 
 
+print(' ===== -ROVERSUB- v3.0 ===== ')
+
+print("Running main.")
+# main fn
 run()

@@ -83,9 +83,10 @@ class ArduinoIMU(IMU):
         # startleft = self.getStartingLeftAngle()
         anglecenter, anglerear = self.parseAngles()
 
-        self.Angle[0] = round(((anglecenter[0] - startcenter[0]) + (anglerear[0] - startright[0])) / 2, 4)
-        self.Angle[1] = round(((anglecenter[1] - startcenter[1]) + (anglerear[1] - startright[1])) / 2, 4)
-        self.Angle[2] = round(((anglecenter[2] - startcenter[2]) + (anglerear[2] - startright[2])) / 2, 4)
+        self.Angle[YAW] = ((round(((anglecenter[0] - startcenter[0]) + (anglerear[0] - startright[0])) / 2, 4) % 360) +
+                           360) % 360
+        self.Angle[PITCH] = round(((anglecenter[1] - startcenter[1]) + (anglerear[1] - startright[1])) / 2, 4)
+        self.Angle[ROLL] = round(((anglecenter[2] - startcenter[2]) + (anglerear[2] - startright[2])) / 2, 4)
         print("Angles: ", self.Angle)
 
     # parse position object data from wt61p, can then pass to other programs
@@ -239,6 +240,8 @@ class ArduinoIMU(IMU):
         # gyro
         # brand new calcs
         self.Error[GYRO][YAW] = self.Angle[YAW] - yawoffset
+        self.Error[GYRO][PITCH] = self.Angle[PITCH] - pitchoffset
+        self.Error[GYRO][ROLL] = self.Angle[ROLL] - rolloffset
         # right side, going left side
         if abs(self.Error[GYRO][YAW]) < 180:
             if self.Angle[YAW] < yawoffset:
@@ -251,7 +254,6 @@ class ArduinoIMU(IMU):
                 self.Error[GYRO][YAW] = -self.Error[GYRO][YAW]
             else:
                 self.Error[GYRO][YAW] = self.Error[GYRO][YAW]
-        self.Angle[YAW] = ((self.Angle[YAW] % 360) + 360) % 360
         # print("Yaw: ", self.Angle[YAW])
 
         # position

@@ -13,21 +13,21 @@ from vector_commander import NavigationCommander
 class TaskIO:
     # filename can first be sent a 0 to initialize string-input commands
     # instead of
-    # self, filename, usingarduino, usingvision, usinggyro, usingsim
-    def __init__(self, filename, usingarduino, usingvision, usinggyro, usingsim, usingping):
+    # self, filename, usingvision, usinggyro, usingsim
+    def __init__(self, filename, usingvision, usinggyro, usingsim, usingping, usingsonar):
+        self.auto_state = 0
         self.Input = False
         if filename == 0:
             self.input = filename
         else:
             self.Filename = filename
-        self.UsingArduino = usingarduino
         self.UsingVision = usingvision
         self.UsingGyro = usinggyro
         self.UsingSim = usingsim
         self.UsingPing = usingping
+        self.UsingSonar = usingsonar
         self.Active = False
-        self.Movement = NavigationCommander(self.UsingArduino,
-                                            self.UsingVision,
+        self.Movement = NavigationCommander(self.UsingVision,
                                             self.UsingGyro,
                                             self.UsingSim,
                                             self.UsingPing,
@@ -35,68 +35,101 @@ class TaskIO:
         self.CommandList = []
 
     # get tasks from the .txt and completes them
-    def get_tasks(self, input=False):
-        # Testing
-        if not input:
-            self.Commands = open(self.Filename)
-            for CommandLine in self.Commands:
-                print("CommandLine: ", CommandLine)
-                self.CommandList.append(CommandLine)
-            print("Commands read...")
-            self.Commands.close()
-            print("Commands: ", self.CommandList)
-            self.Movement.receiveCommands(self.CommandList)
-            self.active = False
-        else:
-            if self.Input != -1:
+    # def get_tasks(self, input=False):
+    #     # Testing
+    #     if not input:
+    #         self.Commands = open(self.Filename)
+    #         for CommandLine in self.Commands:
+    #             print("CommandLine: ", CommandLine)
+    #             self.CommandList.append(CommandLine)
+    #         print("Commands read...")
+    #         self.Commands.close()
+    #         print("Commands: ", self.CommandList)
+    #         self.Movement.receiveCommands(self.CommandList)
+    #         self.active = False
+    #     else:
+    #         if self.Input != -1:
+    #             pass
+    #         else:
+    #             print("Waiting for input...")
+    #
+    #         self.CommandList.append(self.Input)
+    def auto(self):
+        if self.auto_state == 0:
+            while self.Movement.GyroLocking(4, 10):
+                # self.Movement.
                 pass
-            else:
-                print("Waiting for input...")
+            self.auto_state = 1
+        elif self.auto_state == 1:
+            pass
+        elif self.auto_state == 2:
+            pass
+        elif self.auto_state == 3:
+            pass
 
-            self.CommandList.append(self.Input)
+    def alt_auto(self):
+        pass
 
     def testData(self):
         loopi = 0
-        # self.Movement.ZeroSonar()
+        if self.UsingSonar:
+            self.Movement.ZeroSonar()
         starttime = time.perf_counter()
         with open('telemetry_active.txt', 'w') as f:
-            self.Movement.Vision.startStream()
+            if self.UsingVision:
+                self.Movement.Vision.startStream()
             while (time.perf_counter() - starttime) < 30:
-                print("Loop num: ", loopi)
+                # print("Loop num: ", loopi)
                 loopi = loopi + 1
                 print(time.perf_counter() - starttime)
                 perftime = time.perf_counter()
-                # confidence = self.Movement.Sonar.updateDistance()
-                # distance = self.Movement.Sonar.getDistance()
-                # self.Movement.GyroTesting()
-                self.Movement.VisionTesting()
-                print("Vision ran...")
-                self.Movement.GyroTesting()
-                print("Gyro ran...")
+                if self.UsingSonar:
+                    confidence = self.Movement.Sonar.updateDistance()
+                    distance = self.Movement.Sonar.getDistance()
+                # self.Movement.VisionTesting()
+                # print("Vision ran...")
+                if self.UsingGyro:
+                    self.Movement.GyroTesting()
+                # print("Gyro ran...")
+                # if self.UsingVision:
+                #     self.Movement.UpdateThrustersGyroVisionPID()
+                if self.UsingSonar and self.UsingGyro:
+                    self.Movement.UpdateThrusters_GyroSonar_PID()
+                # elif self.UsingGyro:
+                #     self.Movement.UpdateThrusters_Gyro_PID()
                 # self.Movement.ArduinoTesting()
-                if self.Movement.Vision.SeenTarget:
-                    towrite = "Seen target: " + self.Movement.Vision.SeenTarget
-                    print(towrite)
+                if self.UsingVision:
+                    if self.Movement.Vision.SeenTarget:
+                        towrite = "Visible Target: " + self.Movement.Vision.SeenTarget
+                        print(towrite)
+                        f.write(towrite)
+                        f.write("\n")
+                        towrite = "X, Y vision offset: " + self.Movement.Vision.getXOffset() + ", " + \
+                                  self.Movement.Vision.getYOffset()
+                        print(towrite)
+                    else:
+                        towrite = "Target not visible."
+                        print(towrite)
                     f.write(towrite)
                     f.write("\n")
-                    towrite = "X, Y vision offset: " + self.Movement.Vision.getXOffset() + ", " + self.Movement.Vision.getYOffset()
-                    print(towrite)
-                else:
-                    towrite = "Target not visible."
-                    print(towrite)
-                f.write(towrite)
-                f.write("\n")
-
-                # towrite = "Sonar dist, confidence" + str(distance) + str(confidence)
-                # f.write(towrite)
-                # f.write("\n")
-                # towrite = "Sonar PID: " + str(self.Movement.Sonar.getPID())
-                # f.write(towrite)
-                # f.write("\n")
-
-                towrite = "IMU Angles: " + str(self.Movement.ArdIMU.getAngle())
-                f.write(towrite)
-                f.write("\n")
+                if self.UsingSonar:
+                    towrite = "Sonar dist, confidence" + str(distance) + str(confidence)
+                    f.write(towrite)
+                    f.write("\n")
+                    towrite = "Sonar PID: " + str(self.Movement.Sonar.getPID())
+                    f.write(towrite)
+                    f.write("\n")
+                if self.UsingGyro:
+                    towrite = "IMU Angles: " + str(self.Movement.ArdIMU.getAngle())
+                    f.write(towrite)
+                    f.write("\n")
+                    # print(towrite)
+                    towrite = "IMU PIDs: " + str(self.Movement.ArdIMU.getYawPID()) + \
+                              ", " + str(self.Movement.ArdIMU.getPitchPID()) + \
+                              ", " + str(self.Movement.ArdIMU.getRollPID())
+                    f.write(towrite)
+                    f.write("\n")
+                    # print(towrite)
 
                 # towrite = "IMU Acceleration: " + str(self.Movement.ArdIMU.getAcceleration())
                 # f.write(towrite)
