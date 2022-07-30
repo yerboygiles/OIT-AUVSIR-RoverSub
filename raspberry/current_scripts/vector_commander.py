@@ -531,12 +531,16 @@ class NavigationCommander:
                 break
             i = i + 1
 
+    def setSonarOffset(self, slices=5, height=3):
+        self.Sonar.setOffset((self.Sonar.getStartingDistance() / slices) * height)
+
     def SonarLocking(self, threshold=3, timethreshold=5):
         # if(self.Gyro.getYaw() < 0):
         self.sonar_locking = True
         integer = 0
         self.Sonar.update()
-        self.HeightLocked = (abs(self.Sonar.getPID() < threshold))
+        # self.Sonar.setOffsetCurrent(self.Sonar.getDistance())
+        self.HeightLocked = (abs(self.Sonar.getDistance() - self.Sonar.DistanceOffset < threshold))
 
         if self.HeightLocked:
             self.ElapsedTime = time.perf_counter() - self.InitialTime
@@ -549,32 +553,17 @@ class NavigationCommander:
         return self.SonarLocking
 
     def GyroLocking(self, threshold=3, timethreshold=5):
-        # if(self.Gyro.getYaw() < 0):
         self.gyro_locking = True
-        integer = 0
         self.UpdateGyro()
         self.YawLocked = (abs(self.ArdIMU.getYawPID()) < threshold)
         self.PitchLocked = (abs(self.ArdIMU.getPitchPID()) < threshold)
         self.RollLocked = (abs(self.ArdIMU.getRollPID()) < threshold)
-        # towrite = "Angles: " + str(self.ArdIMU.getAngle()) + "\n"
-        # self.writeout.write(towrite)
-        # towrite = "Angles PID: " + str(self.ArdIMU.getYawPID()) + ", " + \
-        #           str(self.ArdIMU.getPitchPID()) + ", " + \
-        #           str(self.ArdIMU.getRollPID()) + "\n"
-        # self.writeout.write(towrite)
-        # towrite = "Angles: " + str(time.perf_counter()) + "\n"
-        # self.writeout.write(towrite)
-        # print("Yaw, YAW PID: ", self.ArdIMU.getYaw(),", ", self.ArdIMU.getYawPID())
-        # print("Yaw PID: ", self.ArdIMU.getYawPID())
-        # print("ANGLE LOCK: ", self.YawLocked, self.PitchLocked, self.RollLocked)
-        # if self.YawLocked and self.PitchLocked and self.RollLocked:
         if self.YawLocked:
             self.ElapsedTime = time.perf_counter() - self.InitialTime
             print("Within gyro threshold. Waiting ", timethreshold, "...")
             if self.ElapsedTime >= timethreshold:
                 self.gyro_locking = False
         else:
-            # print("Gyro:", self.ArdIMU.getGyro())
             self.InitialTime = time.perf_counter()
         return self.gyro_locking
 
@@ -591,12 +580,6 @@ class NavigationCommander:
         else:
             self.InitialTime = time.perf_counter()
         return self.PositionRunning
-
-    def ReturnScanDict(self):
-        scanned_target = self.scanned_target_format
-        self.Vision.getDistance()
-
-        return self.scanned_target_format
 
     def ControlIndividualMotor(self):
         running = True
@@ -645,8 +628,6 @@ class NavigationCommander:
         pass
 
     def BasicDirectionPower(self, index, power=30):
-        # print("Index: ", index)
-        # index = index + 1
         if index != 0:
             if index == 1:
                 # print("MOVING FORWARDS")

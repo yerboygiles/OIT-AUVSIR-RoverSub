@@ -37,6 +37,9 @@ def run():
 
     # testing funcs
     Mission.testData()
+
+    # Mission.auto_state()
+
     # try:
     #     # actual task/mission runner
     #     Mission.get_tasks()

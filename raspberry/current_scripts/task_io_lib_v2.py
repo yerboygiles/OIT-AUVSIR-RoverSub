@@ -56,35 +56,50 @@ class TaskIO:
     #         self.CommandList.append(self.Input)
     def auto_state(self):
         autonomous = True
+        setpid = True
+        starttime = time.perf_counter()
         while autonomous:
             self.Movement.updateSensors()
             if self.auto_state == 0:
-                if self.Movement.GyroLocking(4, 10):
-                    pass
-                else:
+                if setpid:
+                    # descend to 3/5 height of pool
+                    self.Movement.setSonarOffset(5, 3)
+                    self.Movement.Sonar.setOffsetCurrent((self.Movement.Sonar.getStartingDistance() / 5) * 3)
+                    setpid = False
+                if not self.Movement.SonarLocking(self.Movement.Sonar.getStartingDistance()/300, 5):
+                    setpid = True
                     self.auto_state = 1
                 self.auto_state = 1
             elif self.auto_state == 1:
-                if self.Movement.GyroLocking(4, 10):
-                    pass
-                else:
-                    self.auto_state = 2
-                pass
-            elif self.auto_state == 2:
-                if self.Movement.GyroLocking(4, 10):
-                    pass
-                else:
-                    self.auto_state =3
-                pass
-            elif self.auto_state == 3:
-                if self.Movement.GyroLocking(4, 10):
-                    pass
-                else:
-                    self.auto_state = 1
-                pass
+                if setpid:
+                    # forwards
+                    self.Movement.BasicDirectionPower(1)
+                if (time.perf_counter()-starttime) < 30:
+                    autonomous = False
 
-    def alt_auto(self):
-        pass
+    def alt_auto_state(self):
+        autonomous = True
+        setpid = True
+        starttime = time.perf_counter()
+        while autonomous:
+            self.Movement.updateSensors()
+            if self.auto_state == 0:
+                if setpid:
+                    # descend to 3/5 height of pool
+                    self.Movement.setSonarOffset(5, 3)
+                    self.Movement.Sonar.setOffsetCurrent((self.Movement.Sonar.getStartingDistance() / 5) * 3)
+                    setpid = False
+                if not self.Movement.SonarLocking(self.Movement.Sonar.getStartingDistance()/300, 5):
+                    setpid = True
+                    self.auto_state = 1
+                self.auto_state = 1
+            elif self.auto_state == 1:
+                if setpid:
+                    # forwards
+                    self.Movement.BasicDirectionPower(1)
+                if (time.perf_counter()-starttime) < 30:
+                    autonomous = False
+
 
     def testData(self):
         loopi = 0
