@@ -179,7 +179,7 @@ class IMU:
         self.Error_Delta[POSITION][DOWN] = self.Error[POSITION][DOWN] - self.Previous_Error[POSITION][DOWN]
 
     # pid calculation
-    def PID(self):
+    def CalculatePID(self):
         # Yaw PID variable setting
         self.Yaw_P = (self.Error[GYRO][YAW] * self.Kp[GYRO][YAW])
         self.Yaw_I = (self.Error_Sum[GYRO][YAW] * self.Ki[GYRO][YAW])
@@ -406,7 +406,7 @@ class IMU_Group(IMU):
         self.Error_Delta[POSITION][DOWN] = self.Error[POSITION][DOWN] - self.Previous_Error[POSITION][DOWN]
 
     # pid calculation
-    def PID(self):
+    def CalculatePID(self):
         # Yaw PID variable setting
         self.Yaw_P = (self.Error[GYRO][YAW] * self.Kp[GYRO][YAW])
         self.Yaw_I = (self.Error_Sum[GYRO][YAW] * self.Ki[GYRO][YAW])

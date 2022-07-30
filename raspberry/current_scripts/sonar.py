@@ -41,7 +41,7 @@ class Sonar:
         i = 0
         print("Calibrating sonar initial...")
         while i < 10:
-            confidence = self.updateDistance()
+            confidence = self.update()
             distance = self.getDistance()
             if confidence < 65 and distance != 0.0:
                 print("Confidence low...")
@@ -75,14 +75,14 @@ class Sonar:
     def getDistance(self):
         return self.Distance
 
-    def updateDistance(self):
+    def update(self):
         data = self.Ping.get_distance()
         distance = data["distance"]
         confidence = data["confidence"]
         if confidence > 65:
             self.Distance = distance
         self.CalculateError()
-        self.CalcPID()
+        self.CalculatePID()
         return confidence
 
     # req for PID calculation
@@ -107,7 +107,7 @@ class Sonar:
         self.DistanceOffset = self.getDistance()
 
     # pid calculation
-    def CalcPID(self):
+    def CalculatePID(self):
         # Yaw PID variable setting
         self.P = (self.Error * self.Kp)
         self.I = 0

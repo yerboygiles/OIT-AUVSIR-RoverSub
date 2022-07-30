@@ -54,18 +54,34 @@ class TaskIO:
     #             print("Waiting for input...")
     #
     #         self.CommandList.append(self.Input)
-    def auto(self):
-        if self.auto_state == 0:
-            while self.Movement.GyroLocking(4, 10):
-                # self.Movement.
+    def auto_state(self):
+        autonomous = True
+        while autonomous:
+            self.Movement.updateSensors()
+            if self.auto_state == 0:
+                if self.Movement.GyroLocking(4, 10):
+                    pass
+                else:
+                    self.auto_state = 1
+                self.auto_state = 1
+            elif self.auto_state == 1:
+                if self.Movement.GyroLocking(4, 10):
+                    pass
+                else:
+                    self.auto_state = 2
                 pass
-            self.auto_state = 1
-        elif self.auto_state == 1:
-            pass
-        elif self.auto_state == 2:
-            pass
-        elif self.auto_state == 3:
-            pass
+            elif self.auto_state == 2:
+                if self.Movement.GyroLocking(4, 10):
+                    pass
+                else:
+                    self.auto_state =3
+                pass
+            elif self.auto_state == 3:
+                if self.Movement.GyroLocking(4, 10):
+                    pass
+                else:
+                    self.auto_state = 1
+                pass
 
     def alt_auto(self):
         pass
@@ -81,20 +97,24 @@ class TaskIO:
             while (time.perf_counter() - starttime) < 30:
                 # print("Loop num: ", loopi)
                 loopi = loopi + 1
-                print(time.perf_counter() - starttime)
-                perftime = time.perf_counter()
+                # print(time.perf_counter() - starttime)
+                # perftime = time.perf_counter()
                 if self.UsingSonar:
-                    confidence = self.Movement.Sonar.updateDistance()
+                    confidence = self.Movement.Sonar.update()
                     distance = self.Movement.Sonar.getDistance()
                 # self.Movement.VisionTesting()
                 # print("Vision ran...")
                 if self.UsingGyro:
-                    self.Movement.GyroTesting()
+                    self.Movement.ArdIMU.update()
                 # print("Gyro ran...")
                 # if self.UsingVision:
                 #     self.Movement.UpdateThrustersGyroVisionPID()
-                if self.UsingSonar and self.UsingGyro:
-                    self.Movement.UpdateThrusters_GyroSonar_PID()
+                if self.UsingGyro:
+                    if self.UsingSonar:
+                        self.Movement.UpdateThrusters_GyroSonar_PID()
+                    else:
+                        self.Movement.UpdateThrusters_Gyro_PID()
+                    pass
                 # elif self.UsingGyro:
                 #     self.Movement.UpdateThrusters_Gyro_PID()
                 # self.Movement.ArduinoTesting()

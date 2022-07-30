@@ -41,7 +41,7 @@ class NavigationCommander:
                  usingvision=False,
                  usinggyro=False,
                  usingsim=False,
-                 usingping=False,
+                 usingsonar=False,
                  resetheadingoncmd=False):
         # setting up board serial port
 
@@ -91,17 +91,12 @@ class NavigationCommander:
         self.passedGate = False
         self.UsingVision = usingvision
         self.UsingGyro = usinggyro
-        # arduino. omitting for now, in favor of pure rpi gyro reads
-        # self.serial = serial.Serial('/dev/ttyAMA0', 115200)
+
         if self.UsingGyro:
-            # print("Sending IMU")
-            # self.SendToArduino("IMU")
-            # self.JY62_1_IMU = imu_rpi.JY62('/dev/ttyUSB0', 0)
-            # self.JY62_2_IMU = imu_rpi.JY62('/dev/ttyUSB1', 1)
             print("Using Gyro")
             self.ArdIMU = imu_ard.ArduinoIMU(self.ArduinoCommander.getSerial())
-
-        if usingping:
+        self.UsingSonar = usingsonar
+        if self.UsingSonar:
             print("Using Pinger")
             self.Sonar = sonar.Sonar()
         if resetheadingoncmd:
@@ -129,9 +124,6 @@ class NavigationCommander:
         self.UsingSim = usingsim
 
         if self.UsingVision:
-            # import Theos_Really_Good_Detection_Script as obj_det
-            # self.VisionAI = obj_det.Detector("TensorFlow_Graph/Tflite", False)
-            # print("MovementCommander is using Vision AI...")
             self.Vision = vision_v2.vision()
         else:
             print("MovementCommander is not using Vision AI...")
@@ -139,12 +131,9 @@ class NavigationCommander:
         if self.UsingSim:
             # from python.experimental.advanced_telemetry import Telemetry
             # self.TelemetrySim = Telemetry()
-            print("MovementCommander is using Telemetry...")
+            print("MovementCommander is using Simulation...")
         else:
-            print("MovementCommander is not using Telemetry...")
-
-        # initialize thruster values to brake (self.PowerXX set to 0^)
-        # self.UpdateThrusters()
+            print("MovementCommander is not using Simulation...")
 
         # string list of movement commands, because I thought I'd make
         # the index number of each command streamlined with other
@@ -223,7 +212,7 @@ class NavigationCommander:
         self.ArdIMU.UpdateAcceleration()
         # self.ArdIMU.UpdatePosition()
         self.ArdIMU.CalculateError()
-        self.ArdIMU.PID()
+        self.ArdIMU.CalculatePID()
 
         pass
 
@@ -546,7 +535,7 @@ class NavigationCommander:
         # if(self.Gyro.getYaw() < 0):
         self.sonar_locking = True
         integer = 0
-        self.Sonar.updateDistance()
+        self.Sonar.update()
         self.HeightLocked = (abs(self.Sonar.getPID() < threshold))
 
         if self.HeightLocked:
@@ -641,6 +630,19 @@ class NavigationCommander:
             self.VentralPowerRF = speed
         self.UpdateThrusters()
         return running
+
+    def descend_A_Bit(self, safety=True):
+        startdistance = self.Sonar.getStartingDistance()
+        self.Sonar.update()
+        distance = self.Sonar.getDistance()
+        starttime = time.perf_counter()
+        while (distance - (startdistance - startdistance / 5)) < 30:
+            if safety:
+                if time.perf_counter() > starttime + 20:
+                    break
+            self.Sonar.update()
+            self.UpdateThrusters_GyroSonar_PID()
+        pass
 
     def BasicDirectionPower(self, index, power=30):
         # print("Index: ", index)
@@ -757,6 +759,16 @@ class NavigationCommander:
         else:
             self.UpdateThrusters()
 
+    def updateSensors(self):
+        if self.UsingGyro:
+            self.ArdIMU.update()
+            if self.UsingSonar:
+                self.Sonar.update()
+                self.UpdateThrusters_GyroSonar_PID()
+            else:
+                self.UpdateThrusters_Gyro_PID()
+            pass
+
     def UpdateGyro(self):
         if self.UsingGyro:
             self.ArdIMU.UpdateAngle()
@@ -767,7 +779,7 @@ class NavigationCommander:
                                        self.NorthOffset,
                                        self.EastOffset,
                                        self.DownOffset)
-            self.ArdIMU.PID()
+            self.ArdIMU.CalculatePID()
 
     def UpdateThrusters(self):
 

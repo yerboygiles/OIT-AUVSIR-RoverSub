@@ -26,6 +26,7 @@ class ArduinoIMU(IMU):
     FrontAngle = [0.0, 0.0, 0.0]
     RearAngle = [0.0, 0.0, 0.0]
     Position = [0.0, 0.0, 0.0]
+    # gyro yaw, pitch, roll, pos, north, east, down
     Kp = [[0.4, 0.4, 0.4], [0.3, 0.4, 0.4]]  # constant to modify PID
     Ki = [[0.05, 0.15, 0.15], [0.1, 0.1, 0.1]]  # constant to modify PID
     Kd = [[0.2, 0.2, 0.2], [0.1, 0.1, 0.1]]  # constant to modify PID
@@ -71,6 +72,10 @@ class ArduinoIMU(IMU):
     #     self.Angle[0] = round(((anglefront[0] - startfront[0]) + (anglerear[0] - startrear[0])) / 2, 4)
     #     self.Angle[1] = round(((anglefront[1] - startfront[1]) - (anglerear[1] - startrear[1])) / 2, 4)
     #     self.Angle[2] = round(((anglefront[2] - startfront[2]) - (anglerear[2] - startrear[2])) / 2, 4)
+    def update(self):
+        self.UpdateAngle()
+        self.CalculateError()
+        self.CalculatePID()
 
     def UpdateIMU(self):
         self.UpdateAngle()
@@ -329,11 +334,12 @@ class ArduinoIMU(IMU):
             xyz = self.Angle
         return xyz
 
-    def PID(self):
+    def CalculatePID(self):
         if self.integral_overflow > 30:
             self.Error_Sum[GYRO][YAW] = 0
-            self.Error_Sum[GYRO][PITCH] = 0
-            self.Error_Sum[GYRO][ROLL] = 0
+            self.integral_overflow = 0
+            # self.Error_Sum[GYRO][PITCH] = 0
+            # self.Error_Sum[GYRO][ROLL] = 0
         # Yaw PID variable setting
         self.Yaw_P = (self.Error[GYRO][YAW] * self.Kp[GYRO][YAW])
         self.Yaw_I = (self.Error_Sum[GYRO][YAW] * self.Ki[GYRO][YAW])
