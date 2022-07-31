@@ -32,13 +32,14 @@ def run():
     #     GPIO.output(buzzer, GPIO.LOW)
     #     time.sleep(0.2)
 
-    # self, mission filename, usingvision, usinggyro, usingsim, usingping, usingsonar
-    Mission = TaskIO("../mission.txt", False, True, False, False, False)
+    # self, mission filename, usingvision, usinggyro, usingsim, usingsonar
+    Mission = TaskIO("../mission.txt", False, True, False, True)
 
     # testing funcs
-    Mission.testData()
-
-    # Mission.auto_state()
+    # Mission.testData()
+    # autonomous
+    print("Running auto state")
+    Mission.autonomousStMch()
 
     # try:
     #     # actual task/mission runner

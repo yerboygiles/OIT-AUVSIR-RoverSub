@@ -14,7 +14,7 @@ class TaskIO:
     # filename can first be sent a 0 to initialize string-input commands
     # instead of
     # self, filename, usingvision, usinggyro, usingsim
-    def __init__(self, filename, usingvision, usinggyro, usingsim, usingping, usingsonar):
+    def __init__(self, filename, usingvision, usinggyro, usingsim, usingsonar):
         self.auto_state = 0
         self.Input = False
         if filename == 0:
@@ -24,13 +24,12 @@ class TaskIO:
         self.UsingVision = usingvision
         self.UsingGyro = usinggyro
         self.UsingSim = usingsim
-        self.UsingPing = usingping
         self.UsingSonar = usingsonar
         self.Active = False
         self.Movement = NavigationCommander(self.UsingVision,
                                             self.UsingGyro,
                                             self.UsingSim,
-                                            self.UsingPing,
+                                            self.UsingSonar,
                                             False)
         self.CommandList = []
 
@@ -54,52 +53,43 @@ class TaskIO:
     #             print("Waiting for input...")
     #
     #         self.CommandList.append(self.Input)
-    def auto_state(self):
+    def autonomousStMch(self):
         autonomous = True
         setpid = True
         starttime = time.perf_counter()
         while autonomous:
             self.Movement.updateSensors()
+            self.Movement.setThrusters_GyroSonarPID()
             if self.auto_state == 0:
                 if setpid:
                     # descend to 3/5 height of pool
                     self.Movement.setSonarOffset(5, 3)
                     self.Movement.Sonar.setOffsetCurrent((self.Movement.Sonar.getStartingDistance() / 5) * 3)
                     setpid = False
-                if not self.Movement.SonarLocking(self.Movement.Sonar.getStartingDistance()/300, 5):
+                if not self.Movement.SonarLocking(self.Movement.Sonar.getStartingDistance() / 300, 5):
                     setpid = True
-                    self.auto_state = 1
-                self.auto_state = 1
-            elif self.auto_state == 1:
-                if setpid:
-                    # forwards
-                    self.Movement.BasicDirectionPower(1)
-                if (time.perf_counter()-starttime) < 30:
+                    # self.auto_state = 1
                     autonomous = False
+                self.auto_state = 1
+            # elif self.auto_state == 1:
+                # if setpid:
+                #     # forwards
+                #     self.Movement.BasicDirectionPower(1)
+                # if (time.perf_counter() - starttime) < 30:
+                #     autonomous = False
 
-    def alt_auto_state(self):
+    def autonomousStMch_alt(self):
         autonomous = True
         setpid = True
         starttime = time.perf_counter()
         while autonomous:
             self.Movement.updateSensors()
             if self.auto_state == 0:
-                if setpid:
-                    # descend to 3/5 height of pool
-                    self.Movement.setSonarOffset(5, 3)
-                    self.Movement.Sonar.setOffsetCurrent((self.Movement.Sonar.getStartingDistance() / 5) * 3)
-                    setpid = False
-                if not self.Movement.SonarLocking(self.Movement.Sonar.getStartingDistance()/300, 5):
-                    setpid = True
-                    self.auto_state = 1
-                self.auto_state = 1
-            elif self.auto_state == 1:
-                if setpid:
-                    # forwards
-                    self.Movement.BasicDirectionPower(1)
-                if (time.perf_counter()-starttime) < 30:
+                self.Movement.BasicDirectionPower(1)
+                if (time.perf_counter() - starttime) > 30:
                     autonomous = False
-
+                self.auto_state = 1
+            self.Movement.UpdateThrusters()
 
     def testData(self):
         loopi = 0
@@ -126,9 +116,11 @@ class TaskIO:
                 #     self.Movement.UpdateThrustersGyroVisionPID()
                 if self.UsingGyro:
                     if self.UsingSonar:
-                        self.Movement.UpdateThrusters_GyroSonar_PID()
+                        # self.Movement.UpdateThrusters_GyroSonar_PID()
+                        pass
                     else:
-                        self.Movement.UpdateThrusters_Gyro_PID()
+                        # self.Movement.UpdateThrusters_Gyro_PID()
+                        pass
                     pass
                 # elif self.UsingGyro:
                 #     self.Movement.UpdateThrusters_Gyro_PID()
@@ -151,20 +143,23 @@ class TaskIO:
                     towrite = "Sonar dist, confidence" + str(distance) + str(confidence)
                     f.write(towrite)
                     f.write("\n")
+                    print(towrite)
                     towrite = "Sonar PID: " + str(self.Movement.Sonar.getPID())
                     f.write(towrite)
                     f.write("\n")
+                    print(towrite)
+                    # swaws
                 if self.UsingGyro:
                     towrite = "IMU Angles: " + str(self.Movement.ArdIMU.getAngle())
                     f.write(towrite)
                     f.write("\n")
-                    # print(towrite)
+                    print(towrite)
                     towrite = "IMU PIDs: " + str(self.Movement.ArdIMU.getYawPID()) + \
                               ", " + str(self.Movement.ArdIMU.getPitchPID()) + \
                               ", " + str(self.Movement.ArdIMU.getRollPID())
                     f.write(towrite)
                     f.write("\n")
-                    # print(towrite)
+                    print(towrite)
 
                 # towrite = "IMU Acceleration: " + str(self.Movement.ArdIMU.getAcceleration())
                 # f.write(towrite)

@@ -27,8 +27,8 @@ class ArduinoIMU(IMU):
     RearAngle = [0.0, 0.0, 0.0]
     Position = [0.0, 0.0, 0.0]
     # gyro yaw, pitch, roll, pos, north, east, down
-    Kp = [[0.4, 0.4, 0.4], [0.3, 0.4, 0.4]]  # constant to modify PID
-    Ki = [[0.05, 0.15, 0.15], [0.1, 0.1, 0.1]]  # constant to modify PID
+    Kp = [[0.3, 0.4, 0.4], [0.3, 0.4, 0.4]]  # constant to modify PID
+    Ki = [[0.07, 0.15, 0.15], [0.1, 0.1, 0.1]]  # constant to modify PID
     Kd = [[0.2, 0.2, 0.2], [0.1, 0.1, 0.1]]  # constant to modify PID
 
     integral_overflow = 0
@@ -248,7 +248,7 @@ class ArduinoIMU(IMU):
         self.Error[GYRO][PITCH] = self.Angle[PITCH] - pitchoffset
         self.Error[GYRO][ROLL] = self.Angle[ROLL] - rolloffset
         # right side, going left side
-        if abs(self.Error[GYRO][YAW]) < 180:
+        if abs(self.Error[GYRO][YAW]) > 180:
             if self.Angle[YAW] < yawoffset:
                 self.Error[GYRO][YAW] = self.Error[GYRO][YAW]
             else:
@@ -343,19 +343,22 @@ class ArduinoIMU(IMU):
         # Yaw PID variable setting
         self.Yaw_P = (self.Error[GYRO][YAW] * self.Kp[GYRO][YAW])
         self.Yaw_I = (self.Error_Sum[GYRO][YAW] * self.Ki[GYRO][YAW])
-        self.Yaw_D = (self.Error_Delta[GYRO][YAW] * self.Kd[GYRO][YAW])
+        # self.Yaw_D = (self.Error_Delta[GYRO][YAW] * self.Kd[GYRO][YAW])
+        self.Yaw_D = 0
         self.Yaw_PID = self.Yaw_P + self.Yaw_I + self.Yaw_D
 
         # Pitch PID variable setting
         self.Pitch_P = (self.Error[GYRO][PITCH] * self.Kp[GYRO][PITCH])
         self.Pitch_I = (self.Error_Sum[GYRO][PITCH] * self.Ki[GYRO][PITCH])
-        self.Pitch_D = (self.Error_Delta[GYRO][PITCH] * self.Kd[GYRO][PITCH])
+        # self.Pitch_D = (self.Error_Delta[GYRO][PITCH] * self.Kd[GYRO][PITCH])
+        self.Pitch_D = 0
         self.Pitch_PID = self.Pitch_P + self.Pitch_I + self.Pitch_D
 
         # Roll PID variable setting
         self.Roll_P = (self.Error[GYRO][ROLL] * self.Kp[GYRO][ROLL])
         self.Roll_I = (self.Error_Sum[GYRO][ROLL] * self.Ki[GYRO][ROLL])
-        self.Roll_D = (self.Error_Delta[GYRO][ROLL] * self.Kd[GYRO][ROLL])
+        # self.Roll_D = (self.Error_Delta[GYRO][ROLL] * self.Kd[GYRO][ROLL])
+        self.Roll_D = 0
         self.Roll_PID = self.Roll_P + self.Roll_I + self.Roll_D
 
         self.integral_overflow = self.integral_overflow + 1

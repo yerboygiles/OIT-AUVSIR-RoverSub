@@ -19,9 +19,9 @@ class Sonar:
     Error_Delta = 0.0
     PingDistance = 0.0
 
-    Kp = .05  # constant to modify PID
-    Ki = .1  # constant to modify PID
-    Kd = .3  # constant to modify PID
+    Kp = 0.06  # constant to modify PID
+    Ki = 0.03  # constant to modify PID
+    Kd = 0.0  # constant to modify PID
 
     P = 0.0
     I = 0.0
@@ -54,7 +54,7 @@ class Sonar:
         sum = 0
         for i in range(10):
             sum = sum + distances[i]
-        self.DistanceOffset = sum / 10
+        self.StartingDistance = sum / 10
         # print('Starting Distance: ', self.StartingDistance)
         self.Ping.set_speed_of_sound(1450000)
         print('Starting sonar, wait 5...')
