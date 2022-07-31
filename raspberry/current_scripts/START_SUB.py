@@ -33,13 +33,13 @@ def run():
     #     time.sleep(0.2)
 
     # self, mission filename, usingvision, usinggyro, usingsim, usingsonar
-    Mission = TaskIO("../mission.txt", False, True, False, True)
+    Mission = TaskIO("../mission.txt", False, True, False, False)
 
     # testing funcs
     # Mission.testData()
     # autonomous
     print("Running auto state")
-    Mission.autonomousStMch()
+    Mission.autonomousStMch_alt()
 
     # try:
     #     # actual task/mission runner
